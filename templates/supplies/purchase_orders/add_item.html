@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Item - PO-{{ order.order_number }} - Supply Management System{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'purchase_order_list' %}">Purchase Orders</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'purchase_order_detail' order.id %}">PO-{{ order.order_number }}</a></li>
+        <li class="breadcrumb-item active">Add Item</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    Add Item to Purchase Order PO-{{ order.order_number }}
+                </h6>
+            </div>
+            <div class="card-body">
+                <!-- Order Info -->
+                <div class="alert alert-info">
+                    <strong>Supplier:</strong> {{ order.supplier.name }}<br>
+                    <strong>Status:</strong> <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Supply Selection -->
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="{{ form.supply.id_for_label }}" class="form-label">
+                                    Supply Item <span class="text-danger">*</span>
+                                </label>
+                                {{ form.supply }}
+                                {% if form.supply.errors %}
+                                    <div class="text-danger small">{{ form.supply.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Select an item from {{ order.supplier.name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Quantity -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.quantity_ordered.id_for_label }}" class="form-label">
+                                    Quantity Ordered <span class="text-danger">*</span>
+                                </label>
+                                {{ form.quantity_ordered }}
+                                {% if form.quantity_ordered.errors %}
+                                    <div class="text-danger small">{{ form.quantity_ordered.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">How many units to order</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Unit Price -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.unit_price.id_for_label }}" class="form-label">
+                                    Unit Price ($) <span class="text-danger">*</span>
+                                </label>
+                                {{ form.unit_price }}
+                                {% if form.unit_price.errors %}
+                                    <div class="text-danger small">{{ form.unit_price.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Price per unit from supplier</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Total Preview -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-light border">
+                                <strong>Total: $<span id="total-preview">0.00</span></strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'purchase_order_detail' order.id %}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i>
+                                    Back to Order
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle"></i>
+                                    Add Item
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('{{ form.quantity_ordered.id_for_label }}');
+    const priceInput = document.getElementById('{{ form.unit_price.id_for_label }}');
+    const totalPreview = document.getElementById('total-preview');
+    
+    function updateTotal() {
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const price = parseFloat(priceInput.value) || 0;
+        const total = quantity * price;
+        totalPreview.textContent = total.toFixed(2);
+    }
+    
+    if (quantityInput && priceInput) {
+        quantityInput.addEventListener('input', updateTotal);
+        priceInput.addEventListener('input', updateTotal);
+        
+        // Update total on page load if values are already present
+        updateTotal();
+    }
+    
+    // Auto-populate price from supply selection if available
+    const supplySelect = document.getElementById('{{ form.supply.id_for_label }}');
+    if (supplySelect) {
+        supplySelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            if (price && price !== '0' && priceInput) {
+                priceInput.value = price;
+                updateTotal();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

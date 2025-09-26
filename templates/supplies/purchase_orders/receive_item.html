@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Receive Item - PO-{{ order.order_number }} - Supply Management System{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'purchase_order_list' %}">Purchase Orders</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'purchase_order_detail' order.id %}">PO-{{ order.order_number }}</a></li>
+        <li class="breadcrumb-item active">Receive Item</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="bi bi-box-arrow-in-down"></i>
+                    Receive Item - {{ item.supply.name }}
+                </h6>
+            </div>
+            <div class="card-body">
+                <!-- Order and Item Info -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">Purchase Order</h6>
+                                <p class="mb-1"><strong>PO Number:</strong> {{ order.order_number }}</p>
+                                <p class="mb-1"><strong>Supplier:</strong> {{ order.supplier.name }}</p>
+                                <p class="mb-0"><strong>Status:</strong> 
+                                    <span class="badge bg-primary">{{ order.get_status_display }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">Item Details</h6>
+                                <p class="mb-1"><strong>Item:</strong> {{ item.supply.name }}</p>
+                                <p class="mb-1"><strong>Category:</strong> {{ item.supply.category.name }}</p>
+                                <p class="mb-1"><strong>Ordered:</strong> {{ item.quantity_ordered }} units</p>
+                                <p class="mb-0"><strong>Already Received:</strong> {{ item.quantity_received }} units</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Receiving Status -->
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-info-circle"></i> Receiving Status</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <strong>Remaining to Receive:</strong><br>
+                            <span class="h5 text-primary">{{ item.remaining_quantity }} units</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Unit Price:</strong><br>
+                            <span class="h5">${{ item.unit_price|floatformat:2 }}</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Current Stock:</strong><br>
+                            <span class="h5">{{ item.supply.current_stock }} units</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Quantity to Receive -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.quantity_received.id_for_label }}" class="form-label">
+                                    Quantity to Receive <span class="text-danger">*</span>
+                                </label>
+                                {{ form.quantity_received }}
+                                {% if form.quantity_received.errors %}
+                                    <div class="text-danger small">{{ form.quantity_received.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">Maximum: {{ item.remaining_quantity }} units</div>
+                            </div>
+                        </div>
+                        
+                        <!-- New Stock Preview -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">New Stock Level (Preview)</label>
+                                <div class="form-control-plaintext border rounded p-2 bg-light">
+                                    <span id="new-stock-preview">{{ item.supply.current_stock }}</span> units
+                                    <small class="text-muted d-block">
+                                        Current: {{ item.supply.current_stock }} + Receiving: <span id="receiving-amount">0</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Reason/Notes -->
+                    <div class="mb-3">
+                        <label for="{{ form.reason.id_for_label }}" class="form-label">
+                            Receiving Notes
+                        </label>
+                        {{ form.reason }}
+                        {% if form.reason.errors %}
+                            <div class="text-danger small">{{ form.reason.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Optional notes about this receipt (condition, partial delivery, etc.)</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'purchase_order_detail' order.id %}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i>
+                                    Back to Order
+                                </a>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="bi bi-box-arrow-in-down"></i>
+                                    Receive Items
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Warning about stock updates -->
+                <div class="alert alert-warning mt-4">
+                    <h6><i class="bi bi-exclamation-triangle"></i> Important</h6>
+                    <p class="mb-0">
+                        Receiving these items will automatically update the stock levels for 
+                        <strong>{{ item.supply.name }}</strong> and create a stock movement record.
+                        This action cannot be undone without manual stock adjustment.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('{{ form.quantity_received.id_for_label }}');
+    const newStockPreview = document.getElementById('new-stock-preview');
+    const receivingAmount = document.getElementById('receiving-amount');
+    const currentStock = {{ item.supply.current_stock }};
+    const maxQuantity = {{ item.remaining_quantity }};
+    
+    function updateStockPreview() {
+        const receiving = parseInt(quantityInput.value) || 0;
+        const newStock = currentStock + receiving;
+        
+        newStockPreview.textContent = newStock;
+        receivingAmount.textContent = receiving;
+        
+        // Visual feedback for quantity validation
+        if (receiving > maxQuantity) {
+            quantityInput.classList.add('is-invalid');
+        } else {
+            quantityInput.classList.remove('is-invalid');
+        }
+    }
+    
+    if (quantityInput) {
+        quantityInput.addEventListener('input', updateStockPreview);
+        
+        // Set maximum attribute
+        quantityInput.setAttribute('max', maxQuantity);
+        
+        // Update preview on page load
+        updateStockPreview();
+    }
+});
+</script>
+{% endblock %}

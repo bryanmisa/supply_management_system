@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ supply.name }} - Supply Details{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'supply_list' %}">Supplies</a></li>
+    <li class="breadcrumb-item active">{{ supply.name }}</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-lg-6">
+    <div class="card mb-4 shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Supply Information</h5>
+        {% if supply.is_low_stock %}
+          <span class="badge bg-warning text-dark">Low Stock</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <h4 class="card-title mb-1">{{ supply.name }} <small class="text-muted">({{ supply.sku }})</small></h4>
+        {% if supply.description %}
+          <p class="text-muted">{{ supply.description }}</p>
+        {% endif %}
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="small text-muted">Category</div>
+            <div>{{ supply.category.name }}</div>
+          </div>
+          <div class="col-6">
+            <div class="small text-muted">Supplier</div>
+            <div>{{ supply.supplier.name }}</div>
+          </div>
+          <div class="col-6">
+            <div class="small text-muted">Unit Price</div>
+            <div>${{ supply.unit_price|floatformat:2 }} / {{ supply.unit_of_measure }}</div>
+          </div>
+          <div class="col-6">
+            <div class="small text-muted">Stock</div>
+            <div>
+              <strong>{{ supply.current_stock }}</strong>
+              <small class="text-muted">(min {{ supply.minimum_stock }}, max {{ supply.maximum_stock }})</small>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="small text-muted">Status</div>
+            <div>
+              {% if supply.current_stock == 0 %}
+                <span class="badge bg-danger">Out of Stock</span>
+              {% elif supply.is_low_stock %}
+                <span class="badge bg-warning text-dark">Low</span>
+              {% else %}
+                <span class="badge bg-success">In Stock</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="small text-muted">Created</div>
+            <div>{{ supply.created_at|date:"M d, Y" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{% url 'supply_edit' supply.id %}" class="btn btn-outline-primary">
+        <i class="bi bi-pencil"></i> Edit Supply
+      </a>
+      <a href="{% url 'stock_movement' supply.id %}" class="btn btn-primary">
+        <i class="bi bi-arrow-left-right"></i> Record Stock Movement
+      </a>
+      <a href="{% url 'stock_adjustment' supply.id %}" class="btn btn-outline-secondary">
+        <i class="bi bi-sliders"></i> Adjust Stock
+      </a>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Stock Movements</h5>
+        <span class="text-muted small">Last 20</span>
+      </div>
+      <div class="card-body">
+        {% if movements %}
+          <div class="table-responsive">
+            <table class="table table-striped align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th class="text-end">Quantity</th>
+                  <th>Reason</th>
+                  <th>Reference</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for m in movements %}
+                  <tr>
+                    <td>{{ m.created_at|date:"M d, Y g:i A" }}</td>
+                    <td>
+                      <span class="badge bg-{% if m.movement_type == 'IN' %}success{% elif m.movement_type == 'OUT' %}danger{% elif m.movement_type == 'ADJUSTMENT' %}secondary{% else %}info{% endif %}">
+                        {{ m.movement_type }}
+                      </span>
+                    </td>
+                    <td class="text-end">{{ m.quantity }}</td>
+                    <td>{{ m.reason|default:'—' }}</td>
+                    <td>{{ m.reference_number|default:'—' }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted">
+            <i class="bi bi-box"></i> No stock movements yet.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

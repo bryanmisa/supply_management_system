@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}Stock Movement - {{ supply.name }}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'supply_list' %}">Supplies</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'supply_detail' supply.id %}">{{ supply.name }}</a></li>
+    <li class="breadcrumb-item active">Stock Movement</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Record Stock Movement</h5>
+        <span class="text-muted small">SKU: {{ supply.sku }}</span>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-4">
+            <div class="small text-muted">Current Stock</div>
+            <div class="h5 mb-0">{{ supply.current_stock }}</div>
+          </div>
+          <div class="col-md-4">
+            <div class="small text-muted">Min / Max</div>
+            <div class="h5 mb-0">{{ supply.minimum_stock }} / {{ supply.maximum_stock }}</div>
+          </div>
+          <div class="col-md-4">
+            <div class="small text-muted">Unit Price</div>
+            <div class="h5 mb-0">${{ supply.unit_price|floatformat:2 }}</div>
+          </div>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.movement_type.id_for_label }}">Movement Type</label>
+              {{ form.movement_type }}
+              {% if form.movement_type.errors %}
+                <div class="text-danger small">{{ form.movement_type.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.quantity.id_for_label }}">Quantity</label>
+              {{ form.quantity }}
+              {% if form.quantity.errors %}
+                <div class="text-danger small">{{ form.quantity.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.reason.id_for_label }}">Reason</label>
+              {{ form.reason }}
+              {% if form.reason.errors %}
+                <div class="text-danger small">{{ form.reason.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.reference_number.id_for_label }}">Reference Number</label>
+              {{ form.reference_number }}
+              {% if form.reference_number.errors %}
+                <div class="text-danger small">{{ form.reference_number.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <hr>
+          <div class="d-flex justify-content-between">
+            <a class="btn btn-secondary" href="{% url 'supply_detail' supply.id %}"><i class="bi bi-arrow-left"></i> Back</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Record Movement</button>
+          </div>
+        </form>
+
+        <div class="alert alert-warning mt-4">
+          <i class="bi bi-exclamation-triangle"></i>
+          For OUT or RETURN movements, ensure the quantity does not exceed current stock.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
