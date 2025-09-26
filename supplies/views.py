@@ -6,6 +6,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import JsonResponse
+from django.db.models import F
 
 from .models import Category, Supplier, Supply, StockMovement, PurchaseOrder, PurchaseOrderItem, get_dashboard_stats
 from .forms import CategoryForm, SupplierForm, SupplyForm, StockMovementForm, StockAdjustmentForm, SearchForm, PurchaseOrderForm, PurchaseOrderItemForm, ReceiveItemForm
@@ -276,7 +277,13 @@ def stock_adjustment(request, supply_id):
 
 def low_stock_report(request):
     """Show supplies with low stock."""
-    low_stock_supplies = Supply.objects.low_stock().select_related('category', 'supplier')
+    # Include total_value annotation for display in the report
+    low_stock_supplies = (
+        Supply.objects
+        .low_stock()
+        .select_related('category', 'supplier')
+        .annotate(total_value=F('current_stock') * F('unit_price'))
+    )
     return render(request, 'supplies/reports/low_stock.html', {
         'supplies': low_stock_supplies
     })

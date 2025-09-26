@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Low Stock Report{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active">Low Stock Report</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3 mb-0">Low Stock Report</h1>
+  <a href="{% url 'supply_list' %}" class="btn btn-outline-secondary"><i class="bi bi-box-seam"></i> View All Supplies</a>
+</div>
+
+<div class="card shadow">
+  <div class="card-body">
+    {% if supplies %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Item</th>
+              <th>SKU</th>
+              <th>Category</th>
+              <th>Supplier</th>
+              <th class="text-end">Stock</th>
+              <th class="text-end">Min</th>
+              <th class="text-end">Max</th>
+              <th class="text-end">Unit Price</th>
+              <th class="text-end">Total Value</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in supplies %}
+              <tr class="{% if s.current_stock == 0 %}table-danger{% else %}table-warning{% endif %}">
+                <td>
+                  <div class="fw-semibold"><a href="{% url 'supply_detail' s.id %}" class="text-decoration-none">{{ s.name }}</a></div>
+                  <div class="text-muted small">{{ s.unit_of_measure }}</div>
+                </td>
+                <td>{{ s.sku }}</td>
+                <td><span class="badge bg-light text-dark">{{ s.category.name }}</span></td>
+                <td>{{ s.supplier.name }}</td>
+                <td class="text-end"><strong>{{ s.current_stock }}</strong></td>
+                <td class="text-end">{{ s.minimum_stock }}</td>
+                <td class="text-end">{{ s.maximum_stock }}</td>
+                <td class="text-end">${{ s.unit_price|floatformat:2 }}</td>
+                <td class="text-end">${{ s.total_value|floatformat:2 }}</td>
+                <td class="text-end">
+                  <div class="btn-group">
+                    <a href="{% url 'stock_movement' s.id %}" class="btn btn-sm btn-outline-primary" title="Record Movement"><i class="bi bi-arrow-left-right"></i></a>
+                    <a href="{% url 'stock_adjustment' s.id %}" class="btn btn-sm btn-outline-secondary" title="Adjust Stock"><i class="bi bi-sliders"></i></a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-5 text-muted">
+        <i class="bi bi-check2-circle display-4"></i>
+        <p class="mt-3">No items are currently below their minimum stock levels. Great job!</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Optional: future enhancements for filters or export
+</script>
+{% endblock %}
