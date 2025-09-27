@@ -6,8 +6,10 @@ from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
-    # Dashboard
-    path('', views.dashboard, name='dashboard'),
+    # Dashboard - routes to appropriate dashboard based on user role
+    path('', views.unified_dashboard, name='dashboard'),
+    path('manager-dashboard/', views.dashboard, name='manager_dashboard'),
+    path('customer-dashboard/', views.customer_dashboard, name='customer_dashboard'),
     
     # Categories
     path('categories/', views.category_list, name='category_list'),
@@ -47,10 +49,10 @@ urlpatterns = [
     # API endpoints
     path('api/supplies/search/', views.supply_search_api, name='supply_search_api'),
 
-    # Customer Portal (authenticated)
-    path('customer-portal/register/', views.customer_register, name='customer_register'),
-    path('customer-portal/login/', auth_views.LoginView.as_view(template_name='supplies/customer_portal/login.html'), name='customer_login'),
-    path('customer-portal/logout/', auth_views.LogoutView.as_view(next_page='dashboard'), name='customer_logout'),
+    # Authentication (unified for all users)
+    path('register/', views.unified_register, name='register'),
+    path('login/', views.unified_login, name='login'),
+    path('logout/', views.unified_logout, name='logout'),
 
     path('customer-portal/request/', views.customer_request_create, name='customer_request_create'),
     path('customer-portal/my-requests/', views.customer_my_requests, name='customer_my_requests'),

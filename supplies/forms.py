@@ -3,7 +3,7 @@ Django forms for the supplies app.
 """
 from django import forms
 from django.core.exceptions import ValidationError
-from supplies.models import Category, Supplier, Supply, PurchaseOrder, PurchaseOrderItem, CustomerRequest, CustomerRequestItem
+from supplies.models import Category, Supplier, Supply, PurchaseOrder, PurchaseOrderItem, CustomerRequest, CustomerRequestItem, UserProfile
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 
@@ -188,11 +188,8 @@ class CustomerRequestForm(forms.ModelForm):
     """Form for customers to request stock."""
     class Meta:
         model = CustomerRequest
-        fields = ['customer_name', 'customer_email', 'customer_phone', 'notes']
+        fields = ['notes']  # Only notes, no name/email/phone
         widgets = {
-            'customer_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your name'}),
-            'customer_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
-            'customer_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Notes (optional)'}),
         }
 
@@ -218,12 +215,55 @@ class CustomerRequestItemForm(forms.ModelForm):
         return cleaned
 
 
-class CustomerRegistrationForm(UserCreationForm):
-    """Simple customer registration form."""
+class UnifiedRegistrationForm(UserCreationForm):
+    """Unified registration form for both managers and customers."""
+    role = forms.ChoiceField(
+        choices=UserProfile.ROLE_CHOICES,
+        initial='CUSTOMER',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    first_name = forms.CharField(
+        max_length=30,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First name'})
+    )
+    last_name = forms.CharField(
+        max_length=30,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last name'})
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'})
+    )
+    phone = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone number'})
+    )
+    
     class Meta:
         model = get_user_model()
-        fields = ['username', 'email', 'password1', 'password2']
+        fields = ['username', 'first_name', 'last_name', 'email', 'role', 'phone', 'password1', 'password2']
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
         }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add Bootstrap classes to password fields
+        self.fields['password1'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control'})
+    
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.first_name = self.cleaned_data['first_name']
+        user.last_name = self.cleaned_data['last_name']
+        user.email = self.cleaned_data['email']
+        
+        if commit:
+            user.save()
+            # Update the profile with role and phone
+            profile = user.profile
+            profile.role = self.cleaned_data['role']
+            profile.phone = self.cleaned_data['phone']
+            profile.save()
+        
+        return user

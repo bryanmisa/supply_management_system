@@ -30,70 +30,122 @@
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
-                           href="{% url 'dashboard' %}">
-                            <i class="bi bi-speedometer2"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-box-seam"></i> Supplies
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'supply_list' %}">All Supplies</a></li>
-                            <li><a class="dropdown-item" href="{% url 'supply_create' %}">Add New Supply</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'low_stock_report' %}">Low Stock Report</a></li>
-                            <li><a class="dropdown-item" href="{% url 'customer_request_list' %}">Customer Requests</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-tags"></i> Categories
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'category_list' %}">All Categories</a></li>
-                            <li><a class="dropdown-item" href="{% url 'category_create' %}">Add New Category</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-truck"></i> Suppliers
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'supplier_list' %}">All Suppliers</a></li>
-                            <li><a class="dropdown-item" href="{% url 'supplier_create' %}">Add New Supplier</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-cart"></i> Purchase Orders
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'purchase_order_list' %}">All Orders</a></li>
-                            <li><a class="dropdown-item" href="{% url 'purchase_order_create' %}">Create New Order</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{% url 'purchase_order_list' %}?status=PENDING">Pending Orders</a></li>
-                            <li><a class="dropdown-item" href="{% url 'purchase_order_list' %}?status=SENT">Sent Orders</a></li>
-                        </ul>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-people"></i> Customer Portal
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'customer_request_create' %}">Request Stock</a></li>
-                            <li><a class="dropdown-item" href="{% url 'customer_my_requests' %}">My Requests</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            {% if request.user.is_authenticated %}
-                                <li><a class="dropdown-item" href="{% url 'customer_logout' %}">Sign out</a></li>
-                            {% else %}
-                                <li><a class="dropdown-item" href="{% url 'customer_login' %}">Sign in</a></li>
-                                <li><a class="dropdown-item" href="{% url 'customer_register' %}">Create Account</a></li>
-                            {% endif %}
-                        </ul>
-                    </li>
+                    {% if request.user.is_authenticated %}
+                        <!-- Dashboard Link for Managers and Superusers -->
+                        {% if request.user.is_superuser or request.user.profile.is_manager %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'manager_dashboard' %}active{% endif %}" 
+                                   href="{% url 'manager_dashboard' %}">
+                                    <i class="bi bi-speedometer2"></i> Dashboard
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if request.user.is_authenticated %}
+                        <!-- Manager Navigation (for Managers and Superusers) -->
+                        {% if request.user.is_superuser or request.user.profile.is_manager %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-box-seam"></i> Supplies
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'supply_list' %}">All Supplies</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'supply_create' %}">Add New Supply</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'low_stock_report' %}">Low Stock Report</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'customer_request_list' %}">Customer Requests</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-tags"></i> Categories
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'category_list' %}">All Categories</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'category_create' %}">Add New Category</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-truck"></i> Suppliers
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'supplier_list' %}">All Suppliers</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'supplier_create' %}">Add New Supplier</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-cart"></i> Purchase Orders
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'purchase_order_list' %}">All Orders</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'purchase_order_create' %}">Create New Order</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{% url 'purchase_order_list' %}?status=PENDING">Pending Orders</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'purchase_order_list' %}?status=SENT">Sent Orders</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                        
+                        <!-- Customer Navigation (for Customers and Superusers) -->
+                        {% if request.user.is_superuser or request.user.profile.is_customer %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'supply_list' %}">
+                                    <i class="bi bi-box-seam"></i> View Supplies
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-bag"></i> My Requests
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'customer_request_create' %}">New Request</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'customer_my_requests' %}">View All Requests</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                
+                <!-- User Account Section -->
+                <ul class="navbar-nav ms-auto">
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i> 
+                                {{ request.user.get_full_name|default:request.user.username }}
+                                {% if request.user.is_superuser %}
+                                    <span class="badge bg-danger">Admin</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ request.user.profile.get_role_display }}</span>
+                                {% endif %}
+                            </a>
+                            <ul class="dropdown-menu">
+                                {% if request.user.is_superuser %}
+                                    <li><a class="dropdown-item" href="/admin/" target="_blank">
+                                        <i class="bi bi-gear"></i> Django Admin
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                {% endif %}
+                                <li><a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="bi bi-box-arrow-right"></i> Sign out
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">
+                                <i class="bi bi-box-arrow-in-right"></i> Sign in
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">
+                                <i class="bi bi-person-plus"></i> Register
+                            </a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

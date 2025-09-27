@@ -22,18 +22,15 @@
         <form method="post">
           {% csrf_token %}
           <h6 class="text-muted">Your Details</h6>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label" for="{{ req_form.customer_name.id_for_label }}">Name</label>
-              {{ req_form.customer_name }}
-            </div>
-            <div class="col-md-3 mb-3">
-              <label class="form-label" for="{{ req_form.customer_email.id_for_label }}">Email</label>
-              {{ req_form.customer_email }}
-            </div>
-            <div class="col-md-3 mb-3">
-              <label class="form-label" for="{{ req_form.customer_phone.id_for_label }}">Phone</label>
-              {{ req_form.customer_phone }}
+          <div class="mb-3">
+            <div class="card bg-light">
+              <div class="card-body">
+                <strong>Name:</strong> {{ request.user.get_full_name|default:request.user.username }}<br>
+                <strong>Email:</strong> {{ request.user.email }}<br>
+                {% if request.user.profile.phone %}
+                  <strong>Phone:</strong> {{ request.user.profile.phone }}
+                {% endif %}
+              </div>
             </div>
           </div>
 

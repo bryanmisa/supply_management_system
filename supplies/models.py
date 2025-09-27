@@ -7,6 +7,48 @@ from django.core.validators import MinValueValidator
 from django.utils import timezone
 from django.db.models import Q, F, Count
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+class UserProfile(models.Model):
+    """User profile to extend Django's User model with role and additional fields."""
+    ROLE_CHOICES = [
+        ('MANAGER', 'Supply Manager'),
+        ('CUSTOMER', 'Customer'),
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='CUSTOMER')
+    phone = models.CharField(max_length=20, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.get_role_display()}"
+    
+    @property
+    def is_manager(self):
+        return self.role == 'MANAGER'
+    
+    @property
+    def is_customer(self):
+        return self.role == 'CUSTOMER'
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    """Create UserProfile when User is created."""
+    if created:
+        UserProfile.objects.create(user=instance)
+
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    """Save UserProfile when User is saved."""
+    if hasattr(instance, 'profile'):
+        instance.profile.save()
+
 
 class CategoryManager(models.Manager):
     """Custom manager for Category model."""
@@ -372,6 +414,18 @@ class PurchaseOrder(models.Model):
         self.status = 'RECEIVED'
         self.actual_delivery_date = timezone.now().date()
         self.save()
+    
+    def has_pending_items(self):
+        """Check if there are items that haven't been fully received."""
+        return self.items.filter(quantity_received__lt=F('quantity_ordered')).exists()
+    
+    def get_pending_items_count(self):
+        """Get count of items with pending quantities."""
+        return self.items.filter(quantity_received__lt=F('quantity_ordered')).count()
+    
+    def can_be_cancelled(self):
+        """Check if the order can be cancelled."""
+        return self.status in ['PENDING', 'APPROVED', 'SENT', 'PARTIALLY_RECEIVED']
 
 
 class PurchaseOrderItem(models.Model):

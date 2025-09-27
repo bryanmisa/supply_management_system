@@ -50,16 +50,37 @@
             </a>
         {% endif %}
 
-        {% if order.status in 'PENDING,APPROVED,SENT' %}
+        {% if order.can_be_cancelled %}
             <form method="post" action="{% url 'purchase_order_cancel' order.id %}" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Cancel this purchase order?')">
-                    <i class="bi bi-x-circle"></i> Cancel
-                </button>
+                {% if order.status == 'PARTIALLY_RECEIVED' %}
+                    <button type="submit" class="btn btn-warning" onclick="return confirm('Cancel this purchase order? This will prevent {{ order.get_pending_items_count }} remaining item(s) from being delivered.')">
+                        <i class="bi bi-x-circle"></i> Cancel Remaining
+                    </button>
+                {% else %}
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Cancel this purchase order?')">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </button>
+                {% endif %}
             </form>
         {% endif %}
     </div>
 </div>
+
+<!-- Status Alert for Partially Received Orders -->
+{% if order.status == 'PARTIALLY_RECEIVED' and order.has_pending_items %}
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>
+                <strong>Partial Delivery:</strong> This order has {{ order.get_pending_items_count }} item(s) still pending delivery. 
+                You can cancel the remaining items if the supplier cannot deliver them.
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <!-- Order Details -->
 <div class="row mt-4">

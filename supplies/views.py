@@ -11,22 +11,65 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 
 from .models import Category, Supplier, Supply, StockMovement, PurchaseOrder, PurchaseOrderItem, get_dashboard_stats, CustomerRequest, CustomerRequestItem
-from .forms import CategoryForm, SupplierForm, SupplyForm, StockMovementForm, StockAdjustmentForm, SearchForm, PurchaseOrderForm, PurchaseOrderItemForm, ReceiveItemForm, CustomerRequestForm, CustomerRequestItemForm, CustomerRegistrationForm
+from .forms import CategoryForm, SupplierForm, SupplyForm, StockMovementForm, StockAdjustmentForm, SearchForm, PurchaseOrderForm, PurchaseOrderItemForm, ReceiveItemForm, CustomerRequestForm, CustomerRequestItemForm, UnifiedRegistrationForm
+from .decorators import manager_required, customer_required, role_required
 
 
+@manager_required
 def dashboard(request):
-    """Dashboard view with key metrics and recent activity."""
+    """Manager dashboard view with key metrics and recent activity."""
     stats = get_dashboard_stats()
     return render(request, 'supplies/dashboard.html', {'stats': stats})
 
 
+@customer_required
+def customer_dashboard(request):
+    """Customer dashboard view showing available supplies and request status."""
+    # Get available supplies for customers to browse
+    available_supplies = Supply.objects.active().select_related('category', 'supplier').filter(current_stock__gt=0)[:10]
+    
+    # Get customer's recent requests
+    recent_requests = CustomerRequest.objects.filter(user=request.user).order_by('-created_at')[:5]
+    
+    context = {
+        'available_supplies': available_supplies,
+        'recent_requests': recent_requests,
+        'total_requests': CustomerRequest.objects.filter(user=request.user).count(),
+        'pending_requests': CustomerRequest.objects.filter(user=request.user, status='PENDING').count(),
+    }
+    return render(request, 'supplies/customer_dashboard.html', context)
+
+
+def unified_dashboard(request):
+    """Route users to appropriate dashboard based on their role."""
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    # Superusers go to manager dashboard by default
+    if request.user.is_superuser:
+        return redirect('manager_dashboard')
+    
+    if hasattr(request.user, 'profile'):
+        if request.user.profile.is_manager:
+            return redirect('manager_dashboard')
+        else:
+            return redirect('customer_dashboard')
+    else:
+        # Create profile if it doesn't exist (fallback safety)
+        from supplies.models import UserProfile
+        UserProfile.objects.get_or_create(user=request.user, defaults={'role': 'CUSTOMER'})
+        return redirect('customer_dashboard')
+
+
 # Category Views
+@manager_required
 def category_list(request):
     """List all categories."""
     categories = Category.objects.all()
     return render(request, 'supplies/categories/list.html', {'categories': categories})
 
 
+@manager_required
 def category_create(request):
     """Create a new category."""
     if request.method == 'POST':
@@ -41,6 +84,7 @@ def category_create(request):
     return render(request, 'supplies/categories/form.html', {'form': form, 'title': 'Create Category'})
 
 
+@manager_required
 def category_edit(request, category_id):
     """Edit an existing category."""
     category = get_object_or_404(Category, id=category_id)
@@ -61,6 +105,7 @@ def category_edit(request, category_id):
     })
 
 
+@manager_required
 def category_delete(request, category_id):
     """Delete a category."""
     if request.method == 'POST':
@@ -76,12 +121,14 @@ def category_delete(request, category_id):
 
 
 # Supplier Views
+@manager_required
 def supplier_list(request):
     """List all suppliers."""
     suppliers = Supplier.objects.all()
     return render(request, 'supplies/suppliers/list.html', {'suppliers': suppliers})
 
 
+@manager_required
 def supplier_create(request):
     """Create a new supplier."""
     if request.method == 'POST':
@@ -96,6 +143,7 @@ def supplier_create(request):
     return render(request, 'supplies/suppliers/form.html', {'form': form, 'title': 'Create Supplier'})
 
 
+@manager_required
 def supplier_edit(request, supplier_id):
     """Edit an existing supplier."""
     supplier = get_object_or_404(Supplier, id=supplier_id)
@@ -116,6 +164,7 @@ def supplier_edit(request, supplier_id):
     })
 
 
+@manager_required
 def supplier_deactivate(request, supplier_id):
     """Deactivate a supplier."""
     if request.method == 'POST':
@@ -129,6 +178,7 @@ def supplier_deactivate(request, supplier_id):
 
 
 # Supply Views
+@login_required
 def supply_list(request):
     """List all supplies with search and filtering."""
     supplies = Supply.objects.active().select_related('category', 'supplier')
@@ -160,6 +210,7 @@ def supply_list(request):
     })
 
 
+@login_required
 def supply_detail(request, supply_id):
     """View supply details and stock movements."""
     supply = get_object_or_404(Supply, id=supply_id)
@@ -171,6 +222,7 @@ def supply_detail(request, supply_id):
     })
 
 
+@manager_required
 def supply_create(request):
     """Create a new supply."""
     if request.method == 'POST':
@@ -185,6 +237,7 @@ def supply_create(request):
     return render(request, 'supplies/supplies/form.html', {'form': form, 'title': 'Create Supply'})
 
 
+@manager_required
 def supply_edit(request, supply_id):
     """Edit an existing supply."""
     supply = get_object_or_404(Supply, id=supply_id)
@@ -277,6 +330,7 @@ def stock_adjustment(request, supply_id):
     })
 
 
+@manager_required
 def low_stock_report(request):
     """Show supplies with low stock."""
     # Include total_value annotation for display in the report
@@ -292,6 +346,7 @@ def low_stock_report(request):
 
 
 # Purchase Order Views
+@manager_required
 def purchase_order_list(request):
     """List all purchase orders."""
     orders = PurchaseOrder.objects.select_related('supplier').prefetch_related('items')
@@ -322,12 +377,14 @@ def purchase_order_list(request):
     })
 
 
+@manager_required
 def purchase_order_detail(request, order_id):
     """View purchase order details."""
     order = get_object_or_404(PurchaseOrder, id=order_id)
     return render(request, 'supplies/purchase_orders/detail.html', {'order': order})
 
 
+@manager_required
 def purchase_order_create(request):
     """Create a new purchase order."""
     if request.method == 'POST':
@@ -345,6 +402,7 @@ def purchase_order_create(request):
     })
 
 
+@manager_required
 def purchase_order_edit(request, order_id):
     """Edit a purchase order."""
     order = get_object_or_404(PurchaseOrder, id=order_id)
@@ -369,6 +427,7 @@ def purchase_order_edit(request, order_id):
     })
 
 
+@manager_required
 def purchase_order_add_item(request, order_id):
     """Add item to purchase order."""
     order = get_object_or_404(PurchaseOrder, id=order_id)
@@ -398,6 +457,7 @@ def purchase_order_add_item(request, order_id):
     })
 
 
+@manager_required
 def purchase_order_remove_item(request, order_id, item_id):
     """Remove item from purchase order."""
     order = get_object_or_404(PurchaseOrder, id=order_id)
@@ -415,6 +475,7 @@ def purchase_order_remove_item(request, order_id, item_id):
     return redirect('purchase_order_detail', order_id=order_id)
 
 
+@manager_required
 def purchase_order_approve(request, order_id):
     """Approve a purchase order."""
     order = get_object_or_404(PurchaseOrder, id=order_id)
@@ -430,6 +491,7 @@ def purchase_order_approve(request, order_id):
     return redirect('purchase_order_detail', order_id=order_id)
 
 
+@manager_required
 def purchase_order_send(request, order_id):
     """Mark purchase order as sent to supplier."""
     order = get_object_or_404(PurchaseOrder, id=order_id)
@@ -445,6 +507,7 @@ def purchase_order_send(request, order_id):
     return redirect('purchase_order_detail', order_id=order_id)
 
 
+@manager_required
 def purchase_order_receive_item(request, order_id, item_id):
     """Receive items from purchase order."""
     order = get_object_or_404(PurchaseOrder, id=order_id)
@@ -480,36 +543,91 @@ def purchase_order_receive_item(request, order_id, item_id):
     })
 
 
+@manager_required
 def purchase_order_cancel(request, order_id):
     """Cancel a purchase order."""
     order = get_object_or_404(PurchaseOrder, id=order_id)
     
     if request.method == 'POST':
-        if order.status in ['PENDING', 'APPROVED', 'SENT']:
+        if order.can_be_cancelled():
+            # Check original status before changing it
+            original_status = order.status
+            pending_items_count = order.get_pending_items_count() if original_status == 'PARTIALLY_RECEIVED' else 0
+            
             order.status = 'CANCELLED'
             order.save()
-            messages.success(request, f'Purchase Order {order.order_number} cancelled!')
+            
+            # Add reason for cancellation based on original status
+            if original_status == 'PARTIALLY_RECEIVED':
+                messages.success(request, f'Purchase Order {order.order_number} cancelled! {pending_items_count} remaining item(s) will not be delivered.')
+            else:
+                messages.success(request, f'Purchase Order {order.order_number} cancelled!')
         else:
-            messages.error(request, 'Cannot cancel orders that have been received.')
+            messages.error(request, 'Cannot cancel orders that have been fully received.')
     
     return redirect('purchase_order_detail', order_id=order_id)
 
 
-# Customer Request Views
-def customer_register(request):
-    """Register a new customer account and sign them in."""
+# Authentication Views
+def unified_register(request):
+    """Unified registration for both managers and customers."""
     if request.method == 'POST':
-        form = CustomerRegistrationForm(request.POST)
+        form = UnifiedRegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             messages.success(request, 'Account created successfully!')
-            return redirect('customer_my_requests')
+            
+            # Redirect based on role
+            if user.profile.is_manager:
+                return redirect('manager_dashboard')
+            else:
+                return redirect('customer_dashboard')
     else:
-        form = CustomerRegistrationForm()
+        form = UnifiedRegistrationForm()
     return render(request, 'supplies/customer_portal/register.html', {'form': form})
 
-@login_required
+
+def unified_login(request):
+    """Unified login that redirects based on user role."""
+    from django.contrib.auth.views import LoginView
+    from django.urls import reverse_lazy
+    
+    class RoleBasedLoginView(LoginView):
+        template_name = 'supplies/customer_portal/login.html'
+        
+        def get_success_url(self):
+            # Superusers go to manager dashboard
+            if self.request.user.is_superuser:
+                return reverse_lazy('manager_dashboard')
+            
+            if hasattr(self.request.user, 'profile'):
+                if self.request.user.profile.is_manager:
+                    return reverse_lazy('manager_dashboard')
+                else:
+                    return reverse_lazy('customer_dashboard')
+            return reverse_lazy('dashboard')
+    
+    return RoleBasedLoginView.as_view()(request)
+
+
+def unified_logout(request):
+    """Unified logout view with user feedback."""
+    from django.contrib.auth import logout as auth_logout
+    
+    if request.user.is_authenticated:
+        user_name = request.user.get_full_name() or request.user.username
+        auth_logout(request)
+        messages.success(request, f'Successfully signed out. See you later, {user_name}!')
+    else:
+        messages.info(request, 'You were already signed out.')
+    
+    return redirect('dashboard')
+
+
+# Customer Request Views
+
+@customer_required
 def customer_my_requests(request):
     """Customer: list their own requests."""
     qs = CustomerRequest.objects.filter(user=request.user).prefetch_related('items', 'items__supply').order_by('-created_at')
@@ -517,7 +635,7 @@ def customer_my_requests(request):
         'requests': qs
     })
 
-@login_required
+@customer_required
 def customer_request_detail_mine(request, request_id):
     """Customer: view a specific request they own (read-only)."""
     req = get_object_or_404(CustomerRequest, id=request_id, user=request.user)
@@ -526,9 +644,9 @@ def customer_request_detail_mine(request, request_id):
         'readonly': True,
     })
 
-@login_required
+@customer_required
 def customer_request_create(request):
-    """Public page: customer submits a stock request."""
+    """Customer submits a stock request."""
     if request.method == 'POST':
         req_form = CustomerRequestForm(request.POST)
         item_form = CustomerRequestItemForm(request.POST)
@@ -537,6 +655,10 @@ def customer_request_create(request):
             customer_request.status = 'PENDING'
             customer_request.created_by = 'Customer'
             customer_request.user = request.user
+            # Set name/email/phone from user model
+            customer_request.customer_name = request.user.get_full_name() or request.user.username
+            customer_request.customer_email = request.user.email
+            customer_request.customer_phone = getattr(request.user.profile, 'phone', '') if hasattr(request.user, 'profile') else ''
             customer_request.save()
 
             item = item_form.save(commit=False)
@@ -564,6 +686,7 @@ def customer_request_thanks(request, request_number):
     })
 
 
+@manager_required
 def customer_request_list(request):
     """Manager page: list and filter customer requests."""
     status = request.GET.get('status', '')
@@ -576,6 +699,7 @@ def customer_request_list(request):
     })
 
 
+@manager_required
 def customer_request_detail(request, request_id):
     """Manager page: view a single request."""
     req = get_object_or_404(CustomerRequest, id=request_id)
@@ -585,6 +709,7 @@ def customer_request_detail(request, request_id):
     })
 
 
+@manager_required
 def customer_request_approve(request, request_id):
     """Approve a customer request."""
     req = get_object_or_404(CustomerRequest, id=request_id)
@@ -597,6 +722,7 @@ def customer_request_approve(request, request_id):
     return redirect('customer_request_detail', request_id=request_id)
 
 
+@manager_required
 def customer_request_out_for_delivery(request, request_id):
     """Mark request as out for delivery."""
     req = get_object_or_404(CustomerRequest, id=request_id)
@@ -609,6 +735,7 @@ def customer_request_out_for_delivery(request, request_id):
     return redirect('customer_request_detail', request_id=request_id)
 
 
+@manager_required
 def customer_request_delivered(request, request_id):
     """Mark request as delivered, deducting stock."""
     req = get_object_or_404(CustomerRequest, id=request_id)
@@ -623,6 +750,7 @@ def customer_request_delivered(request, request_id):
     return redirect('customer_request_detail', request_id=request_id)
 
 
+@manager_required
 def customer_request_cancel(request, request_id):
     """Cancel a request."""
     req = get_object_or_404(CustomerRequest, id=request_id)
