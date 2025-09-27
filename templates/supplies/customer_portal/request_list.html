@@ -1,0 +1,83 @@
+<!-- New template: templates/supplies/customer_portal/request_list.html -->
+{% extends 'base.html' %}
+{% block title %}Customer Requests{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active">Customer Requests</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-people"></i> Customer Requests</h6>
+    <form method="get" class="d-flex gap-2">
+      <select name="status" class="form-select">
+        <option value="">All</option>
+        <option value="PENDING" {% if selected_status == 'PENDING' %}selected{% endif %}>Pending</option>
+        <option value="APPROVED" {% if selected_status == 'APPROVED' %}selected{% endif %}>Approved</option>
+        <option value="OUT_FOR_DELIVERY" {% if selected_status == 'OUT_FOR_DELIVERY' %}selected{% endif %}>Out for Delivery</option>
+        <option value="DELIVERED" {% if selected_status == 'DELIVERED' %}selected{% endif %}>Delivered</option>
+        <option value="CANCELLED" {% if selected_status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+      </select>
+      <button class="btn btn-outline-primary" type="submit"><i class="bi bi-filter"></i> Filter</button>
+    </form>
+  </div>
+  <div class="card-body">
+    {% if requests %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Request #</th>
+              <th>Customer</th>
+              <th>Status</th>
+              <th>Item(s)</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in requests %}
+              <tr>
+                <td><strong>{{ r.request_number }}</strong></td>
+                <td>
+                  {{ r.customer_name }}<br>
+                  <small class="text-muted">{{ r.customer_email|default:"" }}</small>
+                </td>
+                <td>
+                  <span class="badge bg-{% if r.status == 'PENDING' %}warning{% elif r.status == 'APPROVED' %}info{% elif r.status == 'OUT_FOR_DELIVERY' %}primary{% elif r.status == 'DELIVERED' %}success{% else %}secondary{% endif %}">
+                    {{ r.get_status_display }}
+                  </span>
+                </td>
+                <td>
+                  {% for it in r.items.all %}
+                    <div>{{ it.supply.name }} x {{ it.quantity_requested }}</div>
+                  {% empty %}
+                    <em class="text-muted">No items</em>
+                  {% endfor %}
+                </td>
+                <td><small>{{ r.created_at|date:"M d, Y H:i" }}</small></td>
+                <td class="text-end">
+                  <a href="{% url 'customer_request_detail' r.id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center text-muted py-4">
+        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+        <p class="mt-2 mb-0">No customer requests found.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

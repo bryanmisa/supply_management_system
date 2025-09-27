@@ -1,0 +1,66 @@
+<!-- New template: templates/supplies/customer_portal/request_create.html -->
+{% extends 'base.html' %}
+{% block title %}Request Stock - Customer Portal{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active">Customer Request</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card shadow">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-bag-plus"></i> Request Available Stock</h6>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <h6 class="text-muted">Your Details</h6>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="{{ req_form.customer_name.id_for_label }}">Name</label>
+              {{ req_form.customer_name }}
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label" for="{{ req_form.customer_email.id_for_label }}">Email</label>
+              {{ req_form.customer_email }}
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label" for="{{ req_form.customer_phone.id_for_label }}">Phone</label>
+              {{ req_form.customer_phone }}
+            </div>
+          </div>
+
+          <h6 class="text-muted mt-2">Item</h6>
+          <div class="row">
+            <div class="col-md-8 mb-3">
+              <label class="form-label" for="{{ item_form.supply.id_for_label }}">Supply</label>
+              {{ item_form.supply }}
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="form-label" for="{{ item_form.quantity_requested.id_for_label }}">Quantity</label>
+              {{ item_form.quantity_requested }}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="{{ req_form.notes.id_for_label }}">Notes</label>
+            {{ req_form.notes }}
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Cancel</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Submit Request</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

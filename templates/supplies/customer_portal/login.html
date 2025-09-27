@@ -1,0 +1,39 @@
+<!-- New template: templates/supplies/customer_portal/login.html -->
+{% extends 'base.html' %}
+{% block title %}Sign in - Customer Portal{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active">Sign in</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card shadow">
+      <div class="card-header"><strong>Sign in</strong></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" autofocus required class="form-control">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" required class="form-control">
+          </div>
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'customer_register' %}">Create an account</a>
+            <button class="btn btn-primary" type="submit">Sign in</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

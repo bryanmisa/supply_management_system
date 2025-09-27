@@ -1,0 +1,120 @@
+<!-- New template: templates/supplies/customer_portal/request_detail.html -->
+{% extends 'base.html' %}
+{% block title %}Customer Request - {{ request_obj.request_number }}{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'customer_request_list' %}">Customer Requests</a></li>
+    <li class="breadcrumb-item active">{{ request_obj.request_number }}</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <h3 class="mb-3">
+      <i class="bi bi-person"></i> {{ request_obj.customer_name }}
+      <span class="badge align-middle bg-{% if request_obj.status == 'PENDING' %}warning{% elif request_obj.status == 'APPROVED' %}info{% elif request_obj.status == 'OUT_FOR_DELIVERY' %}primary{% elif request_obj.status == 'DELIVERED' %}success{% else %}secondary{% endif %}">
+        {{ request_obj.get_status_display }}
+      </span>
+    </h3>
+
+    <div class="card mb-3">
+      <div class="card-header"><strong>Request {{ request_obj.request_number }}</strong></div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-6">
+            <div class="small text-muted">Email</div>
+            <div>{{ request_obj.customer_email|default:"—" }}</div>
+          </div>
+          <div class="col-6">
+            <div class="small text-muted">Phone</div>
+            <div>{{ request_obj.customer_phone|default:"—" }}</div>
+          </div>
+        </div>
+        {% if request_obj.notes %}
+          <hr>
+          <div>
+            <div class="small text-muted">Notes</div>
+            <div>{{ request_obj.notes }}</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>Items</strong>
+        <span class="text-muted small">Total qty: {{ request_obj.total_items }}</span>
+      </div>
+      <div class="card-body">
+        {% if request_obj.items.all %}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Supply</th>
+                  <th>SKU</th>
+                  <th class="text-end">Qty</th>
+                  <th class="text-end">Available</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for it in request_obj.items.all %}
+                  <tr>
+                    <td><a class="text-decoration-none" href="{% url 'supply_detail' it.supply.id %}">{{ it.supply.name }}</a></td>
+                    <td><code>{{ it.supply.sku }}</code></td>
+                    <td class="text-end">{{ it.quantity_requested }}</td>
+                    <td class="text-end">{{ it.supply.current_stock }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <em class="text-muted">No items.</em>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    {% if not readonly %}
+      <div class="card">
+        <div class="card-header"><strong>Actions</strong></div>
+        <div class="card-body">
+          {% if request_obj.status == 'PENDING' %}
+            <form method="post" action="{% url 'customer_request_approve' request_obj.id %}" class="d-grid gap-2 mb-2">
+              {% csrf_token %}
+              <button class="btn btn-success" onclick="return confirm('Approve this request?')"><i class="bi bi-check-circle"></i> Approve</button>
+            </form>
+          {% endif %}
+          {% if request_obj.status == 'APPROVED' %}
+            <form method="post" action="{% url 'customer_request_out_for_delivery' request_obj.id %}" class="d-grid gap-2 mb-2">
+              {% csrf_token %}
+              <button class="btn btn-primary" onclick="return confirm('Mark as out for delivery?')"><i class="bi bi-truck"></i> Out for Delivery</button>
+            </form>
+          {% endif %}
+          {% if request_obj.status == 'OUT_FOR_DELIVERY' %}
+            <form method="post" action="{% url 'customer_request_delivered' request_obj.id %}" class="d-grid gap-2 mb-2">
+              {% csrf_token %}
+              <button class="btn btn-success" onclick="return confirm('Mark as delivered and deduct stock?')"><i class="bi bi-box-seam"></i> Mark Delivered</button>
+            </form>
+          {% endif %}
+          {% if request_obj.status in 'PENDING,APPROVED' %}
+            <form method="post" action="{% url 'customer_request_cancel' request_obj.id %}" class="d-grid gap-2">
+              {% csrf_token %}
+              <button class="btn btn-outline-danger" onclick="return confirm('Cancel this request?')"><i class="bi bi-x-circle"></i> Cancel</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% else %}
+      <div class="alert alert-info"><i class="bi bi-info-circle"></i> Thanks! Your request has been submitted.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

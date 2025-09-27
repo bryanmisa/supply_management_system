@@ -1,0 +1,48 @@
+<!-- New template: templates/supplies/customer_portal/register.html -->
+{% extends 'base.html' %}
+{% block title %}Create Account - Customer Portal{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active">Create Account</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow">
+      <div class="card-header"><strong>Create Account</strong></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+            {{ form.username }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+            {{ form.email }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.password1.id_for_label }}">Password</label>
+            {{ form.password1 }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.password2.id_for_label }}">Confirm Password</label>
+            {{ form.password2 }}
+          </div>
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'customer_login' %}">Already have an account? Sign in</a>
+            <button class="btn btn-success" type="submit">Create Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

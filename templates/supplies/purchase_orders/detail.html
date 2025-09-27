@@ -43,13 +43,13 @@
                 </button>
             </form>
         {% endif %}
-        
+
         {% if order.status in 'PENDING,APPROVED' %}
             <a href="{% url 'purchase_order_edit' order.id %}" class="btn btn-secondary">
                 <i class="bi bi-pencil"></i> Edit
             </a>
         {% endif %}
-        
+
         {% if order.status in 'PENDING,APPROVED,SENT' %}
             <form method="post" action="{% url 'purchase_order_cancel' order.id %}" class="d-inline">
                 {% csrf_token %}
@@ -186,8 +186,7 @@
                                             <button type="submit" class="btn btn-outline-danger" 
                                                     onclick="return confirm('Remove this item?')" title="Remove Item">
                                                 <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
+                                            </form>
                                     {% endif %}
                                 </div>
                             </td>

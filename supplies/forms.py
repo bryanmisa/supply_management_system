@@ -2,7 +2,10 @@
 Django forms for the supplies app.
 """
 from django import forms
-from supplies.models import Category, Supplier, Supply, PurchaseOrder, PurchaseOrderItem
+from django.core.exceptions import ValidationError
+from supplies.models import Category, Supplier, Supply, PurchaseOrder, PurchaseOrderItem, CustomerRequest, CustomerRequestItem
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import get_user_model
 
 
 class CategoryForm(forms.ModelForm):
@@ -179,3 +182,48 @@ class ReceiveItemForm(forms.Form):
         if max_quantity:
             self.fields['quantity_received'].widget.attrs['max'] = max_quantity
             self.fields['quantity_received'].help_text = f"Maximum: {max_quantity}"
+
+
+class CustomerRequestForm(forms.ModelForm):
+    """Form for customers to request stock."""
+    class Meta:
+        model = CustomerRequest
+        fields = ['customer_name', 'customer_email', 'customer_phone', 'notes']
+        widgets = {
+            'customer_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your name'}),
+            'customer_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+            'customer_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Notes (optional)'}),
+        }
+
+class CustomerRequestItemForm(forms.ModelForm):
+    """Form for selecting supply and quantity (limited to available stock)."""
+    class Meta:
+        model = CustomerRequestItem
+        fields = ['supply', 'quantity_requested']
+        widgets = {
+            'supply': forms.Select(attrs={'class': 'form-select'}),
+            'quantity_requested': forms.NumberInput(attrs={'class': 'form-control', 'min': '1'}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        supply = cleaned.get('supply')
+        qty = cleaned.get('quantity_requested') or 0
+        if supply and qty:
+            if not supply.is_active:
+                raise ValidationError("Selected supply is not active.")
+            if qty > supply.current_stock:
+                raise ValidationError(f"Requested quantity exceeds available stock ({supply.current_stock}).")
+        return cleaned
+
+
+class CustomerRegistrationForm(UserCreationForm):
+    """Simple customer registration form."""
+    class Meta:
+        model = get_user_model()
+        fields = ['username', 'email', 'password1', 'password2']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}),
+        }

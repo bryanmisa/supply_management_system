@@ -2,6 +2,7 @@
 URL patterns for the supplies app.
 """
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
@@ -45,4 +46,22 @@ urlpatterns = [
     
     # API endpoints
     path('api/supplies/search/', views.supply_search_api, name='supply_search_api'),
+
+    # Customer Portal (authenticated)
+    path('customer-portal/register/', views.customer_register, name='customer_register'),
+    path('customer-portal/login/', auth_views.LoginView.as_view(template_name='supplies/customer_portal/login.html'), name='customer_login'),
+    path('customer-portal/logout/', auth_views.LogoutView.as_view(next_page='dashboard'), name='customer_logout'),
+
+    path('customer-portal/request/', views.customer_request_create, name='customer_request_create'),
+    path('customer-portal/my-requests/', views.customer_my_requests, name='customer_my_requests'),
+    path('customer-portal/my-requests/<int:request_id>/', views.customer_request_detail_mine, name='customer_request_detail_mine'),
+
+    # Manager views remain unchanged
+    path('customer-portal/thanks/<str:request_number>/', views.customer_request_thanks, name='customer_request_thanks'),
+    path('customer-portal/requests/', views.customer_request_list, name='customer_request_list'),
+    path('customer-portal/requests/<int:request_id>/', views.customer_request_detail, name='customer_request_detail'),
+    path('customer-portal/requests/<int:request_id>/approve/', views.customer_request_approve, name='customer_request_approve'),
+    path('customer-portal/requests/<int:request_id>/out-for-delivery/', views.customer_request_out_for_delivery, name='customer_request_out_for_delivery'),
+    path('customer-portal/requests/<int:request_id>/delivered/', views.customer_request_delivered, name='customer_request_delivered'),
+    path('customer-portal/requests/<int:request_id>/cancel/', views.customer_request_cancel, name='customer_request_cancel'),
 ]

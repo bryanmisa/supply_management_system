@@ -45,6 +45,7 @@
                             <li><a class="dropdown-item" href="{% url 'supply_create' %}">Add New Supply</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'low_stock_report' %}">Low Stock Report</a></li>
+                            <li><a class="dropdown-item" href="{% url 'customer_request_list' %}">Customer Requests</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
@@ -75,6 +76,22 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'purchase_order_list' %}?status=PENDING">Pending Orders</a></li>
                             <li><a class="dropdown-item" href="{% url 'purchase_order_list' %}?status=SENT">Sent Orders</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-people"></i> Customer Portal
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'customer_request_create' %}">Request Stock</a></li>
+                            <li><a class="dropdown-item" href="{% url 'customer_my_requests' %}">My Requests</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% if request.user.is_authenticated %}
+                                <li><a class="dropdown-item" href="{% url 'customer_logout' %}">Sign out</a></li>
+                            {% else %}
+                                <li><a class="dropdown-item" href="{% url 'customer_login' %}">Sign in</a></li>
+                                <li><a class="dropdown-item" href="{% url 'customer_register' %}">Create Account</a></li>
+                            {% endif %}
                         </ul>
                     </li>
                 </ul>

@@ -6,7 +6,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 from django.db.models import Q, F, Count
-
+from django.conf import settings
 
 class CategoryManager(models.Manager):
     """Custom manager for Category model."""
@@ -434,3 +434,98 @@ class PurchaseOrderItem(models.Model):
         elif self.purchase_order.status == 'SENT':
             self.purchase_order.status = 'PARTIALLY_RECEIVED'
             self.purchase_order.save()
+
+class CustomerRequestManager(models.Manager):
+    """Manager for CustomerRequest."""
+    def pending(self):
+        return self.filter(status='PENDING')
+    def approved(self):
+        return self.filter(status='APPROVED')
+    def out_for_delivery(self):
+        return self.filter(status='OUT_FOR_DELIVERY')
+    def delivered(self):
+        return self.filter(status='DELIVERED')
+
+class CustomerRequest(models.Model):
+    """Customer stock request header."""
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('OUT_FOR_DELIVERY', 'Out for Delivery'),
+        ('DELIVERED', 'Delivered'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+
+    request_number = models.CharField(max_length=50, unique=True, help_text="Auto-generated request number")
+    customer_name = models.CharField(max_length=100)
+    customer_email = models.EmailField(blank=True)
+    customer_phone = models.CharField(max_length=20, blank=True)
+    notes = models.TextField(blank=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.CharField(max_length=100, default='Customer')
+    # Link request to the authenticated customer account
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                             on_delete=models.SET_NULL, related_name='customer_requests')
+
+    objects = CustomerRequestManager()
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"CR-{self.request_number} - {self.customer_name} ({self.get_status_display()})"
+
+    @property
+    def total_items(self):
+        return sum(i.quantity_requested for i in self.items.all())
+
+    def save(self, *args, **kwargs):
+        if not self.request_number:
+            self.request_number = timezone.now().strftime("CR%Y%m%d%H%M%S")
+        super().save(*args, **kwargs)
+
+    def approve(self, approver='Manager'):
+        if self.status != 'PENDING':
+            raise ValueError("Only pending requests can be approved.")
+        self.status = 'APPROVED'
+        self.updated_at = timezone.now()
+        self.save(update_fields=['status', 'updated_at'])
+
+    def mark_out_for_delivery(self):
+        if self.status != 'APPROVED':
+            raise ValueError("Only approved requests can be marked out for delivery.")
+        self.status = 'OUT_FOR_DELIVERY'
+        self.updated_at = timezone.now()
+        self.save(update_fields=['status', 'updated_at'])
+
+    def mark_delivered(self):
+        if self.status != 'OUT_FOR_DELIVERY':
+            raise ValueError("Only requests out for delivery can be marked delivered.")
+        # Deduct stock for each requested item
+        for item in self.items.select_related('supply').all():
+            # Reference number uses request_number
+            item.supply.stock_out(
+                item.quantity_requested,
+                reference_number=self.request_number,
+                reason=f"Delivered to customer: {self.customer_name}",
+                created_by='Customer Portal'
+            )
+        self.status = 'DELIVERED'
+        self.updated_at = timezone.now()
+        self.save(update_fields=['status', 'updated_at'])
+
+
+class CustomerRequestItem(models.Model):
+    """Line item for a customer stock request."""
+    request = models.ForeignKey(CustomerRequest, on_delete=models.CASCADE, related_name='items')
+    supply = models.ForeignKey(Supply, on_delete=models.PROTECT, related_name='customer_request_items')
+    quantity_requested = models.IntegerField(validators=[MinValueValidator(1)])
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return f"{self.supply.name} x {self.quantity_requested}"

@@ -1,0 +1,67 @@
+<!-- New template: templates/supplies/customer_portal/my_requests.html -->
+{% extends 'base.html' %}
+{% block title %}My Requests{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active">My Requests</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4"><i class="bi bi-list-check"></i> My Requests</h1>
+  <a class="btn btn-primary" href="{% url 'customer_request_create' %}"><i class="bi bi-bag-plus"></i> New Request</a>
+</div>
+
+<div class="card shadow">
+  <div class="card-body">
+    {% if requests %}
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Request #</th>
+              <th>Status</th>
+              <th>Items</th>
+              <th>Created</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in requests %}
+              <tr>
+                <td><strong>{{ r.request_number }}</strong></td>
+                <td>
+                  <span class="badge bg-{% if r.status == 'PENDING' %}warning{% elif r.status == 'APPROVED' %}info{% elif r.status == 'OUT_FOR_DELIVERY' %}primary{% elif r.status == 'DELIVERED' %}success{% else %}secondary{% endif %}">
+                    {{ r.get_status_display }}
+                  </span>
+                </td>
+                <td>
+                  {% for it in r.items.all %}
+                    <div>{{ it.supply.name }} x {{ it.quantity_requested }}</div>
+                  {% empty %}<em>—</em>{% endfor %}
+                </td>
+                <td><small>{{ r.created_at|date:"M d, Y H:i" }}</small></td>
+                <td class="text-end">
+                  <a class="btn btn-sm btn-outline-primary" href="{% url 'customer_request_detail_mine' r.id %}">
+                    <i class="bi bi-eye"></i> View
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center text-muted py-4">
+        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+        <p class="mt-2 mb-0">You have no requests yet.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

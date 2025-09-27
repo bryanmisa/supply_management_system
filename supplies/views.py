@@ -7,9 +7,11 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.db.models import F
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 
-from .models import Category, Supplier, Supply, StockMovement, PurchaseOrder, PurchaseOrderItem, get_dashboard_stats
-from .forms import CategoryForm, SupplierForm, SupplyForm, StockMovementForm, StockAdjustmentForm, SearchForm, PurchaseOrderForm, PurchaseOrderItemForm, ReceiveItemForm
+from .models import Category, Supplier, Supply, StockMovement, PurchaseOrder, PurchaseOrderItem, get_dashboard_stats, CustomerRequest, CustomerRequestItem
+from .forms import CategoryForm, SupplierForm, SupplyForm, StockMovementForm, StockAdjustmentForm, SearchForm, PurchaseOrderForm, PurchaseOrderItemForm, ReceiveItemForm, CustomerRequestForm, CustomerRequestItemForm, CustomerRegistrationForm
 
 
 def dashboard(request):
@@ -491,6 +493,147 @@ def purchase_order_cancel(request, order_id):
             messages.error(request, 'Cannot cancel orders that have been received.')
     
     return redirect('purchase_order_detail', order_id=order_id)
+
+
+# Customer Request Views
+def customer_register(request):
+    """Register a new customer account and sign them in."""
+    if request.method == 'POST':
+        form = CustomerRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Account created successfully!')
+            return redirect('customer_my_requests')
+    else:
+        form = CustomerRegistrationForm()
+    return render(request, 'supplies/customer_portal/register.html', {'form': form})
+
+@login_required
+def customer_my_requests(request):
+    """Customer: list their own requests."""
+    qs = CustomerRequest.objects.filter(user=request.user).prefetch_related('items', 'items__supply').order_by('-created_at')
+    return render(request, 'supplies/customer_portal/my_requests.html', {
+        'requests': qs
+    })
+
+@login_required
+def customer_request_detail_mine(request, request_id):
+    """Customer: view a specific request they own (read-only)."""
+    req = get_object_or_404(CustomerRequest, id=request_id, user=request.user)
+    return render(request, 'supplies/customer_portal/request_detail.html', {
+        'request_obj': req,
+        'readonly': True,
+    })
+
+@login_required
+def customer_request_create(request):
+    """Public page: customer submits a stock request."""
+    if request.method == 'POST':
+        req_form = CustomerRequestForm(request.POST)
+        item_form = CustomerRequestItemForm(request.POST)
+        if req_form.is_valid() and item_form.is_valid():
+            customer_request = req_form.save(commit=False)
+            customer_request.status = 'PENDING'
+            customer_request.created_by = 'Customer'
+            customer_request.user = request.user
+            customer_request.save()
+
+            item = item_form.save(commit=False)
+            item.request = customer_request
+            item.save()
+
+            messages.success(request, f"Request {customer_request.request_number} submitted! We will contact you soon.")
+            return redirect('customer_my_requests')
+    else:
+        req_form = CustomerRequestForm()
+        item_form = CustomerRequestItemForm()
+
+    return render(request, 'supplies/customer_portal/request_create.html', {
+        'req_form': req_form,
+        'item_form': item_form,
+    })
+
+
+def customer_request_thanks(request, request_number):
+    """Simple thank-you page."""
+    cr = get_object_or_404(CustomerRequest, request_number=request_number)
+    return render(request, 'supplies/customer_portal/request_detail.html', {
+        'request_obj': cr,
+        'readonly': True,
+    })
+
+
+def customer_request_list(request):
+    """Manager page: list and filter customer requests."""
+    status = request.GET.get('status', '')
+    qs = CustomerRequest.objects.all().select_related()
+    if status:
+        qs = qs.filter(status=status)
+    return render(request, 'supplies/customer_portal/request_list.html', {
+        'requests': qs,
+        'selected_status': status
+    })
+
+
+def customer_request_detail(request, request_id):
+    """Manager page: view a single request."""
+    req = get_object_or_404(CustomerRequest, id=request_id)
+    return render(request, 'supplies/customer_portal/request_detail.html', {
+        'request_obj': req,
+        'readonly': False,
+    })
+
+
+def customer_request_approve(request, request_id):
+    """Approve a customer request."""
+    req = get_object_or_404(CustomerRequest, id=request_id)
+    if request.method == 'POST':
+        try:
+            req.approve()
+            messages.success(request, f"Request {req.request_number} approved.")
+        except ValueError as e:
+            messages.error(request, str(e))
+    return redirect('customer_request_detail', request_id=request_id)
+
+
+def customer_request_out_for_delivery(request, request_id):
+    """Mark request as out for delivery."""
+    req = get_object_or_404(CustomerRequest, id=request_id)
+    if request.method == 'POST':
+        try:
+            req.mark_out_for_delivery()
+            messages.success(request, f"Request {req.request_number} marked as out for delivery.")
+        except ValueError as e:
+            messages.error(request, str(e))
+    return redirect('customer_request_detail', request_id=request_id)
+
+
+def customer_request_delivered(request, request_id):
+    """Mark request as delivered, deducting stock."""
+    req = get_object_or_404(CustomerRequest, id=request_id)
+    if request.method == 'POST':
+        try:
+            req.mark_delivered()
+            messages.success(request, f"Request {req.request_number} delivered to customer. Stock updated.")
+        except ValueError as e:
+            messages.error(request, str(e))
+        except Exception as e:
+            messages.error(request, f"Delivery failed: {e}")
+    return redirect('customer_request_detail', request_id=request_id)
+
+
+def customer_request_cancel(request, request_id):
+    """Cancel a request."""
+    req = get_object_or_404(CustomerRequest, id=request_id)
+    if request.method == 'POST':
+        if req.status in ['PENDING', 'APPROVED']:
+            req.status = 'CANCELLED'
+            req.save(update_fields=['status'])
+            messages.success(request, f"Request {req.request_number} cancelled.")
+        else:
+            messages.error(request, "Only pending or approved requests can be cancelled.")
+    return redirect('customer_request_detail', request_id=request_id)
 
 
 # API Views for AJAX requests
