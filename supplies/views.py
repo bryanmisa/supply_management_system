@@ -10,9 +10,9 @@ from django.db.models import F
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 
-from .models import Category, Supplier, Supply, StockMovement, PurchaseOrder, PurchaseOrderItem, get_dashboard_stats, CustomerRequest, CustomerRequestItem
+from .models import Category, Supplier, Supply, StockMovement, PurchaseOrder, PurchaseOrderItem, get_dashboard_stats, CustomerRequest
 from .forms import CategoryForm, SupplierForm, SupplyForm, StockMovementForm, StockAdjustmentForm, SearchForm, PurchaseOrderForm, PurchaseOrderItemForm, ReceiveItemForm, CustomerRequestForm, CustomerRequestItemForm, UnifiedRegistrationForm
-from .decorators import manager_required, customer_required, role_required
+from .decorators import manager_required, customer_required
 
 
 @manager_required
