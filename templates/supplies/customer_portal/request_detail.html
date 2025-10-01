@@ -65,8 +65,14 @@
               <tbody>
                 {% for it in request_obj.items.all %}
                   <tr>
-                    <td><a class="text-decoration-none" href="{% url 'supply_detail' it.supply.id %}">{{ it.supply.name }}</a></td>
-                    <td><code>{{ it.supply.sku }}</code></td>
+                    <td>
+                      {% if request.user.is_superuser or request.user.profile.is_manager %}
+                        <a class="text-decoration-none" href="{% url 'supply_detail' it.supply.id %}">{{ it.supply.name }}</a>
+                      {% else %}
+                        {{ it.supply.name }}
+                      {% endif %}
+                    </td>
+                    <td>{{ it.supply.sku }}</td>
                     <td class="text-end">{{ it.quantity_requested }}</td>
                     <td class="text-end">{{ it.supply.current_stock }}</td>
                   </tr>

@@ -210,7 +210,7 @@ def supply_list(request):
     })
 
 
-@login_required
+@manager_required
 def supply_detail(request, supply_id):
     """View supply details and stock movements."""
     supply = get_object_or_404(Supply, id=supply_id)

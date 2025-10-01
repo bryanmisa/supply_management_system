@@ -199,3 +199,88 @@ footer {
         box-shadow: none !important;
     }
 }
+
+/* Sidebar layout */
+.app {
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 260px;
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+.sidebar .nav-link {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.35rem;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+    background: rgba(255,255,255,0.1);
+    color: #fff !important;
+}
+
+.sidebar .sidebar-header {
+    background: rgba(255,255,255,0.05);
+}
+
+.sidebar hr {
+    opacity: 0.15;
+}
+
+.sidebar-account {
+    background: rgba(255,255,255,0.05);
+}
+
+.brand-text,
+.link-text {
+    white-space: nowrap;
+}
+
+/* Mobile header */
+.mobile-header {
+    position: sticky;
+    top: 0;
+    z-index: 1035;
+}
+
+/* Offcanvas adjustments */
+.offcanvas.offcanvas-start {
+    width: 280px;
+}
+
+.offcanvas .offcanvas-header {
+    background: rgba(255,255,255,0.02);
+}
+
+/* Keep .sidebar styles for desktop */
+.sidebar {
+    width: 260px;
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+/* On small screens, stack layout and ensure content is full width */
+@media (max-width: 991.98px) {
+    .app {
+        flex-direction: column;
+    }
+
+    /* Hide desktop sidebar */
+    .sidebar {
+        display: none;
+    }
+
+    .offcanvas {
+        height: 100vh;
+    }
+
+    .brand-text,
+    .link-text {
+        white-space: normal;
+    }
+}

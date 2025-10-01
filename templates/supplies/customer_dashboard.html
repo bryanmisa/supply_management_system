@@ -148,7 +148,6 @@
                 <h6 class="m-0 font-weight-bold text-primary">
                     <i class="bi bi-box-seam"></i> Available Supplies
                 </h6>
-                <a href="{% url 'supply_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
             <div class="card-body">
                 {% if available_supplies %}
@@ -165,10 +164,7 @@
                                 {% for supply in available_supplies %}
                                     <tr>
                                         <td>
-                                            <a href="{% url 'supply_detail' supply.id %}" 
-                                               class="text-decoration-none">
-                                                {{ supply.name }}
-                                            </a>
+                                            {{ supply.name }}
                                         </td>
                                         <td>
                                             <span class="badge bg-{% if supply.current_stock > supply.minimum_stock %}success{% else %}warning{% endif %} badge-sm">
@@ -229,20 +225,6 @@
                                 <p class="card-text text-muted small">Track status of all your requests</p>
                                 <a href="{% url 'customer_my_requests' %}" class="btn btn-success btn-sm">
                                     View Requests
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="card bg-light h-100">
-                            <div class="card-body text-center">
-                                <div class="mb-3">
-                                    <i class="bi bi-search text-info" style="font-size: 2rem;"></i>
-                                </div>
-                                <h6>Browse Supplies</h6>
-                                <p class="card-text text-muted small">Explore available supplies and stock levels</p>
-                                <a href="{% url 'supply_list' %}" class="btn btn-info btn-sm">
-                                    Browse Supplies
                                 </a>
                             </div>
                         </div>
