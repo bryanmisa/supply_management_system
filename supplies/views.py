@@ -6,12 +6,29 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.db.models import F
+from django.db.models import F, ExpressionWrapper, DecimalField
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
 
 from .models import Category, Supplier, Supply, StockMovement, PurchaseOrder, PurchaseOrderItem, get_dashboard_stats, CustomerRequest
-from .forms import CategoryForm, SupplierForm, SupplyForm, StockMovementForm, StockAdjustmentForm, SearchForm, PurchaseOrderForm, PurchaseOrderItemForm, ReceiveItemForm, CustomerRequestForm, CustomerRequestItemForm, UnifiedRegistrationForm
+from supplies.forms import (
+    CategoryForm,
+    SupplierForm,
+    SupplyForm,
+    StockMovementForm,
+    StockAdjustmentForm,
+    SearchForm,
+    PurchaseOrderForm,
+    PurchaseOrderItemForm,
+    ReceiveItemForm,
+    CustomerRequestForm,
+    CustomerRequestItemForm,
+    UnifiedRegistrationForm,
+    CustomerRegistrationForm,
+    ManagerRegistrationForm,  # <-- added
+)
 from .decorators import manager_required, customer_required
 
 
@@ -37,13 +54,14 @@ def customer_dashboard(request):
         'total_requests': CustomerRequest.objects.filter(user=request.user).count(),
         'pending_requests': CustomerRequest.objects.filter(user=request.user, status='PENDING').count(),
     }
-    return render(request, 'supplies/customer_dashboard.html', context)
+    return render(request, 'supplies/customer_portal/customer_dashboard.html', context)
 
 
 def unified_dashboard(request):
     """Route users to appropriate dashboard based on their role."""
     if not request.user.is_authenticated:
-        return redirect('login')
+        # Show landing page with login choices
+        return render(request, 'home.html')
     
     # Superusers go to manager dashboard by default
     if request.user.is_superuser:
@@ -333,12 +351,16 @@ def stock_adjustment(request, supply_id):
 @manager_required
 def low_stock_report(request):
     """Show supplies with low stock."""
-    # Include total_value annotation for display in the report
     low_stock_supplies = (
         Supply.objects
         .low_stock()
         .select_related('category', 'supplier')
-        .annotate(annotated_total_value=F('current_stock') * F('unit_price'))  # changed key
+        .annotate(
+            annotated_total_value=ExpressionWrapper(
+                F('current_stock') * F('unit_price'),
+                output_field=DecimalField(max_digits=12, decimal_places=2)
+            )
+        )
     )
     return render(request, 'supplies/reports/low_stock.html', {
         'supplies': low_stock_supplies
@@ -588,27 +610,76 @@ def unified_register(request):
     return render(request, 'supplies/customer_portal/register.html', {'form': form})
 
 
-def unified_login(request):
-    """Unified login that redirects based on user role."""
-    from django.contrib.auth.views import LoginView
-    from django.urls import reverse_lazy
-    
-    class RoleBasedLoginView(LoginView):
-        template_name = 'supplies/customer_portal/login.html'
-        
-        def get_success_url(self):
-            # Superusers go to manager dashboard
-            if self.request.user.is_superuser:
-                return reverse_lazy('manager_dashboard')
-            
-            if hasattr(self.request.user, 'profile'):
-                if self.request.user.profile.is_manager:
-                    return reverse_lazy('manager_dashboard')
-                else:
-                    return reverse_lazy('customer_dashboard')
-            return reverse_lazy('dashboard')
-    
-    return RoleBasedLoginView.as_view()(request)
+class UnifiedLoginView(LoginView):
+    """Unified login for all users with role-based post-login redirect."""
+    template_name = 'supplies/customer_portal/login.html'
+    redirect_authenticated_user = True
+
+    def get_success_url(self):
+        user = self.request.user
+        if user.is_superuser or (hasattr(user, 'profile') and user.profile.is_manager):
+            return reverse_lazy('manager_dashboard')
+        return reverse_lazy('customer_dashboard')
+
+
+# Expose a function-compatible view for URL pattern expecting `views.unified_login`
+unified_login = UnifiedLoginView.as_view()
+
+
+class ManagerLoginView(LoginView):
+    """Supply Manager login page."""
+    template_name = 'supplies/manager_portal/login.html'
+    redirect_authenticated_user = True
+
+    def get_success_url(self):
+        user = self.request.user
+        # Managers and superusers go to manager dashboard
+        if user.is_superuser or (hasattr(user, 'profile') and user.profile.is_manager):
+            return reverse_lazy('manager_dashboard')
+        # Non-managers who used this page go to their dashboard
+        return reverse_lazy('customer_dashboard')
+
+
+class CustomerLoginView(LoginView):
+    """Customer login page."""
+    template_name = 'supplies/customer_portal/customer_login.html'
+    redirect_authenticated_user = True
+
+    def get_success_url(self):
+        user = self.request.user
+        # Customers go to customer dashboard
+        if hasattr(user, 'profile') and user.profile.is_customer and not user.is_superuser:
+            return reverse_lazy('customer_dashboard')
+        # Managers/superusers who used this page go to manager dashboard
+        return reverse_lazy('manager_dashboard')
+
+
+def customer_register(request):
+    """Customer-only registration page (sets profile.role = 'CUSTOMER')."""
+    if request.method == 'POST':
+        form = CustomerRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Account created successfully!')
+            return redirect('customer_dashboard')
+    else:
+        form = CustomerRegistrationForm()
+    return render(request, 'supplies/customer_portal/customer_register.html', {'form': form})
+
+
+def manager_register(request):
+    """Manager-only registration page (sets profile.role = 'MANAGER')."""
+    if request.method == 'POST':
+        form = ManagerRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Manager account created successfully!')
+            return redirect('manager_dashboard')
+    else:
+        form = ManagerRegistrationForm()
+    return render(request, 'supplies/manager_portal/manager_register.html', {'form': form})
 
 
 def unified_logout(request):

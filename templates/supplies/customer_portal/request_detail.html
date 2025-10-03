@@ -1,13 +1,12 @@
-<!-- New template: templates/supplies/customer_portal/request_detail.html -->
 {% extends 'base.html' %}
 {% block title %}Customer Request - {{ request_obj.request_number }}{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'customer_request_list' %}">Customer Requests</a></li>
-    <li class="breadcrumb-item active">{{ request_obj.request_number }}</li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'dashboard' %}">Dashboard</a>
+    </li>
   </ol>
 </nav>
 {% endblock %}

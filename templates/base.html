@@ -39,57 +39,7 @@
             </div>
             <hr class="text-secondary my-0">
             <div class="sidebar-scroll flex-grow-1">
-                <ul class="nav flex-column px-2 py-2">
-                    {% if request.user.is_authenticated %}
-                        {% if request.user.is_superuser or request.user.profile.is_manager %}
-                            <li class="nav-item text-uppercase small text-secondary px-2 mt-2 mb-1">Manager</li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'manager_dashboard' %}">
-                                    <i class="bi bi-speedometer2 me-2"></i><span class="link-text">Dashboard</span>
-                                </a>
-                            </li>
-
-                            <li class="nav-item text-uppercase small text-secondary px-2 mt-3 mb-1">Supplies</li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'supply_list' %}">
-                                    <i class="bi bi-box-seam me-2"></i><span class="link-text">All Supplies</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'supply_create' %}">
-                                    <i class="bi bi-plus-circle me-2"></i><span class="link-text">Add New Supply</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'low_stock_report' %}">
-                                    <i class="bi bi-exclamation-triangle me-2"></i><span class="link-text">Low Stock Report</span>
-                                </a>
-                            </li>
-
-                            <!-- categories / suppliers / orders (keep existing links) -->
-                        {% endif %}
-
-                        {% if request.user.is_superuser or request.user.profile.is_customer %}
-                            <li class="nav-item text-uppercase small text-secondary px-2 mt-4 mb-1">Customer</li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'customer_request_create' %}">
-                                    <i class="bi bi-bag-plus me-2"></i><span class="link-text">New Request</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'customer_my_requests' %}">
-                                    <i class="bi bi-list-check me-2"></i><span class="link-text">My Requests</span>
-                                </a>
-                            </li>
-                        {% endif %}
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'login' %}">
-                                <i class="bi bi-box-arrow-in-right me-2"></i><span class="link-text">Sign in</span>
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
+                {% include 'partials/sidebar_nav.html' %}
             </div>
             {% if request.user.is_authenticated %}
             <div class="sidebar-account px-3 py-3 border-top border-secondary-subtle">

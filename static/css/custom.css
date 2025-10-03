@@ -284,3 +284,23 @@ footer {
         white-space: normal;
     }
 }
+
+/* Home page */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+}
+.home-card {
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+.home-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1.25rem rgba(0,0,0,.1);
+}
+.home-card-manager {
+    background: #e9f2ff; /* light blue */
+    border: 1px solid #cfe2ff;
+}
+.home-card-customer {
+    background: #ffe9e9; /* light red */
+    border: 1px solid #ffd6d6;
+}

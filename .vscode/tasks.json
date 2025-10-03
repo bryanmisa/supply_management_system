@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Django check",
+			"type": "shell",
+			"command": "/home/bryan/Documents/projects/supply_management_system/.venv/bin/python",
+			"args": [
+				"manage.py",
+				"check"
+			],
+			"problemMatcher": [
+				"$eslint-stylish"
+			]
+		}
+	]
+}

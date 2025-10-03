@@ -1,12 +1,11 @@
-<!-- New template: templates/supplies/customer_portal/login.html -->
 {% extends 'base.html' %}
-{% block title %}Sign in{% endblock %}
+{% block title %}Customer Sign in{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-    <li class="breadcrumb-item active">Sign in</li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+    <li class="breadcrumb-item active">Customer Sign in</li>
   </ol>
 </nav>
 {% endblock %}
@@ -15,9 +14,9 @@
 <div class="row justify-content-center">
   <div class="col-md-5">
     <div class="card shadow">
-      <div class="card-header"><strong>Sign in</strong></div>
+      <div class="card-header"><strong>Customer Sign in</strong></div>
       <div class="card-body">
-        <form method="post">
+        <form method="post" action="{% url 'customer_login' %}">
           {% csrf_token %}
           <div class="mb-3">
             <label class="form-label">Username</label>

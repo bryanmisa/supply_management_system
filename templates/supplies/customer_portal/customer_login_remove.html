@@ -1,6 +1,5 @@
-<!-- New template: templates/supplies/customer_portal/login.html -->
 {% extends 'base.html' %}
-{% block title %}Sign in{% endblock %}
+{% block title %}Customer Sign in{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
@@ -17,7 +16,7 @@
     <div class="card shadow">
       <div class="card-header"><strong>Sign in</strong></div>
       <div class="card-body">
-        <form method="post">
+        <form method="post" action="{% url 'customer_login' %}">
           {% csrf_token %}
           <div class="mb-3">
             <label class="form-label">Username</label>
@@ -27,10 +26,8 @@
             <label class="form-label">Password</label>
             <input type="password" name="password" required class="form-control">
           </div>
-          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div class="d-flex gap-3">
-              <a href="{% url 'customer_register' %}">Create Customer Account</a>
-            </div>
+          <div class="d-flex justify-content-between">
+            <a href="{% url 'customer_register' %}">Create a customer account</a>
             <button class="btn btn-primary" type="submit">Sign in</button>
           </div>
         </form>

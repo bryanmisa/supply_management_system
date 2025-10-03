@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Welcome - Choose Sign in{% endblock %}
+
+{% block breadcrumb %}{% endblock %}
+
+{% block content %}
+<div class="home-hero bg-gradient-primary text-white rounded-lg p-4 p-md-5 mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <i class="bi bi-boxes" style="font-size:2.25rem;"></i>
+    <div>
+      <h1 class="h3 mb-1">Welcome to Supply Management System</h1>
+      <p class="mb-0">Choose how you want to sign in</p>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 justify-content-center">
+  <!-- Manager -->
+  <div class="col-md-6 col-lg-5">
+    <div class="home-card home-card-manager p-4 p-md-5 shadow-sm rounded-3 h-100">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-clipboard-check me-2" style="font-size:1.5rem;"></i>
+        <h2 class="h5 mb-0">Supplier Manager</h2>
+      </div>
+      <p class="text-muted mb-4">Manage supplies, categories, suppliers, purchase orders, and reports.</p>
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'manager_login' %}" class="btn btn-primary">
+          <i class="bi bi-box-arrow-in-right me-1"></i> Sign in as Manager
+        </a>
+        <a href="{% url 'manager_register' %}" class="btn btn-outline-primary">
+          <i class="bi bi-person-plus me-1"></i> Create Manager Account
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Customer -->
+  <div class="col-md-6 col-lg-5">
+    <div class="home-card home-card-customer p-4 p-md-5 shadow-sm rounded-3 h-100">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-people me-2" style="font-size:1.5rem;"></i>
+        <h2 class="h5 mb-0">Customer</h2>
+      </div>
+      <p class="text-muted mb-4">Submit and track supply requests tailored to your needs.</p>
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'customer_login' %}" class="btn btn-danger">
+          <i class="bi bi-box-arrow-in-right me-1"></i> Customer Sign in
+        </a>
+        <a href="{% url 'customer_register' %}" class="btn btn-outline-danger">
+          <i class="bi bi-person-plus me-1"></i> Create Customer Account
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

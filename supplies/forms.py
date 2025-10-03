@@ -25,7 +25,8 @@ class SupplierForm(forms.ModelForm):
     
     class Meta:
         model = Supplier
-        fields = ['name', 'contact_person', 'email', 'phone', 'address', 'is_active']
+        fields = ['name', 'contact_person', 'email', 'phone', 'address', 'is_active'
+        ]
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Supplier name'}),
             'contact_person': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Contact person'}),
@@ -208,6 +209,9 @@ class CustomerRequestItemForm(forms.ModelForm):
         supply = cleaned.get('supply')
         qty = cleaned.get('quantity_requested') or 0
         if supply and qty:
+            # Explicit out-of-stock message
+            if supply.current_stock <= 0:
+                raise ValidationError("Selected supply is out of stock.")
             if not supply.is_active:
                 raise ValidationError("Selected supply is not active.")
             if qty > supply.current_stock:
@@ -266,4 +270,51 @@ class UnifiedRegistrationForm(UserCreationForm):
             profile.phone = self.cleaned_data['phone']
             profile.save()
         
+        return user
+
+
+class CustomerRegistrationForm(UnifiedRegistrationForm):
+    """
+    Registration form for customers only.
+    Forces profile.role = 'CUSTOMER' and hides the role select in the form.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ensure role is forced to CUSTOMER and not shown to the user
+        if 'role' in self.fields:
+            self.fields['role'].initial = 'CUSTOMER'
+            self.fields['role'].widget = forms.HiddenInput()
+
+    def save(self, commit=True):
+        # Use parent to build the user, then force profile.role
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+            profile = user.profile
+            profile.role = 'CUSTOMER'
+            # Ensure phone is set if provided
+            profile.phone = self.cleaned_data.get('phone', '') or profile.phone
+            profile.save()
+        return user
+
+
+class ManagerRegistrationForm(UnifiedRegistrationForm):
+    """
+    Registration form for managers only.
+    Forces profile.role = 'MANAGER' and hides the role select.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if 'role' in self.fields:
+            self.fields['role'].initial = 'MANAGER'
+            self.fields['role'].widget = forms.HiddenInput()
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        if commit:
+            user.save()
+            profile = user.profile
+            profile.role = 'MANAGER'
+            profile.phone = self.cleaned_data.get('phone', '') or profile.phone
+            profile.save()
         return user

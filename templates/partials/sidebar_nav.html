@@ -78,7 +78,6 @@
             </li>
         {% endif %}
 
-        <!-- Customer Section (no direct supply list link for customers) -->
         {% if request.user.is_superuser or request.user.profile.is_customer %}
             <li class="nav-item text-uppercase small text-secondary px-2 mt-4 mb-1">Customer</li>
             <li class="nav-item">
@@ -92,17 +91,5 @@
                 </a>
             </li>
         {% endif %}
-    {% else %}
-        <!-- Public -->
-        <li class="nav-item">
-            <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'login' %}">
-                <i class="bi bi-box-arrow-in-right me-2"></i><span class="link-text">Sign in</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'register' %}">
-                <i class="bi bi-person-plus me-2"></i><span class="link-text">Register</span>
-            </a>
-        </li>
     {% endif %}
 </ul>
