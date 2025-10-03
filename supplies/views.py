@@ -338,7 +338,7 @@ def low_stock_report(request):
         Supply.objects
         .low_stock()
         .select_related('category', 'supplier')
-        .annotate(total_value=F('current_stock') * F('unit_price'))
+        .annotate(annotated_total_value=F('current_stock') * F('unit_price'))  # changed key
     )
     return render(request, 'supplies/reports/low_stock.html', {
         'supplies': low_stock_supplies

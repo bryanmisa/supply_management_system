@@ -50,7 +50,7 @@
                 <td class="text-end">{{ s.minimum_stock }}</td>
                 <td class="text-end">{{ s.maximum_stock }}</td>
                 <td class="text-end">${{ s.unit_price|floatformat:2 }}</td>
-                <td class="text-end">${{ s.total_value|floatformat:2 }}</td>
+                <td class="text-end">${{ s.annotated_total_value|floatformat:2 }}</td>
                 <td class="text-end">
                   <div class="btn-group">
                     <a href="{% url 'stock_movement' s.id %}" class="btn btn-sm btn-outline-primary" title="Record Movement"><i class="bi bi-arrow-left-right"></i></a>
