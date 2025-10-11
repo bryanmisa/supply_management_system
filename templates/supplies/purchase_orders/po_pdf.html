@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PO-{{ order.order_number }}</title>
+  <style>
+    @page { size: A4; margin: 28pt 28pt; }
+    body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 10pt; color: #111; line-height: 1.4; }
+    .header { border-bottom: 1pt solid #dcdfe4; padding-bottom: 10pt; margin-bottom: 14pt; }
+    .header h1 { font-size: 16pt; margin: 0; }
+    .muted { color: #666; }
+    .grid { width: 100%; border-collapse: collapse; }
+    .grid td { vertical-align: top; }
+    .box { border: 1pt solid #e5e7eb; padding: 8pt; border-radius: 4pt; }
+    .section { margin-top: 12pt; }
+    .section-title { font-size: 11pt; margin: 0 0 6pt 0; }
+    table.items { width: 100%; border-collapse: collapse; }
+    table.items th { background: #f5f6fa; text-align: left; }
+    table.items th, table.items td { border: 1pt solid #e5e7eb; padding: 6pt; }
+    .text-right { text-align: right; }
+    .small { color: #555; font-size: 9pt; }
+    .totals { margin-top: 8pt; width: 100%; }
+    .totals td { padding: 4pt; }
+    .badge { display: inline-block; padding: 2pt 6pt; border-radius: 3pt; font-size: 9pt; color: #fff; }
+    .badge-warning { background: #f59e0b; }
+    .badge-info { background: #0ea5e9; }
+    .badge-primary { background: #2563eb; }
+    .badge-secondary { background: #6b7280; }
+    .badge-success { background: #16a34a; }
+    .badge-danger { background: #dc2626; }
+    .footer { margin-top: 14pt; border-top: 1pt solid #dcdfe4; padding-top: 6pt; }
+    /* Row striping for readability */
+    .items tbody tr:nth-child(odd) { background: #fafafa; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Purchase Order PO-{{ order.order_number }}</h1>
+    <div class="small muted">
+      Generated on {{ now|default:order.updated_at|date:"M d, Y H:i" }}
+    </div>
+  </div>
+
+  <table class="grid">
+    <tr>
+      <td width="55%">
+        <div class="section-title">Supplier</div>
+        <div class="box">
+          <strong>{{ order.supplier.name }}</strong><br>
+          {% if order.supplier.contact_person %}Contact: {{ order.supplier.contact_person }}<br>{% endif %}
+          {% if order.supplier.email %}Email: {{ order.supplier.email }}<br>{% endif %}
+          {% if order.supplier.phone %}Phone: {{ order.supplier.phone }}<br>{% endif %}
+          {% if order.supplier.address %}Address: {{ order.supplier.address }}{% endif %}
+        </div>
+      </td>
+      <td width="45%">
+        <div class="section-title">Order Info</div>
+        <div class="box">
+          <table style="width:100%">
+            <tr><td>Order #:</td><td class="text-right">PO-{{ order.order_number }}</td></tr>
+            <tr><td>Order Date:</td><td class="text-right">{{ order.order_date|date:"M d, Y" }}</td></tr>
+            <tr><td>Expected Delivery:</td><td class="text-right">{% if order.expected_delivery_date %}{{ order.expected_delivery_date|date:"M d, Y" }}{% else %}-{% endif %}</td></tr>
+            <tr>
+              <td>Status:</td>
+              <td class="text-right">
+                {% with s=order.status %}
+                  <span class="badge badge-{% if s == 'PENDING' %}warning{% elif s == 'APPROVED' %}info{% elif s == 'SENT' %}primary{% elif s == 'PARTIALLY_RECEIVED' %}secondary{% elif s == 'RECEIVED' %}success{% else %}danger{% endif %}">
+                    {{ order.get_status_display }}
+                  </span>
+                {% endwith %}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <div class="section">
+    <div class="section-title">Items</div>
+    <table class="items">
+      <thead>
+        <tr>
+          <th>Supply</th>
+          <th>SKU</th>
+          <th class="text-right">Qty Ordered</th>
+          <th class="text-right">Qty Received</th>
+          <th class="text-right">Unit Price ($)</th>
+          <th class="text-right">Total ($)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in order.items.all %}
+        <tr>
+          <td>{{ item.supply.name }}</td>
+          <td>{{ item.supply.sku }}</td>
+          <td class="text-right">{{ item.quantity_ordered }}</td>
+          <td class="text-right">{{ item.quantity_received }}</td>
+          <td class="text-right">{{ item.unit_price|floatformat:2 }}</td>
+          <td class="text-right"><strong>{{ item.total_price|floatformat:2 }}</strong></td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="small">No items on this order.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <table class="totals">
+      <tr>
+        <td class="text-right"><strong>Grand Total:</strong></td>
+        <td class="text-right" width="120"><strong>${{ order.total_amount|floatformat:2 }}</strong></td>
+      </tr>
+    </table>
+  </div>
+
+  {% if order.notes %}
+  <div class="section">
+    <div class="section-title">Notes</div>
+    <div class="box" style="min-height:32pt">{{ order.notes|linebreaksbr }}</div>
+  </div>
+  {% endif %}
+
+  <div class="footer small muted">
+    Supply Management System • PO PDF Export
+  </div>
+</body>
+</html>

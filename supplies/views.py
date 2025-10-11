@@ -5,12 +5,14 @@ Simple Django approach working directly with models.
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db.models import F, ExpressionWrapper, DecimalField
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
+from django.template.loader import render_to_string
+from xhtml2pdf import pisa
 
 from .models import Category, Supplier, Supply, StockMovement, PurchaseOrder, PurchaseOrderItem, get_dashboard_stats, CustomerRequest
 from supplies.forms import (
@@ -590,6 +592,20 @@ def purchase_order_cancel(request, order_id):
     return redirect('purchase_order_detail', order_id=order_id)
 
 
+@manager_required
+def purchase_order_export_pdf(request, order_id):
+    """Export a Purchase Order as PDF."""
+    order = get_object_or_404(PurchaseOrder, id=order_id)
+    html = render_to_string('supplies/purchase_orders/po_pdf.html', {'order': order})
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="PO-{order.order_number}.pdf"'
+    result = pisa.CreatePDF(src=html, dest=response)
+    if result.err:
+        messages.error(request, 'Failed to generate PDF for this purchase order.')
+        return redirect('purchase_order_detail', order_id=order_id)
+    return response
+
+
 # Authentication Views
 def unified_register(request):
     """Unified registration for both managers and customers."""
@@ -853,3 +869,26 @@ def supply_search_api(request):
         ]
         return JsonResponse({'results': results})
     return JsonResponse({'results': []})
+
+
+from django.shortcuts import render
+from .models import StockMovement, StockAdjustment, PurchaseOrder
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def supply_transactions_report(request):
+    """Show all supply transactions (stock movements and adjustments)."""
+    stock_movements = StockMovement.objects.select_related('supply', 'user').order_by('-date')
+    stock_adjustments = StockAdjustment.objects.select_related('supply', 'user').order_by('-date')
+    return render(request, 'supplies/reports/supply_transactions.html', {
+        'stock_movements': stock_movements,
+        'stock_adjustments': stock_adjustments,
+    })
+
+@login_required
+def po_status_report(request):
+    """Show all PO transactions grouped by status."""
+    purchase_orders = PurchaseOrder.objects.select_related('supplier').order_by('-order_date')
+    return render(request, 'supplies/reports/po_status.html', {
+        'purchase_orders': purchase_orders,
+    })

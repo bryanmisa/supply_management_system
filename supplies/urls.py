@@ -55,6 +55,7 @@ urlpatterns = [
     path('purchase-orders/<int:order_id>/send/', views.purchase_order_send, name='purchase_order_send'),
     path('purchase-orders/<int:order_id>/items/<int:item_id>/receive/', views.purchase_order_receive_item, name='purchase_order_receive_item'),
     path('purchase-orders/<int:order_id>/cancel/', views.purchase_order_cancel, name='purchase_order_cancel'),
+    path('purchase-orders/<int:order_id>/export/pdf/', views.purchase_order_export_pdf, name='purchase_order_export_pdf'),
 
     # Reports
     path('reports/low-stock/', views.low_stock_report, name='low_stock_report'),

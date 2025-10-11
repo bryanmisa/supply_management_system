@@ -304,3 +304,14 @@ footer {
     background: #ffe9e9; /* light red */
     border: 1px solid #ffd6d6;
 }
+
+/* PO detail action toolbar spacing */
+.action-toolbar { gap: .5rem; }
+.action-toolbar form { margin: 0; }
+@media (max-width: 576px) {
+  .action-toolbar .btn { width: 100%; }
+}
+/* Improve PDF print layout when printing the HTML page (optional) */
+@media print {
+  .action-toolbar { display: none !important; }
+}
