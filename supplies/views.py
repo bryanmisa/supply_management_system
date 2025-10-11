@@ -871,19 +871,24 @@ def supply_search_api(request):
     return JsonResponse({'results': []})
 
 
-from django.shortcuts import render
-from .models import StockMovement, StockAdjustment, PurchaseOrder
-from django.contrib.auth.decorators import login_required
-
 @login_required
 def supply_transactions_report(request):
-    """Show all supply transactions (stock movements and adjustments)."""
-    stock_movements = StockMovement.objects.select_related('supply', 'user').order_by('-date')
-    stock_adjustments = StockAdjustment.objects.select_related('supply', 'user').order_by('-date')
+    """Show all supply transactions (stock movements and adjustments).
+
+    This app records adjustments as StockMovement entries with movement_type='ADJUSTMENT',
+    so we pull movements and filter adjustments from the same model.
+    """
+    # All stock movements (IN/OUT/RETURN/ADJUSTMENT)
+    stock_movements = StockMovement.objects.select_related('supply').order_by('-movement_date')
+
+    # Adjustments are movements with movement_type == 'ADJUSTMENT'
+    stock_adjustments = StockMovement.objects.select_related('supply').filter(movement_type='ADJUSTMENT').order_by('-movement_date')
+
     return render(request, 'supplies/reports/supply_transactions.html', {
         'stock_movements': stock_movements,
         'stock_adjustments': stock_adjustments,
     })
+
 
 @login_required
 def po_status_report(request):
