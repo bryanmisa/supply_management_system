@@ -2,11 +2,31 @@
 Django views for the supplies app.
 Simple Django approach working directly with models.
 """
+import os
+from django.conf import settings
+from django.template.loader import get_template
+from django.http import HttpResponse
+from xhtml2pdf import pisa
+
+def render_to_pdf(template_src, context_dict):
+    """Generate PDF file from HTML template."""
+    template = get_template(template_src)
+    html = template.render(context_dict)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+    
+    # Create PDF
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('We had some errors generating the PDF: %s' % pisa_status.err)
+    return response
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
-from django.db.models import F, ExpressionWrapper, DecimalField, Count, Avg, Sum
+from django.db.models import (
+    F, ExpressionWrapper, DecimalField, Count, Avg, Sum, DurationField
+)
 from django.db.models.functions import ExtractDay
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -906,6 +926,7 @@ def po_status_report(request):
 @login_required
 def stock_movement_report(request):
     """Show all stock movements with filters."""
+    export_pdf = request.GET.get('export') == 'pdf'
     # Get date range from query params with defaults
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
@@ -935,14 +956,17 @@ def stock_movement_report(request):
         movement_count=Count('id')
     )
 
-    return render(request, 'supplies/reports/stock_movement.html', {
+    context = {
         'movements': movements,
         'summaries': summaries,
-        'start_date': start.strftime('%Y-%m-%d'), 
+        'start_date': start.strftime('%Y-%m-%d'),
         'end_date': end.strftime('%Y-%m-%d')
-    })
+    }
 
+    if export_pdf:
+        return render_to_pdf('supplies/reports/pdf/stock_movement_pdf.html', context)
 
+    return render(request, 'supplies/reports/stock_movement.html', context)
 @login_required 
 def usage_report(request):
     """Generate report showing supply usage statistics."""
@@ -1007,11 +1031,10 @@ def usage_report(request):
 @login_required
 def supplier_performance_report(request):
     """Generate report showing supplier performance metrics."""
-    # Get date range from query params
+    export_pdf = request.GET.get('export') == 'pdf'
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
-    # Set default date range to last 90 days if not specified
     if start_date and end_date:
         try:
             start = datetime.strptime(start_date, '%Y-%m-%d')
@@ -1024,23 +1047,37 @@ def supplier_performance_report(request):
         end = timezone.now()
         start = end - timedelta(days=90)
 
-    # Get active suppliers
+    delivery_duration = ExpressionWrapper(
+        F('purchase_orders__actual_delivery_date') - F('purchase_orders__order_date'),
+        output_field=DurationField()
+    )
+
     suppliers = (
         Supplier.objects
         .filter(is_active=True)
         .annotate(
-            total_orders=Count('purchaseorder', 
-                filter=Q(purchaseorder__order_date__range=[start, end])),
-            completed_orders=Count('purchaseorder', 
-                filter=Q(purchaseorder__status='RECEIVED', 
-                              purchaseorder__order_date__range=[start, end])),
-            total_amount=Sum('purchaseorder__total_amount',
-                filter=Q(purchaseorder__order_date__range=[start, end])),
+            total_orders=Count(
+                'purchase_orders',
+                filter=Q(purchase_orders__order_date__range=[start, end])
+            ),
+            completed_orders=Count(
+                'purchase_orders',
+                filter=Q(
+                    purchase_orders__status='RECEIVED',
+                    purchase_orders__order_date__range=[start, end]
+                )
+            ),
+            total_amount=Sum(
+                'purchase_orders__total_amount',
+                filter=Q(purchase_orders__order_date__range=[start, end])
+            ),
             avg_delivery_days=Avg(
-                ExtractDay(F('purchaseorder__actual_delivery_date') - 
-                          F('purchaseorder__order_date')),
-                filter=Q(purchaseorder__status='RECEIVED',
-                              purchaseorder__order_date__range=[start, end])
+                delivery_duration,
+                filter=Q(
+                    purchase_orders__status='RECEIVED',
+                    purchase_orders__order_date__range=[start, end],
+                    purchase_orders__actual_delivery_date__isnull=False
+                )
             )
         )
         .order_by('-total_orders')

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supplier Performance Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .header { margin-bottom: 30px; }
+        .header h1 { color: #333; }
+        .good { color: #28a745; }
+        .warning { color: #ffc107; }
+        .poor { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Supplier Performance Report</h1>
+        <p>Period: {{ start_date }} to {{ end_date }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Supplier</th>
+                <th>Total Orders</th>
+                <th>Completed Orders</th>
+                <th>Completion Rate</th>
+                <th>Total Value</th>
+                <th>Avg. Delivery Time</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for supplier in suppliers %}
+            <tr>
+                <td>
+                    {{ supplier.name }}<br>
+                    <small>{{ supplier.contact_person }}</small>
+                </td>
+                <td>{{ supplier.total_orders }}</td>
+                <td>{{ supplier.completed_orders }}</td>
+                <td>
+                    {% if supplier.total_orders > 0 %}
+                        {% widthratio supplier.completed_orders supplier.total_orders 100 %}%
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>${{ supplier.total_amount|default:"0.00"|floatformat:2 }}</td>
+                <td>
+                    {% if supplier.avg_delivery_days %}
+                        {{ supplier.avg_delivery_days.days|default:"0" }} days
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

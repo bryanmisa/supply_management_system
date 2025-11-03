@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supply Usage Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .header { margin-bottom: 30px; }
+        .header h1 { color: #333; }
+        .low-stock { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Supply Usage Report</h1>
+        <p>Period: {{ start_date }} to {{ end_date }}</p>
+        {% if selected_category %}
+        <p>Category: {{ selected_category.name }}</p>
+        {% endif %}
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Supply</th>
+                <th>Category</th>
+                <th>Total Usage</th>
+                <th>Average Monthly Usage</th>
+                <th>Current Stock</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in usage_data %}
+            <tr>
+                <td>{{ item.supply.name }}</td>
+                <td>{{ item.supply.category.name }}</td>
+                <td>{{ item.total_usage }}</td>
+                <td>{{ item.avg_monthly_usage|floatformat:2 }}</td>
+                <td>{{ item.supply.current_stock }}</td>
+                <td>
+                    {% if item.supply.current_stock < item.supply.reorder_point %}
+                    <span class="low-stock">Low Stock</span>
+                    {% else %}
+                    OK
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
