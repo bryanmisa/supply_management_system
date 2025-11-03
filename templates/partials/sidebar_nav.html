@@ -76,6 +76,28 @@
                     <i class="bi bi-send me-2"></i><span class="link-text">Sent Orders</span>
                 </a>
             </li>
+
+            <li class="nav-item text-uppercase small text-secondary px-2 mt-3 mb-1">Reports</li>
+            <li class="nav-item">
+                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'stock_movement_report' %}">
+                    <i class="bi bi-graph-up me-2"></i><span class="link-text">Stock Movement</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'usage_report' %}">
+                    <i class="bi bi-bar-chart me-2"></i><span class="link-text">Supply Usage</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'supplier_performance_report' %}">
+                    <i class="bi bi-speedometer me-2"></i><span class="link-text">Supplier Performance</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'low_stock_report' %}">
+                    <i class="bi bi-exclamation-circle me-2"></i><span class="link-text">Low Stock</span>
+                </a>
+            </li>
         {% endif %}
 
         {% if request.user.is_superuser or request.user.profile.is_customer %}

@@ -1,0 +1,64 @@
+{% extends 'supplies/reports/reports_base.html' %}
+
+{% block report_title %}Supply Usage Report{% endblock %}
+
+{% block report_content %}
+<div class="mb-3">
+    <form method="get" class="row g-3">
+        <div class="col-md-3">
+            <label for="start_date" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+        </div>
+        <div class="col-md-3">
+            <label for="end_date" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+        </div>
+        <div class="col-md-3">
+            <label for="category" class="form-label">Category (Optional)</label>
+            <select class="form-select" id="category" name="category">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">&nbsp;</label>
+            <button type="submit" class="btn btn-primary d-block">Generate Report</button>
+        </div>
+    </form>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Supply</th>
+                <th>Category</th>
+                <th>Total Usage</th>
+                <th>Average Monthly Usage</th>
+                <th>Current Stock</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in usage_data %}
+            <tr>
+                <td>{{ item.supply.name }}</td>
+                <td>{{ item.supply.category.name }}</td>
+                <td>{{ item.total_usage }}</td>
+                <td>{{ item.avg_monthly_usage|floatformat:2 }}</td>
+                <td>{{ item.supply.current_stock }}</td>
+                <td>
+                    {% if item.supply.current_stock < item.supply.reorder_point %}
+                    <span class="badge bg-danger">Low Stock</span>
+                    {% else %}
+                    <span class="badge bg-success">OK</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -9,6 +9,12 @@ urlpatterns = [
     path('', views.unified_dashboard, name='dashboard'),
     path('manager-dashboard/', views.dashboard, name='manager_dashboard'),
 
+    # Reports
+    path('reports/stock-movements/', views.stock_movement_report, name='stock_movement_report'),
+    path('reports/usage/', views.usage_report, name='usage_report'),
+    path('reports/supplier-performance/', views.supplier_performance_report, name='supplier_performance_report'),
+    path('reports/low-stock/', views.low_stock_report, name='low_stock_report'),
+
     # Manager-facing Customer Requests (list, detail, actions)
     path('customer-requests/', views.customer_request_list, name='customer_request_list'),
     path('customer-requests/<int:request_id>/', views.customer_request_detail, name='customer_request_detail'),

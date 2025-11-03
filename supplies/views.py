@@ -6,13 +6,17 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
-from django.db.models import F, ExpressionWrapper, DecimalField
+from django.db.models import F, ExpressionWrapper, DecimalField, Count, Avg, Sum
+from django.db.models.functions import ExtractDay
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.urls import reverse_lazy
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
+from datetime import datetime, timedelta
+from django.utils import timezone
+from django.db.models import Q
 
 from .models import Category, Supplier, Supply, StockMovement, PurchaseOrder, PurchaseOrderItem, get_dashboard_stats, CustomerRequest
 from supplies.forms import (
@@ -896,4 +900,154 @@ def po_status_report(request):
     purchase_orders = PurchaseOrder.objects.select_related('supplier').order_by('-order_date')
     return render(request, 'supplies/reports/po_status.html', {
         'purchase_orders': purchase_orders,
+    })
+
+
+@login_required
+def stock_movement_report(request):
+    """Show all stock movements with filters."""
+    # Get date range from query params with defaults
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Query base - get all movements 
+    movements = StockMovement.objects.select_related('supply')
+
+    # Apply date filters if provided
+    if start_date and end_date:
+        try:
+            start = datetime.strptime(start_date, '%Y-%m-%d')
+            end = datetime.strptime(end_date, '%Y-%m-%d')
+            movements = movements.filter(movement_date__range=[start, end])
+        except ValueError:
+            messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
+            end = timezone.now()
+            start = end - timedelta(days=30)
+            movements = movements.filter(movement_date__range=[start, end])
+    else:
+        end = timezone.now()
+        start = end - timedelta(days=30)
+        movements = movements.filter(movement_date__range=[start, end])
+
+    # Get movement type summaries
+    summaries = movements.values('movement_type').annotate(
+        total_quantity=Sum('quantity'),
+        movement_count=Count('id')
+    )
+
+    return render(request, 'supplies/reports/stock_movement.html', {
+        'movements': movements,
+        'summaries': summaries,
+        'start_date': start.strftime('%Y-%m-%d'), 
+        'end_date': end.strftime('%Y-%m-%d')
+    })
+
+
+@login_required 
+def usage_report(request):
+    """Generate report showing supply usage statistics."""
+    # Get date range from query params with defaults
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Base query - get all movements that represent usage (OUT type)
+    movements = StockMovement.objects.filter(
+        movement_type='OUT'
+    ).select_related('supply', 'supply__category')
+
+    # Apply date filters if provided
+    if start_date and end_date:
+        try:
+            start = datetime.strptime(start_date, '%Y-%m-%d')
+            end = datetime.strptime(end_date, '%Y-%m-d')
+            movements = movements.filter(movement_date__range=[start, end])
+        except ValueError:
+            messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
+            # Default to last 30 days
+            end = timezone.now()
+            start = end - timedelta(days=30)
+            movements = movements.filter(movement_date__range=[start, end])
+    else:
+        # Default to last 30 days if no dates specified
+        end = timezone.now()
+        start = end - timedelta(days=30) 
+        movements = movements.filter(movement_date__range=[start, end])
+
+    # Optional category filter
+    category_id = request.GET.get('category')
+    if category_id:
+        movements = movements.filter(supply__category_id=category_id)
+
+    # Calculate usage statistics
+    usage_data = movements.values(
+        'supply',
+        'supply__name',
+        'supply__category__name'
+    ).annotate(
+        total_usage=Sum('quantity'),
+        avg_monthly_usage=Avg('quantity')
+    )
+
+    # Attach current stock levels
+    for item in usage_data:
+        item['supply'] = Supply.objects.get(id=item['supply'])
+
+    # Get categories for filter dropdown
+    categories = Category.objects.all()
+
+    return render(request, 'supplies/reports/usage_report.html', {
+        'usage_data': usage_data,
+        'categories': categories,
+        'start_date': start.strftime('%Y-%m-%d'),
+        'end_date': end.strftime('%Y-%m-%d'),
+        'selected_category': category_id
+    })
+
+
+@login_required
+def supplier_performance_report(request):
+    """Generate report showing supplier performance metrics."""
+    # Get date range from query params
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    # Set default date range to last 90 days if not specified
+    if start_date and end_date:
+        try:
+            start = datetime.strptime(start_date, '%Y-%m-%d')
+            end = datetime.strptime(end_date, '%Y-%m-%d')
+        except ValueError:
+            messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
+            end = timezone.now()
+            start = end - timedelta(days=90)
+    else:
+        end = timezone.now()
+        start = end - timedelta(days=90)
+
+    # Get active suppliers
+    suppliers = (
+        Supplier.objects
+        .filter(is_active=True)
+        .annotate(
+            total_orders=Count('purchaseorder', 
+                filter=Q(purchaseorder__order_date__range=[start, end])),
+            completed_orders=Count('purchaseorder', 
+                filter=Q(purchaseorder__status='RECEIVED', 
+                              purchaseorder__order_date__range=[start, end])),
+            total_amount=Sum('purchaseorder__total_amount',
+                filter=Q(purchaseorder__order_date__range=[start, end])),
+            avg_delivery_days=Avg(
+                ExtractDay(F('purchaseorder__actual_delivery_date') - 
+                          F('purchaseorder__order_date')),
+                filter=Q(purchaseorder__status='RECEIVED',
+                              purchaseorder__order_date__range=[start, end])
+            )
+        )
+        .order_by('-total_orders')
+    )
+
+    return render(request, 'supplies/reports/supplier_performance.html', {
+        'suppliers': suppliers,
+        'start_date': start.strftime('%Y-%m-%d'),
+        'end_date': end.strftime('%Y-%m-%d')
     })

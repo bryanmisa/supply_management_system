@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Stock Movement Report{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active">Stock Movement Report</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-arrow-left-right"></i> Stock Movements</h6>
+    
+    <!-- Date filters -->
+    <form method="get" class="d-flex gap-2">
+      <input type="date" name="start_date" value="{{ start_date }}" class="form-control form-control-sm">
+      <input type="date" name="end_date" value="{{ end_date }}" class="form-control form-control-sm">
+      <button type="submit" class="btn btn-sm btn-primary">Filter</button>
+    </form>
+  </div>
+  <div class="card-body">
+    <!-- Movement summaries -->
+    <div class="row g-3 mb-4">
+      {% for summary in summaries %}
+      <div class="col-md-3">
+        <div class="card bg-light">
+          <div class="card-body">
+            <h6 class="card-title">{{ summary.movement_type }}</h6>
+            <p class="mb-0">
+              Count: {{ summary.movement_count }}<br>
+              Total: {{ summary.total_quantity }}
+            </p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Movements table -->
+    {% if movements %}
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Supply</th>
+              <th>Type</th>
+              <th>Quantity</th>
+              <th>Previous</th>
+              <th>New</th>
+              <th>Reason</th>
+              <th>Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in movements %}
+            <tr>
+              <td>{{ m.movement_date|date:"Y-m-d H:i" }}</td>
+              <td>
+                <a href="{% url 'supply_detail' m.supply.id %}">{{ m.supply.name }}</a>
+                <small class="text-muted d-block">{{ m.supply.sku }}</small>
+              </td>
+              <td>
+                <span class="badge bg-{% if m.movement_type == 'IN' %}success{% elif m.movement_type == 'OUT' %}danger{% elif m.movement_type == 'ADJUSTMENT' %}secondary{% else %}info{% endif %}">
+                  {{ m.movement_type }}
+                </span>
+              </td>
+              <td>{{ m.quantity }}</td>
+              <td>{{ m.previous_stock }}</td>
+              <td>{{ m.new_stock }}</td>
+              <td>{{ m.reason|default:"—" }}</td>
+              <td><code>{{ m.reference_number|default:"—" }}</code></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center text-muted py-4">
+        <i class="bi bi-arrow-left-right"></i>
+        <p class="mt-2">No movements found for the selected period.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

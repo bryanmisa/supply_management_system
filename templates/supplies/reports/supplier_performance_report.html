@@ -1,0 +1,58 @@
+{% extends 'supplies/reports/reports_base.html' %}
+
+{% block report_title %}Supplier Performance Report{% endblock %}
+
+{% block report_content %}
+<div class="mb-3">
+    <form method="get" class="row g-3">
+        <div class="col-md-3">
+            <label for="start_date" class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+        </div>
+        <div class="col-md-3">
+            <label for="end_date" class="form-label">End Date</label>
+            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+        </div>
+        <div class="col-md-3">
+            <label for="supplier" class="form-label">Supplier (Optional)</label>
+            <select class="form-select" id="supplier" name="supplier">
+                <option value="">All Suppliers</option>
+                {% for sup in suppliers %}
+                <option value="{{ sup.id }}" {% if selected_supplier == sup.id %}selected{% endif %}>{{ sup.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">&nbsp;</label>
+            <button type="submit" class="btn btn-primary d-block">Generate Report</button>
+        </div>
+    </form>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Supplier</th>
+                <th>Total Orders</th>
+                <th>Total Items</th>
+                <th>Average Delivery Time</th>
+                <th>On-Time Delivery %</th>
+                <th>Order Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for performance in supplier_performance %}
+            <tr>
+                <td>{{ performance.supplier.name }}</td>
+                <td>{{ performance.total_orders }}</td>
+                <td>{{ performance.total_items }}</td>
+                <td>{{ performance.avg_delivery_time|floatformat:1 }} days</td>
+                <td>{{ performance.on_time_delivery_percentage|floatformat:1 }}%</td>
+                <td>${{ performance.total_order_value|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
