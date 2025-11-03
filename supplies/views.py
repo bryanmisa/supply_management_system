@@ -8,18 +8,7 @@ from django.template.loader import get_template
 from django.http import HttpResponse
 from xhtml2pdf import pisa
 
-def render_to_pdf(template_src, context_dict):
-    """Generate PDF file from HTML template."""
-    template = get_template(template_src)
-    html = template.render(context_dict)
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
-    
-    # Create PDF
-    pisa_status = pisa.CreatePDF(html, dest=response)
-    if pisa_status.err:
-        return HttpResponse('We had some errors generating the PDF: %s' % pisa_status.err)
-    return response
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -982,8 +971,8 @@ def usage_report(request):
     # Apply date filters if provided
     if start_date and end_date:
         try:
-            start = datetime.strptime(start_date, '%Y-%m-%d')
-            end = datetime.strptime(end_date, '%Y-%m-d')
+            start = datetime.strptime(start_date, '%Y-%m-%d').replace(hour=0, minute=0, second=0)
+            end = datetime.strptime(end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
             movements = movements.filter(movement_date__range=[start, end])
         except ValueError:
             messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
@@ -1035,15 +1024,21 @@ def supplier_performance_report(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
 
+    # Set default date range
     if start_date and end_date:
         try:
-            start = datetime.strptime(start_date, '%Y-%m-%d')
-            end = datetime.strptime(end_date, '%Y-%m-%d')
+            # Fix: Correct date format string
+            start = datetime.strptime(start_date, '%Y-%m-%d').replace(
+                hour=0, minute=0, second=0)
+            end = datetime.strptime(end_date, '%Y-%m-%d').replace(
+                hour=23, minute=59, second=59)
         except ValueError:
             messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
+            # Default to last 90 days if date parsing fails
             end = timezone.now()
             start = end - timedelta(days=90)
     else:
+        # Default date range - last 90 days
         end = timezone.now()
         start = end - timedelta(days=90)
 
@@ -1083,8 +1078,27 @@ def supplier_performance_report(request):
         .order_by('-total_orders')
     )
 
-    return render(request, 'supplies/reports/supplier_performance.html', {
+    context = {
         'suppliers': suppliers,
         'start_date': start.strftime('%Y-%m-%d'),
         'end_date': end.strftime('%Y-%m-%d')
-    })
+    }
+
+    if export_pdf:
+        template_src = 'supplies/reports/pdf/supplier_performance_pdf.html'
+        return render_to_pdf(template_src, context)
+
+    return render(request, 'supplies/reports/supplier_performance.html', context)
+    
+def render_to_pdf(template_src, context_dict):
+    """Generate PDF file from HTML template."""
+    template = get_template(template_src)
+    html = template.render(context_dict)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="report.pdf"'
+    
+    # Create PDF
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('We had some errors generating the PDF: %s' % pisa_status.err)
+    return response
