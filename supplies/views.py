@@ -153,6 +153,22 @@ def category_delete(request, category_id):
     return redirect('category_list')
 
 
+@manager_required
+def category_supplies(request, category_id):
+    """List all supplies for a specific category."""
+    category = get_object_or_404(Category, id=category_id)
+    supplies = Supply.objects.by_category(category_id).select_related('category', 'supplier')
+    
+    # Pagination (similar to supply_list)
+    paginator = Paginator(supplies, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'supplies/categories/supplies.html', {
+        'page_obj': page_obj,
+        'category': category
+    })
+
 # Supplier Views
 @manager_required
 def supplier_list(request):

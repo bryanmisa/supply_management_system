@@ -1,0 +1,163 @@
+<!-- filepath: templates/supplies/categories/supplies.html -->
+{% extends 'base.html' %}
+
+{% block title %}Supplies in {{ category.name }} - Supply Management System{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'category_list' %}">Categories</a></li>
+        <li class="breadcrumb-item active">{{ category.name }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2">
+                <i class="bi bi-box-seam"></i>
+                Supplies in {{ category.name }}
+            </h1>
+            <a href="{% url 'category_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i>
+                Back to Categories
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">
+            Supplies List
+            {% if page_obj %}
+                <span class="badge bg-secondary">{{ page_obj.paginator.count }} items</span>
+            {% endif %}
+        </h6>
+    </div>
+    <div class="card-body">
+        {% if page_obj %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>SKU</th>
+                            <th>Supplier</th>
+                            <th>Current Stock</th>
+                            <th>Status</th>
+                            <th>Unit Price</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for supply in page_obj %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'supply_detail' supply.id %}" class="text-decoration-none fw-bold">
+                                    {{ supply.name }}
+                                </a>
+                                {% if supply.description %}
+                                    <br>
+                                    <small class="text-muted">{{ supply.description|truncatechars:50 }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <code>{{ supply.sku }}</code>
+                            </td>
+                            <td>{{ supply.supplier.name }}</td>
+                            <td>
+                                <span class="fw-bold">{{ supply.current_stock }}</span>
+                                <small class="text-muted">{{ supply.unit_of_measure }}</small>
+                                {% if supply.minimum_stock %}
+                                    <br>
+                                    <small class="text-muted">Min: {{ supply.minimum_stock }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if supply.current_stock == 0 %}
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                {% elif supply.is_low_stock %}
+                                    <span class="badge bg-warning text-dark">Low Stock</span>
+                                {% else %}
+                                    <span class="badge bg-success">In Stock</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                ${{ supply.unit_price }}
+                                {% if supply.current_stock > 0 %}
+                                    <br>
+                                    <small class="text-muted">
+                                        Total: ${{ supply.total_value|floatformat:2 }}
+                                    </small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{% url 'supply_detail' supply.id %}" 
+                                       class="btn btn-outline-primary" title="View Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'supply_edit' supply.id %}" 
+                                       class="btn btn-outline-secondary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'stock_movement' supply.id %}" 
+                                       class="btn btn-outline-success" title="Stock Movement">
+                                        <i class="bi bi-arrow-left-right"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+                <nav aria-label="Supplies pagination">
+                    <ul class="pagination justify-content-center mt-4">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="page-item active">
+                            <span class="page-link">
+                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                            </span>
+                        </li>
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-box-seam" style="font-size: 4rem; opacity: 0.3;"></i>
+                <h4 class="mt-3">No supplies found in this category</h4>
+                <p>Add supplies to this category or check other categories.</p>
+                <a href="{% url 'supply_create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    Add New Supply
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

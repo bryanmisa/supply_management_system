@@ -51,7 +51,9 @@
                         {% for category in categories %}
                         <tr>
                             <td>
-                                <strong>{{ category.name }}</strong>
+                                <a href="{% url 'category_supplies' category.id %}" class="text-decoration-none">
+                                    <strong>{{ category.name }}</strong>
+                                </a>
                             </td>
                             <td>{{ category.description|default:"No description"|truncatechars:50 }}</td>
                             <td>
