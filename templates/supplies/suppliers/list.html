@@ -91,6 +91,17 @@
                                         </button>
                                     </form>
                                     {% endif %}
+
+                                    {% if supplier.supply_count == 0 %}
+                                    <form method="post" action="{% url 'supplier_delete' supplier.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger" 
+                                                title="Delete" 
+                                                onclick="return confirm('Are you sure you want to delete this supplier?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>System Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        h1 { color: #0d6efd; text-align: center; border-bottom: 2px solid #0d6efd; padding-bottom: 10px; }
+        h2 { color: #0d6efd; margin-top: 30px; font-size: 16px; }
+        .section { margin: 20px 0; }
+        .summary-item { display: inline-block; width: 23%; margin: 1%; text-align: center; border: 1px solid #ddd; padding: 10px; background: #f8f9fa; }
+        .summary-item h3 { margin: 5px 0; font-size: 24px; color: #0d6efd; }
+        .summary-item p { margin: 5px 0; font-size: 12px; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th { background: #0d6efd; color: white; padding: 10px; text-align: left; }
+        td { padding: 8px; border-bottom: 1px solid #ddd; }
+        .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #999; border-top: 1px solid #ddd; padding-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Supply Management System - Comprehensive Report</h1>
+    <p style="text-align: center; color: #666;">Generated: {{ generated_at|date:"M d, Y H:i" }}</p>
+
+    <div class="section">
+        <h2>System Summary</h2>
+        <div class="summary-item">
+            <h3>{{ summary.total_users }}</h3>
+            <p>Total Users</p>
+        </div>
+        <div class="summary-item">
+            <h3>{{ summary.total_supplies }}</h3>
+            <p>Total Supplies</p>
+        </div>
+        <div class="summary-item">
+            <h3>${{ summary.total_inventory_value|floatformat:2 }}</h3>
+            <p>Inventory Value</p>
+        </div>
+        <div class="summary-item">
+            <h3>{{ summary.total_suppliers }}</h3>
+            <p>Suppliers</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Purchase Orders Summary</h2>
+        <table>
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Total Orders</td>
+                <td>{{ purchase_order_stats.total_orders }}</td>
+            </tr>
+            <tr>
+                <td>Total Amount</td>
+                <td>${{ purchase_order_stats.total_amount|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td>Received Orders</td>
+                <td>{{ purchase_order_stats.received }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Customer Requests Summary</h2>
+        <table>
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Total Requests</td>
+                <td>{{ request_stats.total_requests }}</td>
+            </tr>
+            <tr>
+                <td>Delivered</td>
+                <td>{{ request_stats.delivered }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        <p>This is an automated system report. For more details, please visit the admin dashboard.</p>
+    </div>
+</body>
+</html>

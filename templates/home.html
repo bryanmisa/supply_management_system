@@ -15,6 +15,20 @@
 </div>
 
 <div class="row g-4 justify-content-center">
+  <!-- Administrator -->
+  <div class="col-md-6 col-lg-5">
+    <div class="home-card home-card-admin p-4 p-md-5 shadow-sm rounded-3 h-100" style="border-left: 5px solid #dc3545;">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-shield-lock me-2" style="font-size:1.5rem; color: #dc3545;"></i>
+        <h2 class="h5 mb-0">Administrator</h2>
+      </div>
+      <p class="text-muted mb-4">System-wide management: users, inventory, suppliers, purchase orders, and comprehensive reports.</p>
+      <a href="{% url 'admin_login' %}" class="btn btn-danger d-grid">
+        <i class="bi bi-box-arrow-in-right me-1"></i> Admin Sign in
+      </a>
+    </div>
+  </div>
+
   <!-- Manager -->
   <div class="col-md-6 col-lg-5">
     <div class="home-card home-card-manager p-4 p-md-5 shadow-sm rounded-3 h-100">
@@ -36,17 +50,17 @@
 
   <!-- Customer -->
   <div class="col-md-6 col-lg-5">
-    <div class="home-card home-card-customer p-4 p-md-5 shadow-sm rounded-3 h-100">
+    <div class="home-card home-card-customer p-4 p-md-5 shadow-sm rounded-3 h-100" style="border-left: 5px solid #198754;">
       <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-people me-2" style="font-size:1.5rem;"></i>
+        <i class="bi bi-people me-2" style="font-size:1.5rem; color: #198754;"></i>
         <h2 class="h5 mb-0">Customer</h2>
       </div>
       <p class="text-muted mb-4">Submit and track supply requests tailored to your needs.</p>
       <div class="d-flex gap-2 flex-wrap">
-        <a href="{% url 'customer_login' %}" class="btn btn-danger">
+        <a href="{% url 'customer_login' %}" class="btn btn-success">
           <i class="bi bi-box-arrow-in-right me-1"></i> Customer Sign in
         </a>
-        <a href="{% url 'customer_register' %}" class="btn btn-outline-danger">
+        <a href="{% url 'customer_register' %}" class="btn btn-outline-success">
           <i class="bi bi-person-plus me-1"></i> Create Customer Account
         </a>
       </div>

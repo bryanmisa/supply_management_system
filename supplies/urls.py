@@ -8,6 +8,18 @@ urlpatterns = [
     # Dashboard
     path('', views.unified_dashboard, name='dashboard'),
     path('manager-dashboard/', views.dashboard, name='manager_dashboard'),
+    
+    # Admin Portal
+    path('admin_portal/login/', views.AdminLoginView.as_view(), name='admin_login'),
+    path('admin_portal/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('admin_portal/users/', views.admin_user_management, name='admin_user_management'),
+    path('admin_portal/users/<int:user_id>/', views.admin_user_detail, name='admin_user_detail'),
+    path('admin_portal/users/<int:user_id>/deactivate/', views.admin_user_deactivate, name='admin_user_deactivate'),
+    path('admin_portal/inventory/', views.admin_inventory_overview, name='admin_inventory_overview'),
+    path('admin_portal/purchase-orders/', views.admin_purchase_orders, name='admin_purchase_orders'),
+    path('admin_portal/customer-requests/', views.admin_customer_requests, name='admin_customer_requests'),
+    path('admin_portal/reports/', views.admin_comprehensive_report, name='admin_comprehensive_report'),
+    path('admin_portal/reports/export/pdf/', views.admin_export_report_pdf, name='admin_export_report_pdf'),
 
     # Reports
     path('reports/stock-movements/', views.stock_movement_report, name='stock_movement_report'),
@@ -42,6 +54,7 @@ urlpatterns = [
     path('suppliers/create/', views.supplier_create, name='supplier_create'),
     path('suppliers/<int:supplier_id>/edit/', views.supplier_edit, name='supplier_edit'),
     path('suppliers/<int:supplier_id>/deactivate/', views.supplier_deactivate, name='supplier_deactivate'),
+    path('suppliers/<int:supplier_id>/delete/', views.supplier_delete, name='supplier_delete'),
 
     # Supplies
     path('supplies/', views.supply_list, name='supply_list'),

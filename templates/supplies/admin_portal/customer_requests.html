@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Customer Requests - Administrator{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+    <li class="breadcrumb-item active">Customer Requests</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <h1 class="h2 mb-4"><i class="bi bi-bag"></i> Customer Requests</h1>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="row mb-4">
+  <div class="col-md-2 mb-3">
+    <div class="card">
+      <div class="card-body text-center">
+        <div class="text-xs font-weight-bold text-secondary text-uppercase">Total</div>
+        <div class="h3 mb-0">{{ stats.total_requests }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2 mb-3">
+    <div class="card">
+      <div class="card-body text-center">
+        <div class="text-xs font-weight-bold text-warning text-uppercase">Pending</div>
+        <div class="h3 mb-0">{{ stats.pending }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2 mb-3">
+    <div class="card">
+      <div class="card-body text-center">
+        <div class="text-xs font-weight-bold text-info text-uppercase">Approved</div>
+        <div class="h3 mb-0">{{ stats.approved }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2 mb-3">
+    <div class="card">
+      <div class="card-body text-center">
+        <div class="text-xs font-weight-bold text-primary text-uppercase">In Transit</div>
+        <div class="h3 mb-0">{{ stats.out_for_delivery }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2 mb-3">
+    <div class="card">
+      <div class="card-body text-center">
+        <div class="text-xs font-weight-bold text-success text-uppercase">Delivered</div>
+        <div class="h3 mb-0">{{ stats.delivered }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-2 mb-3">
+    <div class="card">
+      <div class="card-body text-center">
+        <div class="text-xs font-weight-bold text-danger text-uppercase">Cancelled</div>
+        <div class="h3 mb-0">{{ stats.cancelled }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" class="row g-3">
+      <div class="col-md-3">
+        <input type="text" name="search" class="form-control" placeholder="Search request #, customer..." value="{{ search_query }}">
+      </div>
+      <div class="col-md-3">
+        <select name="status" class="form-select">
+          <option value="">All Status</option>
+          <option value="PENDING" {% if selected_status == 'PENDING' %}selected{% endif %}>Pending</option>
+          <option value="APPROVED" {% if selected_status == 'APPROVED' %}selected{% endif %}>Approved</option>
+          <option value="OUT_FOR_DELIVERY" {% if selected_status == 'OUT_FOR_DELIVERY' %}selected{% endif %}>In Transit</option>
+          <option value="DELIVERED" {% if selected_status == 'DELIVERED' %}selected{% endif %}>Delivered</option>
+          <option value="CANCELLED" {% if selected_status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select name="customer" class="form-select">
+          <option value="">All Customers</option>
+          {% for customer in customers %}
+            <option value="{{ customer.id }}" {% if selected_customer|add:"" == customer.id|add:"" %}selected{% endif %}>{{ customer.get_full_name|default:customer.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Requests Table -->
+<div class="card shadow">
+  <div class="card-body">
+    {% if page_obj %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Request #</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for req in page_obj %}
+              <tr>
+                <td><strong>{{ req.request_number }}</strong></td>
+                <td>
+                  <strong>{{ req.customer_name }}</strong>
+                  <br>
+                  <small class="text-muted">{{ req.customer_email }}</small>
+                </td>
+                <td><span class="badge bg-secondary">{{ req.items.count }}</span></td>
+                <td>
+                  <span class="badge bg-{% if req.status == 'PENDING' %}warning{% elif req.status == 'APPROVED' %}info{% elif req.status == 'OUT_FOR_DELIVERY' %}primary{% elif req.status == 'DELIVERED' %}success{% else %}secondary{% endif %}">
+                    {{ req.get_status_display }}
+                  </span>
+                </td>
+                <td><small>{{ req.created_at|date:"M d, Y H:i" }}</small></td>
+                <td>
+                  <a href="{% url 'customer_request_detail' req.id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <p class="text-muted mb-0">No requests found</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

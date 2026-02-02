@@ -152,8 +152,12 @@ class SupplyManager(models.Manager):
     
     def with_totals(self):
         """Return supplies with calculated total values."""
+        from django.db.models import ExpressionWrapper, DecimalField
         return self.annotate(
-            total_value=F('current_stock') * F('unit_price')
+            calculated_total_value=ExpressionWrapper(
+                F('current_stock') * F('unit_price'),
+                output_field=DecimalField(max_digits=14, decimal_places=2)
+            )
         )
 
 

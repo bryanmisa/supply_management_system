@@ -1,8 +1,48 @@
 {# Sidebar navigation partial - role-based links #}
 <ul class="nav flex-column px-2 py-2">
     {% if request.user.is_authenticated %}
-        {% if request.user.is_superuser or request.user.profile.is_manager %}
-            <li class="nav-item text-uppercase small text-secondary px-2 mt-2 mb-1">Manager</li>
+        {% if request.user.is_superuser %}
+            <li class="nav-item text-uppercase small text-secondary px-2 mt-2 mb-1">
+                <i class="bi bi-shield-lock"></i> Administrator
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'admin_dashboard' %}">
+                    <i class="bi bi-speedometer2 me-2"></i><span class="link-text">Admin Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'admin_user_management' %}">
+                    <i class="bi bi-people me-2"></i><span class="link-text">User Management</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'admin_inventory_overview' %}">
+                    <i class="bi bi-box-seam me-2"></i><span class="link-text">Inventory</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'admin_purchase_orders' %}">
+                    <i class="bi bi-cart me-2"></i><span class="link-text">Purchase Orders</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'admin_customer_requests' %}">
+                    <i class="bi bi-bag me-2"></i><span class="link-text">Customer Requests</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'admin_comprehensive_report' %}">
+                    <i class="bi bi-file-pdf me-2"></i><span class="link-text">Reports</span>
+                </a>
+            </li>
+
+            <hr class="text-secondary my-2">
+        {% endif %}
+
+        {% if not request.user.is_superuser and request.user.profile.role == 'MANAGER' %}
+            <li class="nav-item text-uppercase small text-secondary px-2 mt-3 mb-1">
+                <i class="bi bi-clipboard-check"></i> Manager
+            </li>
             <li class="nav-item">
                 <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'manager_dashboard' %}">
                     <i class="bi bi-speedometer2 me-2"></i><span class="link-text">Dashboard</span>
@@ -17,41 +57,24 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'supply_create' %}">
-                    <i class="bi bi-plus-circle me-2"></i><span class="link-text">Add New Supply</span>
+                    <i class="bi bi-plus-circle me-2"></i><span class="link-text">Add Supply</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'low_stock_report' %}">
-                    <i class="bi bi-exclamation-triangle me-2"></i><span class="link-text">Low Stock Report</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'customer_request_list' %}">
-                    <i class="bi bi-people me-2"></i><span class="link-text">Customer Requests</span>
+                    <i class="bi bi-exclamation-triangle me-2"></i><span class="link-text">Low Stock</span>
                 </a>
             </li>
 
-            <li class="nav-item text-uppercase small text-secondary px-2 mt-3 mb-1">Categories</li>
+            <li class="nav-item text-uppercase small text-secondary px-2 mt-3 mb-1">Categories & Suppliers</li>
             <li class="nav-item">
                 <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'category_list' %}">
-                    <i class="bi bi-tags me-2"></i><span class="link-text">All Categories</span>
+                    <i class="bi bi-tags me-2"></i><span class="link-text">Categories</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'category_create' %}">
-                    <i class="bi bi-plus-circle me-2"></i><span class="link-text">Add New Category</span>
-                </a>
-            </li>
-
-            <li class="nav-item text-uppercase small text-secondary px-2 mt-3 mb-1">Suppliers</li>
             <li class="nav-item">
                 <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'supplier_list' %}">
-                    <i class="bi bi-truck me-2"></i><span class="link-text">All Suppliers</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'supplier_create' %}">
-                    <i class="bi bi-plus-circle me-2"></i><span class="link-text">Add New Supplier</span>
+                    <i class="bi bi-truck me-2"></i><span class="link-text">Suppliers</span>
                 </a>
             </li>
 
@@ -63,44 +86,24 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'purchase_order_create' %}">
-                    <i class="bi bi-plus-circle me-2"></i><span class="link-text">Create New Order</span>
-                </a>
-            </li>
-            <li class="nav-item ms-4">
-                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'purchase_order_list' %}?status=PENDING">
-                    <i class="bi bi-clock me-2"></i><span class="link-text">Pending Orders</span>
-                </a>
-            </li>
-            <li class="nav-item ms-4">
-                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'purchase_order_list' %}?status=SENT">
-                    <i class="bi bi-send me-2"></i><span class="link-text">Sent Orders</span>
+                    <i class="bi bi-plus-circle me-2"></i><span class="link-text">Create Order</span>
                 </a>
             </li>
 
             <li class="nav-item text-uppercase small text-secondary px-2 mt-3 mb-1">Reports</li>
             <li class="nav-item">
                 <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'stock_movement_report' %}">
-                    <i class="bi bi-graph-up me-2"></i><span class="link-text">Stock Movement</span>
+                    <i class="bi bi-arrow-left-right me-2"></i><span class="link-text">Stock Movements</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'usage_report' %}">
-                    <i class="bi bi-bar-chart me-2"></i><span class="link-text">Supply Usage</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'supplier_performance_report' %}">
-                    <i class="bi bi-speedometer me-2"></i><span class="link-text">Supplier Performance</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'low_stock_report' %}">
-                    <i class="bi bi-exclamation-circle me-2"></i><span class="link-text">Low Stock</span>
+                <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'customer_request_list' %}">
+                    <i class="bi bi-bag me-2"></i><span class="link-text">Customer Requests</span>
                 </a>
             </li>
         {% endif %}
 
-        {% if request.user.is_superuser or request.user.profile.is_customer %}
+        {% if request.user.profile.role == 'CUSTOMER' %}
             <li class="nav-item text-uppercase small text-secondary px-2 mt-4 mb-1">Customer</li>
             <li class="nav-item">
                 <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'customer_request_create' %}">

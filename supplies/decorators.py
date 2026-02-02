@@ -48,6 +48,26 @@ def customer_required(view_func):
     return _wrapped_view
 
 
+def admin_required(view_func):
+    """Decorator to require admin/superuser role for accessing a view."""
+    @wraps(view_func)
+    @login_required
+    def _wrapped_view(request, *args, **kwargs):
+        # Only superusers have admin access
+        if request.user.is_superuser:
+            return view_func(request, *args, **kwargs)
+        else:
+            messages.error(request, "Access denied. Administrator privileges required.")
+            # Redirect to appropriate dashboard based on user role
+            if hasattr(request.user, 'profile'):
+                if request.user.profile.is_manager:
+                    return redirect('manager_dashboard')
+                else:
+                    return redirect('customer_dashboard')
+            return redirect('home')
+    return _wrapped_view
+
+
 def role_required(*roles):
     """Decorator to require specific roles for accessing a view."""
     def decorator(view_func):

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit User - Administrator{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'admin_user_management' %}">Users</a></li>
+    <li class="breadcrumb-item active">{{ user.username }}</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Edit User: {{ user.username }}</h5>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" class="form-control" value="{{ user.username }}" disabled>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">First Name</label>
+              <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Last Name</label>
+              <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" value="{{ user.email }}">
+          </div>
+
+          {% if user.profile %}
+            <div class="mb-3">
+              <label class="form-label">Role</label>
+              <select name="role" class="form-select">
+                <option value="MANAGER" {% if user.profile.role == 'MANAGER' %}selected{% endif %}>Manager</option>
+                <option value="CUSTOMER" {% if user.profile.role == 'CUSTOMER' %}selected{% endif %}>Customer</option>
+              </select>
+            </div>
+          {% endif %}
+
+          <div class="mb-3 form-check">
+            <input type="checkbox" name="is_active" class="form-check-input" {% if user.is_active %}checked{% endif %}>
+            <label class="form-check-label">Active</label>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="{% url 'admin_user_management' %}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

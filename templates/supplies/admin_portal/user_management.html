@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management - Administrator{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+    <li class="breadcrumb-item active">User Management</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h2"><i class="bi bi-people"></i> User Management</h1>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" class="row g-3">
+      <div class="col-md-4">
+        <input type="text" name="search" class="form-control" placeholder="Search username, email, name..." value="{{ search_query }}">
+      </div>
+      <div class="col-md-4">
+        <select name="role" class="form-select">
+          <option value="">All Roles</option>
+          <option value="MANAGER" {% if selected_role == 'MANAGER' %}selected{% endif %}>Manager</option>
+          <option value="CUSTOMER" {% if selected_role == 'CUSTOMER' %}selected{% endif %}>Customer</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Users Table -->
+<div class="card shadow">
+  <div class="card-body">
+    {% if page_obj %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Username</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in page_obj %}
+              <tr>
+                <td><strong>{{ user.username }}</strong></td>
+                <td>{{ user.get_full_name|default:"—" }}</td>
+                <td><small>{{ user.email }}</small></td>
+                <td>
+                  {% if user.is_superuser %}
+                    <span class="badge bg-danger">Superuser</span>
+                  {% elif user.profile.is_manager %}
+                    <span class="badge bg-primary">Manager</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Customer</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if user.is_active %}
+                    <span class="badge bg-success">Active</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                  {% endif %}
+                </td>
+                <td><small>{{ user.date_joined|date:"M d, Y" }}</small></td>
+                <td>
+                  <a href="{% url 'admin_user_detail' user.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  {% if not user.is_superuser and user.is_active %}
+                    <form method="post" action="{% url 'admin_user_deactivate' user.id %}" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Deactivate" onclick="return confirm('Deactivate user?')">
+                        <i class="bi bi-x-circle"></i>
+                      </button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <p class="text-muted mb-0">No users found</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

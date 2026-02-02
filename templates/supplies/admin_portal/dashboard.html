@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Administrator Dashboard{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item active">Admin Dashboard</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <h1 class="h2 mb-1">
+      <i class="bi bi-shield-lock"></i>
+      Administrator Dashboard
+    </h1>
+    <p class="text-muted">System-wide overview and management</p>
+  </div>
+</div>
+
+<!-- Key Metrics -->
+<div class="row mb-4">
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-primary shadow h-100">
+      <div class="card-body">
+        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Users</div>
+        <div class="h3 mb-0">{{ stats.total_users }}</div>
+        <small class="text-muted">Managers: {{ stats.total_managers }} | Customers: {{ stats.total_customers }}</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-success shadow h-100">
+      <div class="card-body">
+        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Supplies</div>
+        <div class="h3 mb-0">{{ stats.total_supplies }}</div>
+        <small class="text-muted"><span class="badge bg-warning">{{ stats.low_stock_items }} Low Stock</span></small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-info shadow h-100">
+      <div class="card-body">
+        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Purchase Orders</div>
+        <div class="h3 mb-0">{{ stats.total_purchase_orders }}</div>
+        <small class="text-muted">System-wide tracking</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-warning shadow h-100">
+      <div class="card-body">
+        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Pending Requests</div>
+        <div class="h3 mb-0">{{ stats.pending_requests }}</div>
+        <small class="text-muted">Awaiting approval</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Additional Metrics -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card shadow">
+      <div class="card-body">
+        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Suppliers</div>
+        <div class="h3 mb-0">{{ stats.total_suppliers }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow">
+      <div class="card-body">
+        <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Categories</div>
+        <div class="h3 mb-0">{{ stats.total_categories }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card shadow">
+      <div class="card-body">
+        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Out of Stock</div>
+        <div class="h3 mb-0" id="outOfStock">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card shadow">
+      <div class="card-header">
+        <h6 class="m-0 font-weight-bold text-primary">
+          <i class="bi bi-lightning"></i>
+          Quick Actions
+        </h6>
+      </div>
+      <div class="card-body">
+        <div class="row g-2">
+          <div class="col-md-3">
+            <a href="{% url 'admin_user_management' %}" class="btn btn-primary d-grid">
+              <i class="bi bi-people"></i>
+              Manage Users
+            </a>
+          </div>
+          <div class="col-md-3">
+            <a href="{% url 'admin_inventory_overview' %}" class="btn btn-success d-grid">
+              <i class="bi bi-box-seam"></i>
+              Inventory
+            </a>
+          </div>
+          <div class="col-md-3">
+            <a href="{% url 'admin_purchase_orders' %}" class="btn btn-info d-grid">
+              <i class="bi bi-cart"></i>
+              Purchase Orders
+            </a>
+          </div>
+          <div class="col-md-3">
+            <a href="{% url 'admin_comprehensive_report' %}" class="btn btn-warning d-grid">
+              <i class="bi bi-file-pdf"></i>
+              Reports
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Movements -->
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow">
+      <div class="card-header">
+        <h6 class="m-0 font-weight-bold text-primary">Recent Stock Movements</h6>
+      </div>
+      <div class="card-body">
+        {% if stats.recent_movements %}
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>Date</th>
+                  <th>Supply</th>
+                  <th>Type</th>
+                  <th class="text-end">Qty</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for movement in stats.recent_movements %}
+                  <tr>
+                    <td><small>{{ movement.movement_date|date:"M d, Y H:i" }}</small></td>
+                    <td>{{ movement.supply.name }}</td>
+                    <td>
+                      <span class="badge {% if movement.movement_type == 'IN' %}bg-success{% else %}bg-danger{% endif %}">
+                        {{ movement.get_movement_type_display }}
+                      </span>
+                    </td>
+                    <td class="text-end">{{ movement.quantity }}</td>
+                    <td><small>{{ movement.reason }}</small></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted mb-0">No recent stock movements</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

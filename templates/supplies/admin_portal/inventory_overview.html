@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Inventory Overview - Administrator{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+    <li class="breadcrumb-item active">Inventory Overview</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h2"><i class="bi bi-box-seam"></i> Inventory Overview</h1>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" class="row g-3">
+      <div class="col-md-3">
+        <input type="text" name="search" class="form-control" placeholder="Search name, SKU..." value="{{ search_query }}">
+      </div>
+      <div class="col-md-3">
+        <select name="category" class="form-select">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select name="status" class="form-select">
+          <option value="">All Status</option>
+          <option value="low" {% if selected_status == 'low' %}selected{% endif %}>Low Stock</option>
+          <option value="out" {% if selected_status == 'out' %}selected{% endif %}>Out of Stock</option>
+          <option value="overstock" {% if selected_status == 'overstock' %}selected{% endif %}>Overstock</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Supplies Table -->
+<div class="card shadow">
+  <div class="card-body">
+    {% if page_obj %}
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>Name</th>
+              <th>SKU</th>
+              <th>Category</th>
+              <th>Supplier</th>
+              <th class="text-end">Current</th>
+              <th class="text-end">Min/Max</th>
+              <th class="text-end">Unit Price</th>
+              <th class="text-end">Total Value</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for supply in page_obj %}
+              <tr>
+                <td>
+                  <a href="{% url 'supply_detail' supply.id %}" class="text-decoration-none">
+                    {{ supply.name }}
+                  </a>
+                </td>
+                <td><code>{{ supply.sku }}</code></td>
+                <td>{{ supply.category.name }}</td>
+                <td>{{ supply.supplier.name }}</td>
+                <td class="text-end"><strong>{{ supply.current_stock }}</strong></td>
+                <td class="text-end"><small>{{ supply.minimum_stock }}/{{ supply.maximum_stock }}</small></td>
+                <td class="text-end">${{ supply.unit_price|floatformat:2 }}</td>
+                <td class="text-end">${{ supply.calculated_total_value|floatformat:2 }}</td>
+                <td>
+                  {% if supply.current_stock == 0 %}
+                    <span class="badge bg-danger">Out</span>
+                  {% elif supply.is_low_stock %}
+                    <span class="badge bg-warning">Low</span>
+                  {% elif supply.current_stock > supply.maximum_stock %}
+                    <span class="badge bg-info">Over</span>
+                  {% else %}
+                    <span class="badge bg-success">OK</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      {% include "partials/pagination.html" %}
+    {% else %}
+      <p class="text-muted mb-0">No supplies found</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
