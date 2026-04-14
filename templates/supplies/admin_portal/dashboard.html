@@ -180,4 +180,57 @@
     </div>
   </div>
 </div>
+
+<!-- Clickable Supplies List -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card shadow">
+      <div class="card-header">
+        <h6 class="m-0 font-weight-bold text-primary">Supplies Inventory</h6>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>Supply Name</th>
+                <th>SKU</th>
+                <th>Category</th>
+                <th>Current Stock</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if stats.recent_supplies %}
+                {% for supply in stats.recent_supplies %}
+                <tr>
+                  <td>
+                    <a href="{% url 'supply_detail' supply.id %}" class="text-decoration-none">
+                      {{ supply.name }}
+                    </a>
+                  </td>
+                  <td>{{ supply.sku }}</td>
+                  <td>{{ supply.category.name }}</td>
+                  <td>{{ supply.current_stock }} {{ supply.unit_of_measure }}</td>
+                  <td>
+                    {% if supply.is_active %}
+                      <span class="badge bg-success">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted">No supplies available</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

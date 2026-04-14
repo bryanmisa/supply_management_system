@@ -1145,6 +1145,7 @@ def admin_dashboard(request):
         'low_stock_items': Supply.objects.low_stock().count(),
         'recent_movements': StockMovement.objects.select_related('supply').order_by('-movement_date')[:10],
         'recent_orders': PurchaseOrder.objects.select_related('supplier').order_by('-order_date')[:5],
+        'recent_supplies': Supply.objects.select_related('category').order_by('-created_at')[:5],
     }
     
     return render(request, 'supplies/admin_portal/dashboard.html', {'stats': stats})
@@ -1223,6 +1224,88 @@ def admin_user_deactivate(request, user_id):
             messages.error(request, 'User not found.')
     
     return redirect('admin_user_management')
+
+
+@admin_required
+def admin_user_reset_password(request, user_id):
+    """Reset password for a user."""
+    if request.method == 'POST':
+        try:
+            user = User.objects.get(id=user_id)
+            if user.is_superuser:
+                messages.error(request, 'Cannot reset password for superuser accounts.')
+            else:
+                # Generate a random password
+                import random
+                import string
+                new_password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, f'Password for {user.username} has been reset. New password: {new_password}')
+        except User.DoesNotExist:
+            messages.error(request, 'User not found.')
+    
+    return redirect('admin_user_management')
+
+
+@admin_required
+def admin_user_create(request):
+    """Create a new admin user (superuser)."""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        
+        # Basic validation
+        if not username or not email or not password1 or not password2:
+            messages.error(request, 'Please fill in all required fields.')
+            return render(request, 'supplies/admin_portal/user_create.html')
+        
+        if password1 != password2:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'supplies/admin_portal/user_create.html')
+        
+        if len(password1) < 8:
+            messages.error(request, 'Password must be at least 8 characters long.')
+            return render(request, 'supplies/admin_portal/user_create.html')
+        
+        # Check if username already exists
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists.')
+            return render(request, 'supplies/admin_portal/user_create.html')
+        
+        # Check if email already exists
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Email already exists.')
+            return render(request, 'supplies/admin_portal/user_create.html')
+        
+        try:
+            # Create the user
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                password=password1,
+                is_staff=True,
+                is_superuser=True  # Make them a superuser/admin
+            )
+            
+            # Update the profile to set role as MANAGER (though superuser has all permissions)
+            if hasattr(user, 'profile'):
+                user.profile.role = 'MANAGER'
+                user.profile.save()
+            
+            messages.success(request, f'Admin user {username} created successfully!')
+            return redirect('admin_user_management')
+        except Exception as e:
+            messages.error(request, f'Error creating user: {str(e)}')
+            return render(request, 'supplies/admin_portal/user_create.html')
+    
+    return render(request, 'supplies/admin_portal/user_create.html')
 
 
 @admin_required

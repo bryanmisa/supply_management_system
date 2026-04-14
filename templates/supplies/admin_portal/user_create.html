@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Admin - Administrator{% endblock %}
+
+{% block breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'admin_user_management' %}">Users</a></li>
+    <li class="breadcrumb-item active">Create Admin</li>
+  </ol>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card shadow">
+      <div class="card-header">
+        <h5 class="mb-0">Create New Admin User</h5>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" required placeholder="Enter username">
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" required placeholder="Enter email">
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">First Name</label>
+              <input type="text" name="first_name" class="form-control" placeholder="First name">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Last Name</label>
+              <input type="text" name="last_name" class="form-control" placeholder="Last name">
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password1" class="form-control" required placeholder="Enter password (min 8 characters)">
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" name="password2" class="form-control" required placeholder="Confirm password">
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success">Create Admin</button>
+            <a href="{% url 'admin_user_management' %}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
