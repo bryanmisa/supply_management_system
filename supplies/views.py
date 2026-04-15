@@ -1143,6 +1143,7 @@ def admin_dashboard(request):
         'pending_requests': CustomerRequest.objects.filter(status='PENDING').count(),
         'total_purchase_orders': PurchaseOrder.objects.count(),
         'low_stock_items': Supply.objects.low_stock().count(),
+        'out_of_stock_items': Supply.objects.out_of_stock().count(),
         'recent_movements': StockMovement.objects.select_related('supply').order_by('-movement_date')[:10],
         'recent_orders': PurchaseOrder.objects.select_related('supplier').order_by('-order_date')[:5],
         'recent_supplies': Supply.objects.select_related('category').order_by('-created_at')[:5],
@@ -1200,6 +1201,13 @@ def admin_user_detail(request, user_id):
             role = request.POST.get('role', user.profile.role)
             user.profile.role = role
             user.profile.save()
+            
+        new_password = request.POST.get('new_password')
+        if new_password:
+            if len(new_password) < 8:
+                messages.error(request, 'Minimum 8 characters required for password.')
+                return render(request, 'supplies/admin_portal/user_detail.html', {'user': user})
+            user.set_password(new_password)
         
         user.save()
         messages.success(request, f'User {user.username} updated successfully!')
@@ -1250,7 +1258,7 @@ def admin_user_reset_password(request, user_id):
 
 @admin_required
 def admin_user_create(request):
-    """Create a new admin user (superuser)."""
+    """Create a new user (Customer, Manager, or Admin)."""
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')
@@ -1258,6 +1266,7 @@ def admin_user_create(request):
         last_name = request.POST.get('last_name')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
+        role = request.POST.get('role', 'CUSTOMER')
         
         # Basic validation
         if not username or not email or not password1 or not password2:
@@ -1290,16 +1299,16 @@ def admin_user_create(request):
                 first_name=first_name,
                 last_name=last_name,
                 password=password1,
-                is_staff=True,
-                is_superuser=True  # Make them a superuser/admin
+                is_staff=(role in ['MANAGER', 'ADMIN']),
+                is_superuser=(role == 'ADMIN')
             )
             
-            # Update the profile to set role as MANAGER (though superuser has all permissions)
+            # Update the profile to set role
             if hasattr(user, 'profile'):
-                user.profile.role = 'MANAGER'
+                user.profile.role = 'MANAGER' if role == 'ADMIN' else role
                 user.profile.save()
             
-            messages.success(request, f'Admin user {username} created successfully!')
+            messages.success(request, f'User {username} created successfully as {role}!')
             return redirect('admin_user_management')
         except Exception as e:
             messages.error(request, f'Error creating user: {str(e)}')

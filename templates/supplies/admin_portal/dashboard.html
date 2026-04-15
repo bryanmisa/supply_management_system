@@ -88,7 +88,7 @@
     <div class="card shadow">
       <div class="card-body">
         <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Out of Stock</div>
-        <div class="h3 mb-0" id="outOfStock">—</div>
+        <div class="h3 mb-0" id="outOfStock">{{ stats.out_of_stock_items|default:"0" }}</div>
       </div>
     </div>
   </div>
@@ -106,25 +106,31 @@
       </div>
       <div class="card-body">
         <div class="row g-2">
-          <div class="col-md-3">
+          <div class="col-md">
             <a href="{% url 'admin_user_management' %}" class="btn btn-primary d-grid">
               <i class="bi bi-people"></i>
               Manage Users
             </a>
           </div>
-          <div class="col-md-3">
+          <div class="col-md">
+            <a href="{% url 'admin_user_create' %}" class="btn btn-outline-primary d-grid">
+              <i class="bi bi-person-plus"></i>
+              Create User
+            </a>
+          </div>
+          <div class="col-md">
             <a href="{% url 'admin_inventory_overview' %}" class="btn btn-success d-grid">
               <i class="bi bi-box-seam"></i>
               Inventory
             </a>
           </div>
-          <div class="col-md-3">
+          <div class="col-md">
             <a href="{% url 'admin_purchase_orders' %}" class="btn btn-info d-grid">
               <i class="bi bi-cart"></i>
-              Purchase Orders
+              Orders
             </a>
           </div>
-          <div class="col-md-3">
+          <div class="col-md">
             <a href="{% url 'admin_comprehensive_report' %}" class="btn btn-warning d-grid">
               <i class="bi bi-file-pdf"></i>
               Reports

@@ -103,7 +103,7 @@
             </li>
         {% endif %}
 
-        {% if request.user.profile.role == 'CUSTOMER' %}
+        {% if request.user.profile.role == 'CUSTOMER' and not request.user.is_superuser %}
             <li class="nav-item text-uppercase small text-secondary px-2 mt-4 mb-1">Customer</li>
             <li class="nav-item">
                 <a class="nav-link text-white-50 d-flex align-items-center" href="{% url 'customer_request_create' %}">

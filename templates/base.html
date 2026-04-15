@@ -39,7 +39,7 @@
                 </a>
                 </div>
             <hr class="text-secondary my-0">
-            <div class="sidebar-scroll flex-grow-1">
+            <div class="sidebar-scroll">
                 {% include 'partials/sidebar_nav.html' %}
             </div>
             {% if request.user.is_authenticated %}
@@ -80,7 +80,7 @@
                     {% include 'partials/sidebar_nav.html' %}
                 </div>
                 {% if request.user.is_authenticated %}
-                <div class="sidebar-account px-3 py-3 border-top border-secondary-subtle mt-auto">
+                <div class="sidebar-account px-3 py-3 border-top border-secondary-subtle">
                     {% include 'partials/sidebar_account.html' %}
                 </div>
                 {% endif %}
