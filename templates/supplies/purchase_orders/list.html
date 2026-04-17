@@ -104,7 +104,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <span class="badge {% if order.status == 'PENDING' %}bg-warning{% elif order.status == 'APPROVED' %}bg-info{% elif order.status == 'SENT' %}bg-primary{% elif order.status == 'PARTIALLY_RECEIVED' %}bg-secondary{% elif order.status == 'RECEIVED' %}bg-success{% else %}bg-danger{% endif %}">
+                                <span class="status-neon {% if order.status == 'PENDING' %}status-neon-warning{% elif order.status == 'APPROVED' %}status-neon-info{% elif order.status == 'SENT' %}status-neon-primary{% elif order.status == 'PARTIALLY_RECEIVED' %}status-neon-orange{% elif order.status == 'RECEIVED' %}status-neon-success{% else %}status-neon-danger{% endif %}">
                                     {{ order.get_status_display }}
                                 </span>
                             </td>

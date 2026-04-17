@@ -74,13 +74,13 @@
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-info">{{ supplier.supply_count }} items</span>
+                                <span class="status-neon status-neon-info">{{ supplier.supply_count }} items</span>
                             </td>
                             <td>
                                 {% if supplier.is_active %}
-                                    <span class="badge bg-success">Active</span>
+                                    <span class="status-neon status-neon-success">Active</span>
                                 {% else %}
-                                    <span class="badge bg-secondary">Inactive</span>
+                                    <span class="status-neon status-neon-info">Inactive</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">

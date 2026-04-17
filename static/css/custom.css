@@ -59,6 +59,14 @@
     --sidebar-active:  #ffffff;
     --sidebar-active-bg: rgba(82,113,255,0.15);
     --sidebar-border:  rgba(255,255,255,0.06);
+
+    /* Neon Palette */
+    --neon-green:      #39FF14;
+    --neon-cyan:       #00FFFF;
+    --neon-blue:       #1F51FF;
+    --neon-yellow:     #CCFF00;
+    --neon-red:        #FF3131;
+    --neon-orange:     #FFAD00;
 }
 
 /* ── 2. Reset & Base ─────────────────────────────────────── */
@@ -363,6 +371,24 @@ html, body {
 .badge.bg-info     { background: var(--info-subtle)    !important; color: var(--info)    !important; border: 1px solid rgba(30,144,255,0.3); }
 .badge.bg-primary  { background: var(--primary-subtle) !important; color: var(--primary) !important; border: 1px solid rgba(82,113,255,0.3); }
 .badge.bg-secondary{ background: rgba(255,255,255,0.07) !important; color: var(--text-secondary) !important; border: 1px solid var(--border); }
+
+/* ── 9.1 Neon Status Utilities (No Background) ───────────── */
+.status-neon {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+}
+
+.status-neon-success { color: var(--neon-green); text-shadow: 0 0 8px rgba(57, 255, 20, 0.4); }
+.status-neon-warning { color: var(--neon-yellow); text-shadow: 0 0 8px rgba(204, 255, 0, 0.4); }
+.status-neon-danger  { color: var(--neon-red); text-shadow: 0 0 8px rgba(255, 49, 49, 0.4); }
+.status-neon-info    { color: var(--neon-cyan); text-shadow: 0 0 8px rgba(0, 255, 255, 0.4); }
+.status-neon-primary { color: var(--neon-blue); text-shadow: 0 0 8px rgba(31, 81, 255, 0.4); }
+.status-neon-orange  { color: var(--neon-orange); text-shadow: 0 0 8px rgba(255, 173, 0, 0.4); }
 
 /* ── 10. Buttons ─────────────────────────────────────────── */
 .btn {
@@ -734,3 +760,53 @@ small, .small { color: var(--text-secondary); }
 
 /* ── 28. Offcanvas sidebar account ───────────────────────── */
 .offcanvas .sidebar-account { background: rgba(0,0,0,0.2); }
+
+/* ── 29. TomSelect Integration ───────────────────────────── */
+.ts-wrapper.form-control, .ts-wrapper.form-select {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.ts-control {
+    background: rgba(0,0,0,0.35) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 0.6rem 0.9rem !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease !important;
+}
+
+.ts-wrapper.focus .ts-control {
+    background: rgba(0,0,0,0.5) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+.ts-dropdown {
+    background: #161928 !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    border-radius: var(--radius-sm) !important;
+    box-shadow: var(--shadow-lg) !important;
+    margin-top: 4px !important;
+    z-index: 10000 !important;
+}
+
+.ts-dropdown .option {
+    padding: 0.6rem 0.9rem !important;
+}
+
+.ts-dropdown .active {
+    background: var(--primary-subtle) !important;
+    color: var(--primary) !important;
+}
+
+.ts-wrapper .items {
+    background: transparent !important;
+}
+
+.ts-control input {
+    color: var(--text) !important;
+}

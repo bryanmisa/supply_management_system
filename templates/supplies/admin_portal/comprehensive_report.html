@@ -175,7 +175,7 @@
                             <td><small class="text-secondary">{{ movement.movement_date|date:"M d, Y H:i" }}</small></td>
                             <td class="fw-600">{{ movement.supply.name }}</td>
                             <td>
-                                <span class="badge {% if movement.movement_type == 'IN' %}bg-success{% else %}bg-danger{% endif %}">
+                                <span class="status-neon {% if movement.movement_type == 'IN' %}status-neon-success{% else %}status-neon-danger{% endif %}">
                                     {{ movement.get_movement_type_display }}
                                 </span>
                             </td>

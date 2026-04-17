@@ -53,23 +53,23 @@
                             </td>
                             <td>
                                 {% if r.status == 'PENDING' %}
-                                    <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 py-1 px-3">
+                                    <span class="status-neon status-neon-warning">
                                         <i class="bi bi-hourglass-split me-1"></i> Awaiting Review
                                     </span>
                                 {% elif r.status == 'APPROVED' %}
-                                    <span class="badge bg-info-subtle text-info border border-info border-opacity-25 py-1 px-3">
+                                    <span class="status-neon status-neon-info">
                                         <i class="bi bi-check2-circle me-1"></i> Authenticated
                                     </span>
                                 {% elif r.status == 'OUT_FOR_DELIVERY' %}
-                                    <span class="badge bg-primary-subtle text-primary border border-primary border-opacity-25 py-1 px-3">
+                                    <span class="status-neon status-neon-primary">
                                         <i class="bi bi-truck me-1"></i> In Transit
                                     </span>
                                 {% elif r.status == 'DELIVERED' %}
-                                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25 py-1 px-3">
+                                    <span class="status-neon status-neon-success">
                                         <i class="bi bi-house-check me-1"></i> Fulfilled
                                     </span>
                                 {% else %}
-                                    <span class="badge bg-secondary-subtle text-secondary border border-white border-opacity-10 py-1 px-3">
+                                    <span class="status-neon status-neon-danger">
                                         {{ r.get_status_display }}
                                     </span>
                                 {% endif %}

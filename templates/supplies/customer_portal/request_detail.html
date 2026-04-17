@@ -25,7 +25,7 @@
             </div>
         </div>
         <div>
-            <span class="badge {% if request_obj.status == 'PENDING' %}bg-warning-subtle text-warning border-warning{% elif request_obj.status == 'APPROVED' %}bg-info-subtle text-info border-info{% elif request_obj.status == 'OUT_FOR_DELIVERY' %}bg-primary-subtle text-primary border-primary{% elif request_obj.status == 'DELIVERED' %}bg-success-subtle text-success border-success{% else %}bg-secondary-subtle text-secondary border-white{% endif %} py-2 px-3 border border-opacity-25 rounded-pill shadow-sm">
+            <span class="status-neon {% if request_obj.status == 'PENDING' %}status-neon-warning{% elif request_obj.status == 'APPROVED' %}status-neon-info{% elif request_obj.status == 'OUT_FOR_DELIVERY' %}status-neon-primary{% elif request_obj.status == 'DELIVERED' %}status-neon-success{% else %}status-neon-danger{% endif %} py-1 shadow-sm">
                 <i class="bi bi-info-circle me-1"></i> {{ request_obj.get_status_display }}
             </span>
         </div>

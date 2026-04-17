@@ -90,7 +90,7 @@
                   </a>
                   <div class="xsmall text-muted mt-1">SKU: {{ supply.sku }}</div>
                 </td>
-                <td class="small text-secondary">{{ supply.category.name }}</td>
+                <td class="small text-secondary"><span class="status-neon status-neon-info">{{ supply.category.name }}</span></td>
                 <td class="small text-secondary fw-500">{{ supply.supplier.name|truncatechars:20 }}</td>
                 <td class="text-end">
                     <span class="fw-800 text-white h6 mb-0">{{ supply.current_stock }}</span>
@@ -103,13 +103,13 @@
                 <td class="text-end fw-700 text-white">${{ supply.calculated_total_value|floatformat:2 }}</td>
                 <td class="text-center">
                   {% if supply.current_stock == 0 %}
-                    <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 py-1 px-3 w-75">STOCKOUT</span>
+                    <span class="status-neon status-neon-danger">STOCKOUT</span>
                   {% elif supply.is_low_stock %}
-                    <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 py-1 px-3 w-75">CRITICAL</span>
+                    <span class="status-neon status-neon-warning">CRITICAL</span>
                   {% elif supply.current_stock > supply.maximum_stock %}
-                    <span class="badge bg-info-subtle text-info border border-info border-opacity-25 py-1 px-3 w-75">SURPLUS</span>
+                    <span class="status-neon status-neon-info">SURPLUS</span>
                   {% else %}
-                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25 py-1 px-3 w-75">NOMINAL</span>
+                    <span class="status-neon status-neon-success">NOMINAL</span>
                   {% endif %}
                 </td>
               </tr>

@@ -66,7 +66,7 @@
                   <div class="xsmall text-muted">{{ r.customer_email|default:"No verified email" }}</div>
                 </td>
                 <td>
-                  <span class="badge {% if r.status == 'PENDING' %}bg-warning-subtle text-warning border-warning{% elif r.status == 'APPROVED' %}bg-info-subtle text-info border-info{% elif r.status == 'OUT_FOR_DELIVERY' %}bg-primary-subtle text-primary border-primary{% elif r.status == 'DELIVERED' %}bg-success-subtle text-success border-success{% else %}bg-secondary-subtle text-secondary border-white{% endif %} py-1 px-2 border border-opacity-25 rounded-pill xsmall">
+                  <span class="status-neon {% if r.status == 'PENDING' %}status-neon-warning{% elif r.status == 'APPROVED' %}status-neon-info{% elif r.status == 'OUT_FOR_DELIVERY' %}status-neon-primary{% elif r.status == 'DELIVERED' %}status-neon-success{% else %}status-neon-danger{% endif %} xsmall">
                     {{ r.get_status_display }}
                   </span>
                 </td>

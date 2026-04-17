@@ -20,7 +20,7 @@
             Purchase Order: #{{ order.order_number }}
         </h1>
         <div class="d-flex align-items-center gap-2">
-            <span class="badge {% if order.status == 'PENDING' %}bg-warning{% elif order.status == 'APPROVED' %}bg-info{% elif order.status == 'SENT' %}bg-primary{% elif order.status == 'PARTIALLY_RECEIVED' %}bg-secondary{% elif order.status == 'RECEIVED' %}bg-success{% else %}bg-danger{% endif %} py-2 px-3">
+            <span class="status-neon {% if order.status == 'PENDING' %}status-neon-warning{% elif order.status == 'APPROVED' %}status-neon-info{% elif order.status == 'SENT' %}status-neon-primary{% elif order.status == 'PARTIALLY_RECEIVED' %}status-neon-orange{% elif order.status == 'RECEIVED' %}status-neon-success{% else %}status-neon-danger{% endif %} py-1">
                 <i class="bi bi-info-circle me-1"></i> {{ order.get_status_display }}
             </span>
             <span class="text-secondary small">Placed on {{ order.order_date|date:"F d, Y" }}</span>
@@ -223,7 +223,7 @@
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="fw-600">{{ item.quantity_received }}</span>
                                     {% if item.quantity_pending > 0 %}
-                                        <span class="badge bg-warning-subtle text-warning xsmall">
+                                        <span class="status-neon status-neon-warning xsmall ms-2">
                                             {{ item.quantity_pending }} pending
                                         </span>
                                     {% else %}

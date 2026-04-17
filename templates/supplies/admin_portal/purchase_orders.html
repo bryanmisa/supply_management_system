@@ -85,11 +85,11 @@
                     <div class="fw-700 text-secondary small">{{ order.supplier.name }}</div>
                 </td>
                 <td class="text-center">
-                    <span class="badge bg-secondary-subtle text-secondary py-1 px-2 border border-white border-opacity-10">{{ order.items.count }} units</span>
+                    <span class="status-neon status-neon-info">{{ order.items.count }} units</span>
                 </td>
                 <td class="text-end fw-800 text-white">${{ order.total_amount|floatformat:2 }}</td>
                 <td class="text-center">
-                  <span class="badge {% if order.status == 'PENDING' %}bg-warning-subtle text-warning border-warning{% elif order.status == 'RECEIVED' %}bg-success-subtle text-success border-success{% else %}bg-info-subtle text-info border-info{% endif %} py-1 px-3 border border-opacity-25 rounded-pill xsmall">
+                  <span class="status-neon {% if order.status == 'PENDING' %}status-neon-warning{% elif order.status == 'RECEIVED' %}status-neon-success{% else %}status-neon-info{% endif %}">
                     {{ order.get_status_display }}
                   </span>
                 </td>

@@ -40,7 +40,7 @@
       <div class="card-header d-flex justify-content-between align-items-center bg-transparent">
         <span class="fw-600">General Information</span>
         {% if supply.is_low_stock %}
-          <span class="badge bg-warning text-dark">Low Stock Alert</span>
+          <span class="status-neon status-neon-warning">Low Stock Alert</span>
         {% endif %}
       </div>
       <div class="card-body">
@@ -55,7 +55,7 @@
         <div class="row g-4">
           <div class="col-6">
             <div class="text-xs text-uppercase fw-600 text-muted mb-1">Category</div>
-            <div class="badge bg-primary">{{ supply.category.name }}</div>
+            <div class="status-neon status-neon-info">{{ supply.category.name }}</div>
           </div>
           <div class="col-6">
             <div class="text-xs text-uppercase fw-600 text-muted mb-1">Supplier</div>
@@ -69,11 +69,11 @@
             <div class="text-xs text-uppercase fw-600 text-muted mb-1">Stock Status</div>
             <div>
               {% if supply.current_stock == 0 %}
-                <span class="badge bg-danger">Out of Stock</span>
+                <span class="status-neon status-neon-danger">Out of Stock</span>
               {% elif supply.is_low_stock %}
-                <span class="badge bg-warning text-dark">Low</span>
+                <span class="status-neon status-neon-warning">Low</span>
               {% else %}
-                <span class="badge bg-success">In Stock</span>
+                <span class="status-neon status-neon-success">In Stock</span>
               {% endif %}
             </div>
           </div>
@@ -119,7 +119,7 @@
                   <tr>
                     <td><small class="text-secondary">{{ m.movement_date|date:"M d, Y H:i" }}</small></td>
                     <td>
-                      <span class="badge {% if m.movement_type == 'IN' %}bg-success{% elif m.movement_type == 'OUT' %}bg-danger{% elif m.movement_type == 'ADJUSTMENT' %}bg-info{% else %}bg-secondary{% endif %}">
+                      <span class="status-neon {% if m.movement_type == 'IN' %}status-neon-success{% elif m.movement_type == 'OUT' %}status-neon-danger{% elif m.movement_type == 'ADJUSTMENT' %}status-neon-info{% else %}status-neon-primary{% endif %}">
                         {{ m.get_movement_type_display }}
                       </span>
                     </td>

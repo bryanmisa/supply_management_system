@@ -52,7 +52,7 @@
                     <div class="xsmall text-muted">SKU: {{ item.supply.sku }}</div>
                 </td>
                 <td>
-                    <span class="badge bg-secondary-subtle text-secondary small py-1 px-2 border border-white border-opacity-10">
+                    <span class="status-neon status-neon-info">
                         {{ item.supply.category.name }}
                     </span>
                 </td>
@@ -68,11 +68,11 @@
                 </td>
                 <td class="text-center">
                     {% if item.supply.current_stock < item.supply.minimum_stock %}
-                        <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 py-1 px-2 w-75">
+                        <span class="status-neon status-neon-danger">
                             <i class="bi bi-exclamation-octagon me-1"></i> Depleted
                         </span>
                     {% else %}
-                        <span class="badge bg-success-subtle text-success border border-success border-opacity-25 py-1 px-2 w-75">
+                        <span class="status-neon status-neon-success">
                             <i class="bi bi-shield-check me-1"></i> Nominal
                         </span>
                     {% endif %}

@@ -133,10 +133,10 @@
                                 <div class="text-secondary small">{{ req.customer_email }}</div>
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-secondary">{{ req.items.count }} units</span>
+                                <span class="status-neon status-neon-info">{{ req.items.count }} units</span>
                             </td>
                             <td>
-                                <span class="badge {% if req.status == 'PENDING' %}bg-warning{% elif req.status == 'APPROVED' %}bg-info{% elif req.status == 'OUT_FOR_DELIVERY' %}bg-primary{% elif req.status == 'DELIVERED' %}bg-success{% else %}bg-secondary{% endif %}">
+                                <span class="status-neon {% if req.status == 'PENDING' %}status-neon-warning{% elif req.status == 'APPROVED' %}status-neon-info{% elif req.status == 'OUT_FOR_DELIVERY' %}status-neon-primary{% elif req.status == 'DELIVERED' %}status-neon-success{% else %}status-neon-secondary{% endif %}">
                                     {{ req.get_status_display }}
                                 </span>
                             </td>

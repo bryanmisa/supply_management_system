@@ -90,7 +90,7 @@
                                         <br><small>{{ supply.sku }}</small>
                                     </td>
                                     <td>
-                                        <span class="badge {% if supply.current_stock == 0 %}bg-danger{% else %}bg-warning{% endif %}">
+                                        <span class="status-neon {% if supply.current_stock == 0 %}status-neon-danger{% else %}status-neon-warning{% endif %}">
                                             {{ supply.current_stock }}
                                         </span>
                                     </td>
@@ -138,7 +138,7 @@
                                         </a>
                                     </td>
                                     <td>
-                                        <span class="badge {% if movement.movement_type == 'IN' %}bg-success{% elif movement.movement_type == 'OUT' %}bg-danger{% else %}bg-info{% endif %}">
+                                        <span class="status-neon {% if movement.movement_type == 'IN' %}status-neon-success{% elif movement.movement_type == 'OUT' %}status-neon-danger{% else %}status-neon-info{% endif %}">
                                             {{ movement.get_movement_type_display }}
                                         </span>
                                     </td>

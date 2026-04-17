@@ -50,7 +50,7 @@
       <div class="metric-label">Total Supplies</div>
       <div class="metric-value">{{ stats.total_supplies }}</div>
       <div class="mt-2">
-          <span class="badge bg-warning text-dark" style="font-size: 0.65rem;">{{ stats.low_stock_items }} Low Stock</span>
+          <span class="status-neon status-neon-warning" style="font-size: 0.65rem;">{{ stats.low_stock_items }} Low Stock</span>
       </div>
       <i class="bi bi-box-seam metric-icon" style="color:var(--success);"></i>
     </div>
@@ -137,7 +137,7 @@
                     </a>
                 </td>
                 <td>
-                  <span class="badge {% if movement.movement_type == 'IN' %}bg-success{% elif movement.movement_type == 'OUT' %}bg-danger{% else %}bg-info{% endif %}">
+                  <span class="status-neon {% if movement.movement_type == 'IN' %}status-neon-success{% elif movement.movement_type == 'OUT' %}status-neon-danger{% else %}status-neon-info{% endif %}">
                     {{ movement.get_movement_type_display }}
                   </span>
                 </td>
@@ -195,9 +195,9 @@
               </td>
               <td>
                 {% if supply.is_active %}
-                  <span class="badge bg-success">Active</span>
+                  <span class="status-neon status-neon-success">Active</span>
                 {% else %}
-                  <span class="badge bg-secondary">Inactive</span>
+                  <span class="status-neon status-neon-info">Inactive</span>
                 {% endif %}
               </td>
             </tr>
