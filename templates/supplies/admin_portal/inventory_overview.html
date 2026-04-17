@@ -1,94 +1,115 @@
 {% extends 'base.html' %}
-
-{% block title %}Inventory Overview - Administrator{% endblock %}
+{% block title %}Inventory Statistics - Admin Intelligence{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
-    <li class="breadcrumb-item active">Inventory Overview</li>
+    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Control</a></li>
+    <li class="breadcrumb-item active">Operational Overview</li>
   </ol>
 </nav>
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h2"><i class="bi bi-box-seam"></i> Inventory Overview</h1>
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4 fade-in">
+    <div>
+        <h1 class="h3 mb-1 fw-700 text-white">
+            <i class="bi bi-cpu-fill me-2" style="color:var(--primary);"></i>
+            Inventory Intelligence Matrix
+        </h1>
+        <p class="mb-0 text-secondary small">Comprehensive analytical oversight of physical asset flows and valuation</p>
+    </div>
 </div>
 
-<!-- Filters -->
-<div class="card mb-4">
+<!-- Filters & Intelligence Controls -->
+<div class="card shadow-sm border mb-4 fade-in">
+  <div class="card-header py-3 bg-black bg-opacity-10">
+      <span class="fw-700 small text-uppercase" style="letter-spacing: 0.1em;"><i class="bi bi-funnel me-2 text-primary"></i>Analytical Filters</span>
+  </div>
   <div class="card-body">
     <form method="GET" class="row g-3">
       <div class="col-md-3">
-        <input type="text" name="search" class="form-control" placeholder="Search name, SKU..." value="{{ search_query }}">
+        <label class="xsmall text-uppercase fw-700 text-secondary mb-2 d-block">Asset Search</label>
+        <div class="input-group">
+            <span class="input-group-text bg-black border-white border-opacity-10 text-secondary"><i class="bi bi-search"></i></span>
+            <input type="text" name="search" class="form-control" placeholder="Search ID, SKU, Name..." value="{{ search_query }}">
+        </div>
       </div>
       <div class="col-md-3">
+        <label class="xsmall text-uppercase fw-700 text-secondary mb-2 d-block">Classification Sector</label>
         <select name="category" class="form-select">
           <option value="">All Categories</option>
           {% for cat in categories %}
-            <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+            <option value="{{ cat.id }}" {% if selected_category|stringformat:"s" == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="col-md-3">
+        <label class="xsmall text-uppercase fw-700 text-secondary mb-2 d-block">Threshold Status</label>
         <select name="status" class="form-select">
-          <option value="">All Status</option>
-          <option value="low" {% if selected_status == 'low' %}selected{% endif %}>Low Stock</option>
-          <option value="out" {% if selected_status == 'out' %}selected{% endif %}>Out of Stock</option>
-          <option value="overstock" {% if selected_status == 'overstock' %}selected{% endif %}>Overstock</option>
+          <option value="">All Fulfillment States</option>
+          <option value="low" {% if selected_status == 'low' %}selected{% endif %}>Critical Threshold (Low)</option>
+          <option value="out" {% if selected_status == 'out' %}selected{% endif %}>Stockout (Zero)</option>
+          <option value="overstock" {% if selected_status == 'overstock' %}selected{% endif %}>Surplus (Overstock)</option>
         </select>
       </div>
-      <div class="col-md-3">
-        <button type="submit" class="btn btn-primary w-100">Filter</button>
+      <div class="col-md-3 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100 fw-600">
+            <i class="bi bi-sliders me-2"></i> Update View
+        </button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Supplies Table -->
-<div class="card shadow">
-  <div class="card-body">
+<!-- Intelligence Data Table -->
+<div class="card shadow-sm border fade-in">
+  <div class="card-body p-0">
     {% if page_obj %}
       <div class="table-responsive">
-        <table class="table table-hover">
-          <thead class="table-light">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
             <tr>
-              <th>Name</th>
-              <th>SKU</th>
-              <th>Category</th>
-              <th>Supplier</th>
-              <th class="text-end">Current</th>
-              <th class="text-end">Min/Max</th>
-              <th class="text-end">Unit Price</th>
-              <th class="text-end">Total Value</th>
-              <th>Status</th>
+              <th>Asset Identifier</th>
+              <th>Sector</th>
+              <th>Partner</th>
+              <th class="text-end">Balance</th>
+              <th class="text-end">Range (M/M)</th>
+              <th class="text-end">Unit Value</th>
+              <th class="text-end">Global Value</th>
+              <th class="text-center">Lifecycle</th>
             </tr>
           </thead>
           <tbody>
             {% for supply in page_obj %}
               <tr>
                 <td>
-                  <a href="{% url 'supply_detail' supply.id %}" class="text-decoration-none">
+                  <a href="{% url 'supply_detail' supply.id %}" class="text-decoration-none fw-700 text-white">
                     {{ supply.name }}
                   </a>
+                  <div class="xsmall text-muted mt-1">SKU: {{ supply.sku }}</div>
                 </td>
-                <td><code>{{ supply.sku }}</code></td>
-                <td>{{ supply.category.name }}</td>
-                <td>{{ supply.supplier.name }}</td>
-                <td class="text-end"><strong>{{ supply.current_stock }}</strong></td>
-                <td class="text-end"><small>{{ supply.minimum_stock }}/{{ supply.maximum_stock }}</small></td>
-                <td class="text-end">${{ supply.unit_price|floatformat:2 }}</td>
-                <td class="text-end">${{ supply.calculated_total_value|floatformat:2 }}</td>
-                <td>
+                <td class="small text-secondary">{{ supply.category.name }}</td>
+                <td class="small text-secondary fw-500">{{ supply.supplier.name|truncatechars:20 }}</td>
+                <td class="text-end">
+                    <span class="fw-800 text-white h6 mb-0">{{ supply.current_stock }}</span>
+                    <div class="xsmall text-muted">{{ supply.unit_of_measure }}</div>
+                </td>
+                <td class="text-end text-secondary fw-500 small">
+                    {{ supply.minimum_stock }} <i class="bi bi-dash hsmall"></i> {{ supply.maximum_stock }}
+                </td>
+                <td class="text-end text-secondary small">${{ supply.unit_price|floatformat:2 }}</td>
+                <td class="text-end fw-700 text-white">${{ supply.calculated_total_value|floatformat:2 }}</td>
+                <td class="text-center">
                   {% if supply.current_stock == 0 %}
-                    <span class="badge bg-danger">Out</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 py-1 px-3 w-75">STOCKOUT</span>
                   {% elif supply.is_low_stock %}
-                    <span class="badge bg-warning">Low</span>
+                    <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 py-1 px-3 w-75">CRITICAL</span>
                   {% elif supply.current_stock > supply.maximum_stock %}
-                    <span class="badge bg-info">Over</span>
+                    <span class="badge bg-info-subtle text-info border border-info border-opacity-25 py-1 px-3 w-75">SURPLUS</span>
                   {% else %}
-                    <span class="badge bg-success">OK</span>
+                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25 py-1 px-3 w-75">NOMINAL</span>
                   {% endif %}
                 </td>
               </tr>
@@ -98,10 +119,21 @@
       </div>
 
       <!-- Pagination -->
-      {% include "partials/pagination.html" %}
+      <div class="p-4 border-top border-white border-opacity-10 bg-black bg-opacity-10 d-flex justify-content-center">
+          {% include "partials/pagination.html" %}
+      </div>
     {% else %}
-      <p class="text-muted mb-0">No supplies found</p>
+      <div class="text-center py-5">
+          <i class="bi bi-search fs-1 opacity-10"></i>
+          <p class="text-secondary mt-3">No assets identified within current filter protocol.</p>
+      </div>
     {% endif %}
   </div>
 </div>
+
+<style>
+.xsmall { font-size: 0.725rem; }
+.hsmall { font-size: 0.6rem; vertical-align: middle; }
+.card { background-color: var(--card-bg); }
+</style>
 {% endblock %}

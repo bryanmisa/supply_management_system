@@ -1,64 +1,97 @@
 {% extends 'supplies/reports/reports_base.html' %}
 
-{% block report_title %}Supply Usage Report{% endblock %}
+{% block report_title %}Supply Consumption Analytics{% endblock %}
 
 {% block report_content %}
-<div class="mb-3">
-    <form method="get" class="row g-3">
+<!-- Filter Section -->
+<div class="bg-black bg-opacity-25 rounded p-3 mb-4 border border-white border-opacity-10 shadow-sm fade-in">
+    <form method="get" class="row g-3 align-items-end">
         <div class="col-md-3">
-            <label for="start_date" class="form-label">Start Date</label>
-            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+            <label for="start_date" class="form-label text-secondary small fw-600 text-uppercase">Start Point</label>
+            <input type="date" class="form-control shadow-inner" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
         </div>
         <div class="col-md-3">
-            <label for="end_date" class="form-label">End Date</label>
-            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+            <label for="end_date" class="form-label text-secondary small fw-600 text-uppercase">End Point</label>
+            <input type="date" class="form-control shadow-inner" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
         </div>
-        <div class="col-md-3">
-            <label for="category" class="form-label">Category (Optional)</label>
-            <select class="form-select" id="category" name="category">
-                <option value="">All Categories</option>
+        <div class="col-md-4">
+            <label for="category" class="form-label text-secondary small fw-600 text-uppercase">Sector Analysis</label>
+            <select class="form-select shadow-inner" id="category" name="category">
+                <option value="">All Operational Sectors</option>
                 {% for cat in categories %}
                 <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>{{ cat.name }}</option>
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-3">
-            <label class="form-label">&nbsp;</label>
-            <button type="submit" class="btn btn-primary d-block">Generate Report</button>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100 fw-600 shadow-sm">
+                <i class="bi bi-graph-up-arrow me-1"></i> Analyze
+            </button>
         </div>
     </form>
 </div>
 
-<div class="table-responsive">
-    <table class="table table-striped">
+<!-- Usage Metrics Table -->
+<div class="table-responsive fade-in">
+    <table class="table table-hover align-middle mb-0">
         <thead>
             <tr>
-                <th>Supply</th>
-                <th>Category</th>
-                <th>Total Usage</th>
-                <th>Average Monthly Usage</th>
-                <th>Current Stock</th>
-                <th>Status</th>
+                <th>Asset Descriptor</th>
+                <th>Classification</th>
+                <th class="text-end">Total Flux</th>
+                <th class="text-end">Monthly Velocity</th>
+                <th class="text-end">Current Buffer</th>
+                <th class="text-center">Lifecycle Status</th>
             </tr>
         </thead>
         <tbody>
             {% for item in usage_data %}
             <tr>
-                <td>{{ item.supply.name }}</td>
-                <td>{{ item.supply.category.name }}</td>
-                <td>{{ item.total_usage }}</td>
-                <td>{{ item.avg_monthly_usage|floatformat:2 }}</td>
-                <td>{{ item.supply.current_stock }}</td>
                 <td>
-                    {% if item.supply.current_stock < item.supply.reorder_point %}
-                    <span class="badge bg-danger">Low Stock</span>
+                    <div class="fw-700 text-white">{{ item.supply.name }}</div>
+                    <div class="xsmall text-muted">SKU: {{ item.supply.sku }}</div>
+                </td>
+                <td>
+                    <span class="badge bg-secondary-subtle text-secondary small py-1 px-2 border border-white border-opacity-10">
+                        {{ item.supply.category.name }}
+                    </span>
+                </td>
+                <td class="text-end fw-600">{{ item.total_usage }} units</td>
+                <td class="text-end text-white">
+                    <span class="fw-800">{{ item.avg_monthly_usage|floatformat:2 }}</span>
+                    <span class="xsmall text-secondary">/mo</span>
+                </td>
+                <td class="text-end">
+                    <div class="fw-700 {% if item.supply.current_stock < item.supply.minimum_stock %}text-danger{% else %}text-white{% endif %}">
+                        {{ item.supply.current_stock }}
+                    </div>
+                </td>
+                <td class="text-center">
+                    {% if item.supply.current_stock < item.supply.minimum_stock %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 py-1 px-2 w-75">
+                            <i class="bi bi-exclamation-octagon me-1"></i> Depleted
+                        </span>
                     {% else %}
-                    <span class="badge bg-success">OK</span>
+                        <span class="badge bg-success-subtle text-success border border-success border-opacity-25 py-1 px-2 w-75">
+                            <i class="bi bi-shield-check me-1"></i> Nominal
+                        </span>
                     {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-5">
+                    <i class="bi bi-bar-chart fs-1 opacity-10"></i>
+                    <p class="mt-2 text-secondary">No consumption metrics identified for the specified parameters.</p>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<style>
+.xsmall { font-size: 0.75rem; }
+.shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4); }
+</style>
 {% endblock %}

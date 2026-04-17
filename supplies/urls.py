@@ -9,8 +9,14 @@ urlpatterns = [
     path('', views.unified_dashboard, name='dashboard'),
     path('manager-dashboard/', views.dashboard, name='manager_dashboard'),
     
+    # Authentication
+    # The unified login and register routes handle entry for all systems (Admin, Manager, Customer)
+    path('register/', views.unified_register, name='register'),
+    path('login/', views.unified_login, name='login'),
+    path('logout/', views.unified_logout, name='logout'),
+
     # Admin Portal
-    path('admin_portal/login/', views.AdminLoginView.as_view(), name='admin_login'),
+    # These routes manage users, global settings, and view high-level logs.
     path('admin_portal/dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin_portal/users/', views.admin_user_management, name='admin_user_management'),
     path('admin_portal/users/create/', views.admin_user_create, name='admin_user_create'),
@@ -83,16 +89,10 @@ urlpatterns = [
     path('reports/low-stock/', views.low_stock_report, name='low_stock_report'),
 
     # API
+    # Endpoints intended for synchronous fetch calls from the frontend
     path('api/supplies/search/', views.supply_search_api, name='supply_search_api'),
 
-    # Authentication - separate login pages
-    path('manager/login/', views.ManagerLoginView.as_view(), name='manager_login'),
-    path('customer/login/', views.CustomerLoginView.as_view(), name='customer_login'),
-
-    # Registration + unified auth kept for compatibility
+    # Registration endpoints mapped directly to roles, keeping URLs separate for clarity
     path('customer/register/', views.customer_register, name='customer_register'),
     path('manager/register/', views.manager_register, name='manager_register'),
-    path('register/', views.unified_register, name='register'),
-    path('login/', views.unified_login, name='login'),
-    path('logout/', views.unified_logout, name='logout'),
 ]

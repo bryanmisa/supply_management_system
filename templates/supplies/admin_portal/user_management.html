@@ -12,64 +12,79 @@
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h2"><i class="bi bi-people"></i> User Management</h1>
-  <a href="{% url 'admin_user_create' %}" class="btn btn-success">
-    <i class="bi bi-person-plus"></i> Create User
-  </a>
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1 fw-700" style="letter-spacing:-0.02em;">
+            <i class="bi bi-people me-2" style="color:var(--primary);"></i>User Management
+        </h1>
+        <p class="mb-0" style="color:var(--text-secondary); font-size:0.875rem;">
+            Control access, roles, and security for system users
+        </p>
+    </div>
+    <a href="{% url 'admin_user_create' %}" class="btn btn-primary">
+        <i class="bi bi-person-plus me-1"></i> Create User
+    </a>
 </div>
 
 <!-- Filters -->
-<div class="card mb-4">
-  <div class="card-body">
+<div class="search-form mb-4">
     <form method="GET" class="row g-3">
-      <div class="col-md-4">
-        <input type="text" name="search" class="form-control" placeholder="Search username, email, name..." value="{{ search_query }}">
+      <div class="col-md-6">
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" name="search" class="form-control" placeholder="Search by username, email, or name..." value="{{ search_query }}">
+        </div>
       </div>
-      <div class="col-md-4">
+      <div class="col-md-3">
         <select name="role" class="form-select">
           <option value="">All Roles</option>
           <option value="MANAGER" {% if selected_role == 'MANAGER' %}selected{% endif %}>Manager</option>
           <option value="CUSTOMER" {% if selected_role == 'CUSTOMER' %}selected{% endif %}>Customer</option>
         </select>
       </div>
-      <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100">Filter</button>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
       </div>
     </form>
-  </div>
 </div>
 
 <!-- Users Table -->
-<div class="card shadow">
-  <div class="card-body">
+<div class="card shadow fade-in">
+  <div class="card-header d-flex align-items-center justify-content-between">
+    <span class="fw-600">User Directory</span>
+  </div>
+  <div class="card-body p-0">
     {% if page_obj %}
       <div class="table-responsive">
-        <table class="table table-hover">
-          <thead class="table-light">
+        <table class="table table-hover mb-0">
+          <thead>
             <tr>
-              <th>Username</th>
-              <th>Name</th>
+              <th>User Identity</th>
               <th>Email</th>
-              <th>Role</th>
+              <th class="text-center">Role</th>
               <th>Status</th>
-              <th>Joined</th>
-              <th>Actions</th>
+              <th>Joined Date</th>
+              <th class="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for user in page_obj %}
               <tr>
-                <td><strong>{{ user.username }}</strong></td>
-                <td>{{ user.get_full_name|default:"—" }}</td>
-                <td><small>{{ user.email }}</small></td>
                 <td>
+                    <div class="fw-600 text-white" style="font-size:1rem;">{{ user.username }}</div>
+                    <div class="text-secondary small">{{ user.get_full_name|default:"No full name set" }}</div>
+                </td>
+                <td>
+                    <div class="small text-secondary fw-500">{{ user.email }}</div>
+                </td>
+                <td class="text-center">
                   {% if user.is_superuser %}
-                    <span class="badge bg-danger">Superuser</span>
+                    <span class="badge bg-danger">Principal Admin</span>
                   {% elif user.profile.is_manager %}
                     <span class="badge bg-primary">Manager</span>
                   {% else %}
-                    <span class="badge bg-secondary">Customer</span>
+                    <span class="badge bg-secondary">Client / Customer</span>
                   {% endif %}
                 </td>
                 <td>
@@ -79,26 +94,30 @@
                     <span class="badge bg-secondary">Inactive</span>
                   {% endif %}
                 </td>
-                <td><small>{{ user.date_joined|date:"M d, Y" }}</small></td>
                 <td>
-                   <a href="{% url 'admin_user_detail' user.id %}" class="btn btn-sm btn-outline-primary" title="Edit">
-                     <i class="bi bi-pencil"></i>
-                   </a>
-                   <form method="post" action="{% url 'admin_user_reset_password' user.id %}" style="display:inline;">
-                     {% csrf_token %}
-                     <button type="submit" class="btn btn-sm btn-outline-warning" title="Reset Password" onclick="return confirm('Reset password for {{ user.username }}?')">
-                       <i class="bi bi-key"></i>
-                     </button>
-                   </form>
-                   {% if not user.is_superuser and user.is_active %}
-                     <form method="post" action="{% url 'admin_user_deactivate' user.id %}" style="display:inline;">
-                       {% csrf_token %}
-                       <button type="submit" class="btn btn-sm btn-outline-danger" title="Deactivate" onclick="return confirm('Deactivate user?')">
-                         <i class="bi bi-x-circle"></i>
-                       </button>
-                     </form>
-                   {% endif %}
-                 </td>
+                    <small class="text-secondary">{{ user.date_joined|date:"M d, Y" }}</small>
+                </td>
+                <td class="text-center">
+                    <div class="btn-group btn-group-sm">
+                        <a href="{% url 'admin_user_detail' user.id %}" class="btn btn-secondary" title="Edit Profile">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{% url 'admin_user_reset_password' user.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary" title="Reset Access" onclick="return confirm('Reset password for {{ user.username }}?')">
+                                <i class="bi bi-key text-warning"></i>
+                            </button>
+                        </form>
+                        {% if not user.is_superuser and user.is_active %}
+                            <form method="post" action="{% url 'admin_user_deactivate' user.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-secondary" title="Revoke Access" onclick="return confirm('Suspend user access?')">
+                                    <i class="bi bi-slash-circle text-danger"></i>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </td>
               </tr>
             {% endfor %}
           </tbody>
@@ -106,9 +125,15 @@
       </div>
 
       <!-- Pagination -->
-      {% include "partials/pagination.html" %}
+      <div class="card-footer px-3 py-3 border-0">
+          {% include "partials/pagination.html" %}
+      </div>
     {% else %}
-      <p class="text-muted mb-0">No users found</p>
+      <div class="text-center py-5">
+          <i class="bi bi-people" style="font-size: 3.5rem; opacity: 0.15;"></i>
+          <h5 class="mt-3">No matching accounts</h5>
+          <p class="text-secondary small">Try a different search term or check all roles.</p>
+      </div>
     {% endif %}
   </div>
 </div>

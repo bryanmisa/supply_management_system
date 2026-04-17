@@ -13,42 +13,60 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-  <div class="col-lg-6">
-    <div class="card mb-4 shadow-sm">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Supply Information</h5>
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1 fw-700" style="letter-spacing:-0.02em;">
+            <i class="bi bi-info-circle me-2" style="color:var(--primary);"></i>Supply Details
+        </h1>
+        <p class="mb-0" style="color:var(--text-secondary); font-size:0.875rem;">
+            SKU: <code class="text-primary">{{ supply.sku }}</code>
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'supply_edit' supply.id %}" class="btn btn-secondary">
+        <i class="bi bi-pencil me-1"></i> Edit
+      </a>
+      <a href="{% url 'stock_movement' supply.id %}" class="btn btn-primary">
+        <i class="bi bi-arrow-left-right me-1"></i> Movement
+      </a>
+    </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <!-- Info Card -->
+    <div class="card mb-4 h-100">
+      <div class="card-header d-flex justify-content-between align-items-center bg-transparent">
+        <span class="fw-600">General Information</span>
         {% if supply.is_low_stock %}
-          <span class="badge bg-warning text-dark">Low Stock</span>
+          <span class="badge bg-warning text-dark">Low Stock Alert</span>
         {% endif %}
       </div>
       <div class="card-body">
-        <h4 class="card-title mb-1">{{ supply.name }} <small class="text-muted">({{ supply.sku }})</small></h4>
+        <h4 class="mb-3 fw-700 text-white">{{ supply.name }}</h4>
+        
         {% if supply.description %}
-          <p class="text-muted">{{ supply.description }}</p>
+          <p class="text-secondary small mb-4">{{ supply.description }}</p>
         {% endif %}
-        <div class="row g-3">
+
+        <hr class="border-secondary opacity-25">
+
+        <div class="row g-4">
           <div class="col-6">
-            <div class="small text-muted">Category</div>
-            <div>{{ supply.category.name }}</div>
+            <div class="text-xs text-uppercase fw-600 text-muted mb-1">Category</div>
+            <div class="badge bg-primary">{{ supply.category.name }}</div>
           </div>
           <div class="col-6">
-            <div class="small text-muted">Supplier</div>
-            <div>{{ supply.supplier.name }}</div>
+            <div class="text-xs text-uppercase fw-600 text-muted mb-1">Supplier</div>
+            <div class="text-white fw-500">{{ supply.supplier.name }}</div>
           </div>
           <div class="col-6">
-            <div class="small text-muted">Unit Price</div>
-            <div>${{ supply.unit_price|floatformat:2 }} / {{ supply.unit_of_measure }}</div>
+            <div class="text-xs text-uppercase fw-600 text-muted mb-1">Price / Unit</div>
+            <div class="text-white fw-500">${{ supply.unit_price|floatformat:2 }} <small class="text-secondary">/ {{ supply.unit_of_measure }}</small></div>
           </div>
           <div class="col-6">
-            <div class="small text-muted">Stock</div>
-            <div>
-              <strong>{{ supply.current_stock }}</strong>
-              <small class="text-muted">(min {{ supply.minimum_stock }}, max {{ supply.maximum_stock }})</small>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="small text-muted">Status</div>
+            <div class="text-xs text-uppercase fw-600 text-muted mb-1">Stock Status</div>
             <div>
               {% if supply.current_stock == 0 %}
                 <span class="badge bg-danger">Out of Stock</span>
@@ -59,70 +77,73 @@
               {% endif %}
             </div>
           </div>
-          <div class="col-6">
-            <div class="small text-muted">Created</div>
-            <div>{{ supply.created_at|date:"M d, Y" }}</div>
-          </div>
+        </div>
+
+        <div class="mt-4 p-3 rounded-lg bg-black bg-opacity-25 border border-white border-opacity-10">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="text-xs text-uppercase fw-600 text-muted mb-1">Current Stock</div>
+                    <div class="h3 mb-0 fw-800 text-white">{{ supply.current_stock }}</div>
+                </div>
+                <div class="text-end">
+                    <div class="small text-secondary">Min: {{ supply.minimum_stock }}</div>
+                    <div class="small text-secondary">Max: {{ supply.maximum_stock }}</div>
+                </div>
+            </div>
         </div>
       </div>
     </div>
-
-    <div class="d-flex gap-2">
-      <a href="{% url 'supply_edit' supply.id %}" class="btn btn-outline-primary">
-        <i class="bi bi-pencil"></i> Edit Supply
-      </a>
-      <a href="{% url 'stock_movement' supply.id %}" class="btn btn-primary">
-        <i class="bi bi-arrow-left-right"></i> Record Stock Movement
-      </a>
-      <a href="{% url 'stock_adjustment' supply.id %}" class="btn btn-outline-secondary">
-        <i class="bi bi-sliders"></i> Adjust Stock
-      </a>
-    </div>
   </div>
 
-  <div class="col-lg-6">
-    <div class="card shadow-sm">
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Recent Stock Movements</h5>
-        <span class="text-muted small">Last 20</span>
+  <div class="col-lg-7">
+    <!-- History Card -->
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between align-items-center bg-transparent">
+        <span class="fw-600">Stock History</span>
+        <span class="text-muted small">Recent Activities</span>
       </div>
-      <div class="card-body">
+      <div class="card-body p-0">
         {% if movements %}
           <div class="table-responsive">
-            <table class="table table-striped align-middle">
-              <thead class="table-light">
+            <table class="table table-hover mb-0">
+              <thead>
                 <tr>
                   <th>Date</th>
                   <th>Type</th>
-                  <th class="text-end">Quantity</th>
-                  <th>Reason</th>
+                  <th class="text-end">Qty</th>
                   <th>Reference</th>
                 </tr>
               </thead>
               <tbody>
                 {% for m in movements %}
                   <tr>
-                    <td>{{ m.created_at|date:"M d, Y g:i A" }}</td>
+                    <td><small class="text-secondary">{{ m.movement_date|date:"M d, Y H:i" }}</small></td>
                     <td>
-                      <span class="badge bg-{% if m.movement_type == 'IN' %}success{% elif m.movement_type == 'OUT' %}danger{% elif m.movement_type == 'ADJUSTMENT' %}secondary{% else %}info{% endif %}">
-                        {{ m.movement_type }}
+                      <span class="badge {% if m.movement_type == 'IN' %}bg-success{% elif m.movement_type == 'OUT' %}bg-danger{% elif m.movement_type == 'ADJUSTMENT' %}bg-info{% else %}bg-secondary{% endif %}">
+                        {{ m.get_movement_type_display }}
                       </span>
                     </td>
-                    <td class="text-end">{{ m.quantity }}</td>
-                    <td>{{ m.reason|default:'—' }}</td>
-                    <td>{{ m.reference_number|default:'—' }}</td>
+                    <td class="text-end fw-600">{{ m.quantity }}</td>
+                    <td><small class="text-secondary">{{ m.reference_number|default:'—' }}</small></td>
                   </tr>
                 {% endfor %}
               </tbody>
             </table>
           </div>
         {% else %}
-          <div class="text-center py-4 text-muted">
-            <i class="bi bi-box"></i> No stock movements yet.
+          <div class="text-center py-5">
+            <i class="bi bi-clock-history" style="font-size: 3rem; opacity: 0.2;"></i>
+            <p class="mt-3 text-secondary mb-0">No history found for this item.</p>
           </div>
         {% endif %}
       </div>
     </div>
   </div>
+</div>
+
+<div class="mt-4">
+    <a href="{% url 'stock_adjustment' supply.id %}" class="btn btn-outline-secondary">
+        <i class="bi bi-sliders me-1"></i> Stock Adjustment
+    </a>
 </div>
 {% endblock %}

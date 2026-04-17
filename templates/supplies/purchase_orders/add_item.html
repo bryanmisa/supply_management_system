@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% block title %}Add Item - PO-{{ order.order_number }} - Supply Management System{% endblock %}
 
 {% block breadcrumb %}
@@ -16,98 +15,105 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card shadow">
+        <div class="card shadow border">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="bi bi-plus-circle"></i>
-                    Add Item to Purchase Order PO-{{ order.order_number }}
+                <h6 class="mb-0 fw-700">
+                    <i class="bi bi-plus-circle me-2 text-primary"></i>
+                    Procurement Line Item: PO-{{ order.order_number }}
                 </h6>
             </div>
-            <div class="card-body">
-                <!-- Order Info -->
-                <div class="alert alert-info">
-                    <strong>Supplier:</strong> {{ order.supplier.name }}<br>
-                    <strong>Status:</strong> <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+            <div class="card-body p-4">
+                <!-- Order Content Summary -->
+                <div class="bg-black bg-opacity-25 rounded p-3 mb-4 border border-white border-opacity-10">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded text-primary">
+                                <i class="bi bi-truck fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="text-secondary xsmall text-uppercase fw-600">Fulfillment Partner</div>
+                            <div class="fw-700 h5 mb-0">{{ order.supplier.name }}</div>
+                            <div class="badge bg-secondary-subtle text-secondary small mt-1">
+                                Status: {{ order.get_status_display }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <form method="post">
                     {% csrf_token %}
                     
-                    <div class="row">
+                    <div class="row g-4">
                         <!-- Supply Selection -->
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label for="{{ form.supply.id_for_label }}" class="form-label">
-                                    Supply Item <span class="text-danger">*</span>
+                                <label for="{{ form.supply.id_for_label }}" class="form-label text-secondary small fw-600 text-uppercase">
+                                    Inventory Specification <span class="text-danger">*</span>
                                 </label>
                                 {{ form.supply }}
                                 {% if form.supply.errors %}
-                                    <div class="text-danger small">{{ form.supply.errors }}</div>
+                                    <div class="text-danger xsmall mt-1">{{ form.supply.errors }}</div>
                                 {% endif %}
-                                <div class="form-text">Select an item from {{ order.supplier.name }}</div>
+                                <div class="text-secondary xsmall mt-1">Select valid inventory from this provider</div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="row">
+                        
                         <!-- Quantity -->
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="{{ form.quantity_ordered.id_for_label }}" class="form-label">
-                                    Quantity Ordered <span class="text-danger">*</span>
+                                <label for="{{ form.quantity_ordered.id_for_label }}" class="form-label text-secondary small fw-600 text-uppercase">
+                                    Order Quantity <span class="text-danger">*</span>
                                 </label>
                                 {{ form.quantity_ordered }}
                                 {% if form.quantity_ordered.errors %}
-                                    <div class="text-danger small">{{ form.quantity_ordered.errors }}</div>
+                                    <div class="text-danger xsmall mt-1">{{ form.quantity_ordered.errors }}</div>
                                 {% endif %}
-                                <div class="form-text">How many units to order</div>
+                                <div class="text-secondary xsmall mt-1">Total units requested</div>
                             </div>
                         </div>
                         
                         <!-- Unit Price -->
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="{{ form.unit_price.id_for_label }}" class="form-label">
-                                    Unit Price ($) <span class="text-danger">*</span>
+                                <label for="{{ form.unit_price.id_for_label }}" class="form-label text-secondary small fw-600 text-uppercase">
+                                    Unit Cost (USD) <span class="text-danger">*</span>
                                 </label>
                                 {{ form.unit_price }}
                                 {% if form.unit_price.errors %}
-                                    <div class="text-danger small">{{ form.unit_price.errors }}</div>
+                                    <div class="text-danger xsmall mt-1">{{ form.unit_price.errors }}</div>
                                 {% endif %}
-                                <div class="form-text">Price per unit from supplier</div>
+                                <div class="text-secondary xsmall mt-1">Negotiated price per unit</div>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Total Preview -->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="alert alert-light border">
-                                <strong>Total: $<span id="total-preview">0.00</span></strong>
-                            </div>
+                    <!-- Total Live Calculation -->
+                    <div class="mt-4 p-3 rounded border border-dashed border-white border-opacity-25 bg-black bg-opacity-10 fade-in">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-secondary small fw-600 text-uppercase">Line Item Subtotal</span>
+                            <span class="h4 mb-0 fw-800 text-white">$<span id="total-preview">0.00</span></span>
                         </div>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-12">
-                            <hr>
-                            <div class="d-flex justify-content-between">
-                                <a href="{% url 'purchase_order_detail' order.id %}" class="btn btn-secondary">
-                                    <i class="bi bi-arrow-left"></i>
-                                    Back to Order
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-plus-circle"></i>
-                                    Add Item
-                                </button>
-                            </div>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top border-white border-opacity-10">
+                        <a href="{% url 'purchase_order_detail' order.id %}" class="btn btn-secondary px-4">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Review
+                        </a>
+                        <button type="submit" class="btn btn-primary px-5">
+                            <i class="bi bi-cart-plus me-1"></i> Add to Purchase
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.xsmall { font-size: 0.75rem; }
+.border-dashed { border-style: dashed !important; }
+</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -121,18 +127,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const quantity = parseFloat(quantityInput.value) || 0;
         const price = parseFloat(priceInput.value) || 0;
         const total = quantity * price;
-        totalPreview.textContent = total.toFixed(2);
+        totalPreview.textContent = total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
     
     if (quantityInput && priceInput) {
         quantityInput.addEventListener('input', updateTotal);
         priceInput.addEventListener('input', updateTotal);
-        
-        // Update total on page load if values are already present
         updateTotal();
     }
     
-    // Auto-populate price from supply selection if available
     const supplySelect = document.getElementById('{{ form.supply.id_for_label }}');
     if (supplySelect) {
         supplySelect.addEventListener('change', function() {

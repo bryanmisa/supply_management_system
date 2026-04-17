@@ -1,6 +1,5 @@
-<!-- New template: templates/supplies/customer_portal/my_requests.html -->
 {% extends 'base.html' %}
-{% block title %}My Requests{% endblock %}
+{% block title %}My Requests - Supply Management System{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
@@ -12,56 +11,111 @@
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h4"><i class="bi bi-list-check"></i> My Requests</h1>
-  <a class="btn btn-primary" href="{% url 'customer_request_create' %}"><i class="bi bi-bag-plus"></i> New Request</a>
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4 fade-in">
+    <div>
+        <h1 class="h3 mb-1 fw-700 text-white">
+            <i class="bi bi-clock-history me-2" style="color:var(--primary);"></i>My Request Pipeline
+        </h1>
+        <p class="mb-0 text-secondary small">Real-time tracking of your inventory procurement requests</p>
+    </div>
+    <a href="{% url 'customer_request_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> New Request
+    </a>
 </div>
 
-<div class="card shadow">
-  <div class="card-body">
-    {% if requests %}
-      <div class="table-responsive">
-        <table class="table align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>Request #</th>
-              <th>Status</th>
-              <th>Items</th>
-              <th>Created</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for r in requests %}
-              <tr>
-                <td><strong>{{ r.request_number }}</strong></td>
-                <td>
-                  <span class="badge bg-{% if r.status == 'PENDING' %}warning{% elif r.status == 'APPROVED' %}info{% elif r.status == 'OUT_FOR_DELIVERY' %}primary{% elif r.status == 'DELIVERED' %}success{% else %}secondary{% endif %}">
-                    {{ r.get_status_display }}
-                  </span>
-                </td>
-                <td>
-                  {% for it in r.items.all %}
-                    <div>{{ it.supply.name }} x {{ it.quantity_requested }}</div>
-                  {% empty %}<em>—</em>{% endfor %}
-                </td>
-                <td><small>{{ r.created_at|date:"M d, Y H:i" }}</small></td>
-                <td class="text-end">
-                  <a class="btn btn-sm btn-outline-primary" href="{% url 'customer_request_detail_mine' r.id %}">
-                    <i class="bi bi-eye"></i> View
-                  </a>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <div class="text-center text-muted py-4">
-        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-        <p class="mt-2 mb-0">You have no requests yet.</p>
-      </div>
-    {% endif %}
-  </div>
+<!-- Requests Table Card -->
+<div class="card shadow-sm border fade-in">
+    <div class="card-header d-flex align-items-center justify-content-between py-3">
+        <span class="fw-700">
+            <i class="bi bi-list-stars me-2 text-primary"></i>Submission History
+        </span>
+    </div>
+    <div class="card-body p-0">
+        {% if requests %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Protocol ID</th>
+                            <th>Fulfillment Status</th>
+                            <th>Resource Matrix</th>
+                            <th>Submission Timeline</th>
+                            <th class="text-center">Operations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in requests %}
+                        <tr>
+                            <td>
+                                <div class="fw-800 text-white h6 mb-0">#{{ r.request_number }}</div>
+                                <div class="xsmall text-secondary mt-1">Order UUID: {{ r.id|truncatechars:12 }}</div>
+                            </td>
+                            <td>
+                                {% if r.status == 'PENDING' %}
+                                    <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 py-1 px-3">
+                                        <i class="bi bi-hourglass-split me-1"></i> Awaiting Review
+                                    </span>
+                                {% elif r.status == 'APPROVED' %}
+                                    <span class="badge bg-info-subtle text-info border border-info border-opacity-25 py-1 px-3">
+                                        <i class="bi bi-check2-circle me-1"></i> Authenticated
+                                    </span>
+                                {% elif r.status == 'OUT_FOR_DELIVERY' %}
+                                    <span class="badge bg-primary-subtle text-primary border border-primary border-opacity-25 py-1 px-3">
+                                        <i class="bi bi-truck me-1"></i> In Transit
+                                    </span>
+                                {% elif r.status == 'DELIVERED' %}
+                                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25 py-1 px-3">
+                                        <i class="bi bi-house-check me-1"></i> Fulfilled
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-secondary-subtle text-secondary border border-white border-opacity-10 py-1 px-3">
+                                        {{ r.get_status_display }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3">
+                                <div class="resources-preview">
+                                    {% for it in r.items.all|slice:":2" %}
+                                        <div class="d-flex align-items-center gap-2 mb-1">
+                                            <span class="bg-primary bg-opacity-10 text-primary px-2 rounded fw-600 xsmall">{{ it.quantity_requested }}</span>
+                                            <span class="text-secondary small">{{ it.supply.name|truncatechars:20 }}</span>
+                                        </div>
+                                    {% endfor %}
+                                    {% if r.items.count > 2 %}
+                                        <div class="xsmall text-muted mt-1">+ {{ r.items.count|add:"-2" }} additional resources</div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="small fw-500 text-white">{{ r.created_at|date:"F d, Y" }}</div>
+                                <div class="xsmall text-secondary">{{ r.created_at|date:"H:i" }} server time</div>
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'customer_request_detail_mine' r.id %}" class="btn btn-sm btn-secondary shadow-sm">
+                                    <i class="bi bi-eye me-1"></i> Analysis
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 opacity-10"></i>
+                <h5 class="mt-3 fw-700">No requests identified</h5>
+                <p class="text-secondary small mx-auto" style="max-width: 350px;">You haven't initiated any inventory requests in this period. Create a new request to begin.</p>
+                <a href="{% url 'customer_request_create' %}" class="btn btn-primary mt-3">
+                    <i class="bi bi-plus-circle me-1"></i> Initialize Request
+                </a>
+            </div>
+        {% endif %}
+    </div>
 </div>
+
+<style>
+.xsmall { font-size: 0.725rem; }
+.resources-preview { min-width: 200px; }
+</style>
 {% endblock %}

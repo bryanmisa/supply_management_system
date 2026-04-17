@@ -1,5 +1,4 @@
 {% extends 'base.html' %}
-
 {% block title %}Receive Item - PO-{{ order.order_number }} - Supply Management System{% endblock %}
 
 {% block breadcrumb %}
@@ -15,57 +14,77 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card shadow">
+    <div class="col-lg-10 col-xl-8">
+        <div class="card shadow border">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="bi bi-box-arrow-in-down"></i>
-                    Receive Item - {{ item.supply.name }}
+                <h6 class="mb-0 fw-700">
+                    <i class="bi bi-box-arrow-in-down me-2 text-primary"></i>
+                    Receive Inventory: {{ item.supply.name }}
                 </h6>
             </div>
-            <div class="card-body">
-                <!-- Order and Item Info -->
-                <div class="row mb-4">
+            <div class="card-body p-4">
+                <!-- Context row -->
+                <div class="row g-4 mb-4">
                     <div class="col-md-6">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h6 class="card-title">Purchase Order</h6>
-                                <p class="mb-1"><strong>PO Number:</strong> {{ order.order_number }}</p>
-                                <p class="mb-1"><strong>Supplier:</strong> {{ order.supplier.name }}</p>
-                                <p class="mb-0"><strong>Status:</strong> 
-                                    <span class="badge bg-primary">{{ order.get_status_display }}</span>
-                                </p>
+                        <div class="h-100 p-3 rounded border border-white border-opacity-10 bg-black bg-opacity-25">
+                            <div class="text-secondary small fw-600 text-uppercase mb-2">Order Context</div>
+                            <div class="d-flex flex-column gap-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-secondary small">PO Number:</span>
+                                    <span class="fw-600">#{{ order.order_number }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-secondary small">Partner:</span>
+                                    <span class="fw-600">{{ order.supplier.name }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-secondary small">Current Status:</span>
+                                    <span class="badge bg-primary-subtle text-primary small py-0 px-2">{{ order.get_status_display }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="card bg-light">
-                            <div class="card-body">
-                                <h6 class="card-title">Item Details</h6>
-                                <p class="mb-1"><strong>Item:</strong> {{ item.supply.name }}</p>
-                                <p class="mb-1"><strong>Category:</strong> {{ item.supply.category.name }}</p>
-                                <p class="mb-1"><strong>Ordered:</strong> {{ item.quantity_ordered }} units</p>
-                                <p class="mb-0"><strong>Already Received:</strong> {{ item.quantity_received }} units</p>
+                        <div class="h-100 p-3 rounded border border-white border-opacity-10 bg-black bg-opacity-25">
+                            <div class="text-secondary small fw-600 text-uppercase mb-2">Item Specifications</div>
+                            <div class="d-flex flex-column gap-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-secondary small">Category:</span>
+                                    <span class="fw-600">{{ item.supply.category.name }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-secondary small">Quantity Ordered:</span>
+                                    <span class="fw-600">{{ item.quantity_ordered }} units</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-secondary small">Already Fulfilled:</span>
+                                    <span class="text-success fw-600">{{ item.quantity_received }} units</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Receiving Status -->
-                <div class="alert alert-info">
-                    <h6><i class="bi bi-info-circle"></i> Receiving Status</h6>
-                    <div class="row">
+                <!-- Live Metrics Bar -->
+                <div class="mb-5">
+                    <div class="row g-2">
                         <div class="col-md-4">
-                            <strong>Remaining to Receive:</strong><br>
-                            <span class="h5 text-primary">{{ item.remaining_quantity }} units</span>
+                            <div class="metric-card border border-white border-opacity-10 bg-primary bg-opacity-10 p-3 h-100 text-center">
+                                <div class="text-secondary xsmall text-uppercase fw-700 mb-1">Expected Remainder</div>
+                                <div class="h4 mb-0 fw-800 text-primary">{{ item.remaining_quantity }} units</div>
+                            </div>
                         </div>
                         <div class="col-md-4">
-                            <strong>Unit Price:</strong><br>
-                            <span class="h5">${{ item.unit_price|floatformat:2 }}</span>
+                            <div class="metric-card border border-white border-opacity-10 p-3 h-100 text-center">
+                                <div class="text-secondary xsmall text-uppercase fw-700 mb-1">Unit Value</div>
+                                <div class="h4 mb-0 fw-800 text-white">${{ item.unit_price|floatformat:2 }}</div>
+                            </div>
                         </div>
                         <div class="col-md-4">
-                            <strong>Current Stock:</strong><br>
-                            <span class="h5">{{ item.supply.current_stock }} units</span>
+                            <div class="metric-card border border-white border-opacity-10 p-3 h-100 text-center">
+                                <div class="text-secondary xsmall text-uppercase fw-700 mb-1">Current On-Hand</div>
+                                <div class="h4 mb-0 fw-800 text-white">{{ item.supply.current_stock }} units</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -73,77 +92,78 @@
                 <form method="post">
                     {% csrf_token %}
                     
-                    <div class="row">
+                    <div class="row g-4">
                         <!-- Quantity to Receive -->
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="{{ form.quantity_received.id_for_label }}" class="form-label">
-                                    Quantity to Receive <span class="text-danger">*</span>
+                                <label for="{{ form.quantity_received.id_for_label }}" class="form-label text-secondary small fw-600 text-uppercase">
+                                    Quantity Arrived <span class="text-danger">*</span>
                                 </label>
                                 {{ form.quantity_received }}
                                 {% if form.quantity_received.errors %}
-                                    <div class="text-danger small">{{ form.quantity_received.errors }}</div>
+                                    <div class="text-danger xsmall mt-1">{{ form.quantity_received.errors }}</div>
                                 {% endif %}
-                                <div class="form-text">Maximum: {{ item.remaining_quantity }} units</div>
+                                <div class="text-secondary xsmall mt-2">Maximum allowed: {{ item.remaining_quantity }} units</div>
                             </div>
                         </div>
                         
                         <!-- New Stock Preview -->
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">New Stock Level (Preview)</label>
-                                <div class="form-control-plaintext border rounded p-2 bg-light">
-                                    <span id="new-stock-preview">{{ item.supply.current_stock }}</span> units
-                                    <small class="text-muted d-block">
-                                        Current: {{ item.supply.current_stock }} + Receiving: <span id="receiving-amount">0</span>
-                                    </small>
+                                <label class="form-label text-secondary small fw-600 text-uppercase">Projected Inventory Level</label>
+                                <div class="p-4 rounded border border-white border-opacity-10 bg-black bg-opacity-50 text-center shadow-inner">
+                                    <div class="h2 mb-0 fw-800 text-success" id="new-stock-preview">{{ item.supply.current_stock }}</div>
+                                    <div class="xsmall text-secondary text-uppercase mt-1">Total On-Hand units</div>
+                                    <div class="mt-2 pt-2 border-top border-white border-opacity-10 xsmall text-secondary">
+                                        {{ item.supply.current_stock }} (Base) + <span id="receiving-amount" class="text-white fw-600">0</span> (Entry)
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Reason/Notes -->
-                    <div class="mb-3">
-                        <label for="{{ form.reason.id_for_label }}" class="form-label">
-                            Receiving Notes
+                    <div class="mb-4 mt-3">
+                        <label for="{{ form.reason.id_for_label }}" class="form-label text-secondary small fw-600 text-uppercase">
+                            Reception Narrative / Discrepancies
                         </label>
                         {{ form.reason }}
                         {% if form.reason.errors %}
-                            <div class="text-danger small">{{ form.reason.errors }}</div>
+                            <div class="text-danger xsmall mt-1">{{ form.reason.errors }}</div>
                         {% endif %}
-                        <div class="form-text">Optional notes about this receipt (condition, partial delivery, etc.)</div>
+                        <div class="text-secondary xsmall mt-1">Describe shipment condition or partial fulfillment context</div>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-12">
-                            <hr>
-                            <div class="d-flex justify-content-between">
-                                <a href="{% url 'purchase_order_detail' order.id %}" class="btn btn-secondary">
-                                    <i class="bi bi-arrow-left"></i>
-                                    Back to Order
-                                </a>
-                                <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-box-arrow-in-down"></i>
-                                    Receive Items
-                                </button>
-                            </div>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top border-white border-opacity-10">
+                        <a href="{% url 'purchase_order_detail' order.id %}" class="btn btn-secondary px-4">
+                            <i class="bi bi-x-circle me-1"></i> Abort
+                        </a>
+                        <button type="submit" class="btn btn-success px-5 fw-600 shadow-sm">
+                            <i class="bi bi-box-arrow-in-down me-1"></i> Confirm Receipt
+                        </button>
                     </div>
                 </form>
                 
-                <!-- Warning about stock updates -->
-                <div class="alert alert-warning mt-4">
-                    <h6><i class="bi bi-exclamation-triangle"></i> Important</h6>
-                    <p class="mb-0">
-                        Receiving these items will automatically update the stock levels for 
-                        <strong>{{ item.supply.name }}</strong> and create a stock movement record.
-                        This action cannot be undone without manual stock adjustment.
-                    </p>
+                <!-- System Warning -->
+                <div class="alert alert-danger bg-danger bg-opacity-10 border-0 mt-5 fade-in">
+                    <div class="d-flex">
+                        <i class="bi bi-shield-lock-fill me-3 fs-3 text-danger"></i>
+                        <div>
+                            <h6 class="fw-700 mb-1 text-danger">Stock Level Commit</h6>
+                            <p class="mb-0 small opacity-75 text-danger">Confirming receipt will physically increment inventory levels and log a permanent stock movement record. Verification of physical count is recommended prior to submission.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.xsmall { font-size: 0.75rem; }
+.shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4); }
+textarea.form-control { min-height: 100px; }
+</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -159,24 +179,23 @@ document.addEventListener('DOMContentLoaded', function() {
         const receiving = parseInt(quantityInput.value) || 0;
         const newStock = currentStock + receiving;
         
-        newStockPreview.textContent = newStock;
-        receivingAmount.textContent = receiving;
+        newStockPreview.textContent = newStock.toLocaleString();
+        receivingAmount.textContent = receiving.toLocaleString();
         
-        // Visual feedback for quantity validation
         if (receiving > maxQuantity) {
             quantityInput.classList.add('is-invalid');
+            newStockPreview.classList.remove('text-success');
+            newStockPreview.classList.add('text-danger');
         } else {
             quantityInput.classList.remove('is-invalid');
+            newStockPreview.classList.add('text-success');
+            newStockPreview.classList.remove('text-danger');
         }
     }
     
     if (quantityInput) {
         quantityInput.addEventListener('input', updateStockPreview);
-        
-        // Set maximum attribute
         quantityInput.setAttribute('max', maxQuantity);
-        
-        // Update preview on page load
         updateStockPreview();
     }
 });

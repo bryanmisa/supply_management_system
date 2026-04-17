@@ -1,6 +1,4 @@
-<!-- filepath: templates/supplies/categories/supplies.html -->
 {% extends 'base.html' %}
-
 {% block title %}Supplies in {{ category.name }} - Supply Management System{% endblock %}
 
 {% block breadcrumb %}
@@ -14,100 +12,88 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h2">
-                <i class="bi bi-box-seam"></i>
-                Supplies in {{ category.name }}
-            </h1>
-            <a href="{% url 'category_list' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left"></i>
-                Back to Categories
-            </a>
-        </div>
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4 fade-in">
+    <div>
+        <h1 class="h3 mb-1 fw-700 text-white">
+            <i class="bi bi-tag-fill me-2" style="color:var(--primary);"></i>
+            Inventory: {{ category.name }}
+        </h1>
+        <p class="mb-0 text-secondary small">Viewing all physical assets categorized under this segment</p>
     </div>
+    <a href="{% url 'category_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Return to Segments
+    </a>
 </div>
 
-<div class="card shadow">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">
-            Supplies List
+<div class="card shadow-sm border fade-in">
+    <div class="card-header d-flex align-items-center justify-content-between py-3">
+        <span class="fw-700">
+            <i class="bi bi-list-stars me-2 text-primary"></i>Categorized Assets
             {% if page_obj %}
-                <span class="badge bg-secondary">{{ page_obj.paginator.count }} items</span>
+                <span class="badge bg-secondary-subtle text-secondary small ms-2 px-2">{{ page_obj.paginator.count }} units</span>
             {% endif %}
-        </h6>
+        </span>
+        <a href="{% url 'supply_create' %}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Add Supply
+        </a>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
         {% if page_obj %}
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>SKU</th>
-                            <th>Supplier</th>
-                            <th>Current Stock</th>
-                            <th>Status</th>
-                            <th>Unit Price</th>
-                            <th>Actions</th>
+                            <th>Item Identifier</th>
+                            <th>Logistic Partner</th>
+                            <th class="text-end">Buffer Level</th>
+                            <th class="text-center">Lifecycle</th>
+                            <th class="text-end">Unit Value</th>
+                            <th class="text-center">Operations</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for supply in page_obj %}
                         <tr>
                             <td>
-                                <a href="{% url 'supply_detail' supply.id %}" class="text-decoration-none fw-bold">
+                                <a href="{% url 'supply_detail' supply.id %}" class="text-decoration-none fw-700 text-white">
                                     {{ supply.name }}
                                 </a>
-                                {% if supply.description %}
-                                    <br>
-                                    <small class="text-muted">{{ supply.description|truncatechars:50 }}</small>
-                                {% endif %}
+                                <div class="xsmall text-muted mt-1">SKU: {{ supply.sku }}</div>
                             </td>
-                            <td>
-                                <code>{{ supply.sku }}</code>
+                            <td class="small text-secondary fw-500">{{ supply.supplier.name }}</td>
+                            <td class="text-end">
+                                <div class="fw-700 text-white">{{ supply.current_stock }}</div>
+                                <div class="xsmall text-muted">{{ supply.unit_of_measure }}</div>
                             </td>
-                            <td>{{ supply.supplier.name }}</td>
-                            <td>
-                                <span class="fw-bold">{{ supply.current_stock }}</span>
-                                <small class="text-muted">{{ supply.unit_of_measure }}</small>
-                                {% if supply.minimum_stock %}
-                                    <br>
-                                    <small class="text-muted">Min: {{ supply.minimum_stock }}</small>
-                                {% endif %}
-                            </td>
-                            <td>
+                            <td class="text-center">
                                 {% if supply.current_stock == 0 %}
-                                    <span class="badge bg-danger">Out of Stock</span>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 py-1 px-2 w-75">Out of Stock</span>
                                 {% elif supply.is_low_stock %}
-                                    <span class="badge bg-warning text-dark">Low Stock</span>
+                                    <span class="badge bg-warning-subtle text-warning border border-warning border-opacity-25 py-1 px-2 w-75">Low Threshold</span>
                                 {% else %}
-                                    <span class="badge bg-success">In Stock</span>
+                                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25 py-1 px-2 w-75">Nominal</span>
                                 {% endif %}
                             </td>
-                            <td>
-                                ${{ supply.unit_price }}
+                            <td class="text-end">
+                                <div class="fw-600 text-white">${{ supply.unit_price|floatformat:2 }}</div>
                                 {% if supply.current_stock > 0 %}
-                                    <br>
-                                    <small class="text-muted">
-                                        Total: ${{ supply.total_value|floatformat:2 }}
-                                    </small>
+                                    <div class="xsmall text-secondary">Total: ${{ supply.total_value|floatformat:2 }}</div>
                                 {% endif %}
                             </td>
-                            <td>
-                                <div class="btn-group btn-group-sm" role="group">
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm border border-white border-opacity-10 rounded overflow-hidden shadow-sm">
                                     <a href="{% url 'supply_detail' supply.id %}" 
-                                       class="btn btn-outline-primary" title="View Details">
-                                        <i class="bi bi-eye"></i>
+                                       class="btn btn-secondary" title="View Metrics">
+                                        <i class="bi bi-activity text-primary"></i>
                                     </a>
                                     <a href="{% url 'supply_edit' supply.id %}" 
-                                       class="btn btn-outline-secondary" title="Edit">
-                                        <i class="bi bi-pencil"></i>
+                                       class="btn btn-secondary" title="Calibrate">
+                                        <i class="bi bi-pencil text-info"></i>
                                     </a>
                                     <a href="{% url 'stock_movement' supply.id %}" 
-                                       class="btn btn-outline-success" title="Stock Movement">
-                                        <i class="bi bi-arrow-left-right"></i>
+                                       class="btn btn-secondary" title="Log Transaction">
+                                        <i class="bi bi-arrow-left-right text-success"></i>
                                     </a>
                                 </div>
                             </td>
@@ -117,47 +103,74 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
+            <!-- Modern Pagination -->
             {% if page_obj.has_other_pages %}
-                <nav aria-label="Supplies pagination">
-                    <ul class="pagination justify-content-center mt-4">
-                        {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1">First</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
-                            </li>
-                        {% endif %}
+                <div class="p-4 border-top border-white border-opacity-10 bg-black bg-opacity-10 d-flex justify-content-center">
+                    <nav aria-label="Supplies navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1"><i class="bi bi-chevron-double-left"></i></a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="bi bi-chevron-left"></i></a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-double-left"></i></span></li>
+                                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></li>
+                            {% endif %}
 
-                        <li class="page-item active">
-                            <span class="page-link">
-                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                            </span>
-                        </li>
+                            <li class="page-item active">
+                                <span class="page-link px-3">
+                                    Segment {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
 
-                        {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="bi bi-chevron-right"></i></a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}"><i class="bi bi-chevron-double-right"></i></a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right"></i></span></li>
+                                <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-double-right"></i></span></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
             {% endif %}
         {% else %}
-            <div class="text-center text-muted py-5">
-                <i class="bi bi-box-seam" style="font-size: 4rem; opacity: 0.3;"></i>
-                <h4 class="mt-3">No supplies found in this category</h4>
-                <p>Add supplies to this category or check other categories.</p>
-                <a href="{% url 'supply_create' %}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i>
-                    Add New Supply
+            <div class="text-center py-5">
+                <i class="bi bi-box-seam fs-1 opacity-10"></i>
+                <h5 class="mt-3">No inventory mapped to this segment</h5>
+                <p class="text-secondary small">Try registering new supplies within this category threshold.</p>
+                <a href="{% url 'supply_create' %}" class="btn btn-primary mt-2">
+                    <i class="bi bi-plus-circle me-1"></i>
+                    Register Asset
                 </a>
             </div>
         {% endif %}
     </div>
 </div>
+
+<style>
+.xsmall { font-size: 0.75rem; }
+.pagination .page-link {
+    background: var(--surface-hover);
+    border-color: var(--border);
+    color: var(--text-secondary);
+}
+.pagination .page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+.pagination .page-link:hover {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+}
+</style>
 {% endblock %}

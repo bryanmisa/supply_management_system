@@ -1,12 +1,11 @@
-<!-- New template: templates/supplies/customer_portal/request_create.html -->
 {% extends 'base.html' %}
-{% block title %}Request Stock - Customer Portal{% endblock %}
+{% block title %}Initiate Request - Supply Management System{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
-    <li class="breadcrumb-item active">Customer Request</li>
+    <li class="breadcrumb-item active">New Request</li>
   </ol>
 </nav>
 {% endblock %}
@@ -14,65 +13,114 @@
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-lg-8">
-    <div class="card shadow">
-      <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-bag-plus"></i> Request Available Stock</h6>
-      </div>
-      <div class="card-body">
+    <!-- Page Header -->
+    <div class="mb-4 text-center fade-in">
+        <h1 class="h3 mb-1 fw-700 text-white">
+            <i class="bi bi-box-arrow-in-right me-2" style="color:var(--primary);"></i>
+            Inventory Acquisition
+        </h1>
+        <p class="text-secondary small">Formal procurement request for operational assets</p>
+    </div>
+
+    <div class="card shadow border fade-in">
+      <div class="card-body p-4 p-md-5">
         <form method="post" novalidate>
           {% csrf_token %}
+          
           {% if req_form.non_field_errors or item_form.non_field_errors %}
-            <div class="alert alert-danger">
-              {{ req_form.non_field_errors }}
-              {{ item_form.non_field_errors }}
-            </div>
-          {% endif %}
-          <h6 class="text-muted">Your Details</h6>
-          <div class="mb-3">
-            <div class="card bg-light">
-              <div class="card-body">
-                <strong>Name:</strong> {{ request.user.get_full_name|default:request.user.username }}<br>
-                <strong>Email:</strong> {{ request.user.email }}<br>
-                {% if request.user.profile.phone %}
-                  <strong>Phone:</strong> {{ request.user.profile.phone }}
-                {% endif %}
+            <div class="alert alert-danger bg-danger bg-opacity-10 border-0 mb-4 d-flex align-items-center">
+              <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
+              <div>
+                <div class="fw-700">Submission Blocked</div>
+                <div class="small opacity-75">{{ req_form.non_field_errors }} {{ item_form.non_field_errors }}</div>
               </div>
             </div>
+          {% endif %}
+
+          <!-- Requestor Meta -->
+          <div class="mb-5">
+              <div class="d-flex align-items-center mb-3">
+                  <div class="bg-primary bg-opacity-10 p-2 rounded me-3 text-primary">
+                      <i class="bi bi-person-badge"></i>
+                  </div>
+                  <h6 class="mb-0 fw-700 text-uppercase small text-secondary" style="letter-spacing: 0.1em;">Requestor Profile</h6>
+              </div>
+              <div class="p-4 rounded bg-black bg-opacity-25 border border-white border-opacity-10 d-flex flex-wrap gap-5">
+                  <div>
+                      <div class="text-xs text-secondary mb-1 text-uppercase fw-600">Identity</div>
+                      <div class="fw-700 text-white">{{ request.user.get_full_name|default:request.user.username }}</div>
+                  </div>
+                  <div>
+                      <div class="text-xs text-secondary mb-1 text-uppercase fw-600">Comms Channel</div>
+                      <div class="fw-500 text-secondary small">{{ request.user.email }}</div>
+                  </div>
+                  {% if request.user.profile.phone %}
+                  <div>
+                      <div class="text-xs text-secondary mb-1 text-uppercase fw-600">Voice Line</div>
+                      <div class="fw-500 text-secondary small">{{ request.user.profile.phone }}</div>
+                  </div>
+                  {% endif %}
+              </div>
           </div>
 
-          <h6 class="text-muted mt-2">Item</h6>
-          <div class="row">
-            <div class="col-md-8 mb-3">
-              <label class="form-label" for="{{ item_form.supply.id_for_label }}">Supply</label>
-              {{ item_form.supply }}
-              {% if item_form.supply.errors %}
-                <div class="text-danger small">{{ item_form.supply.errors|striptags }}</div>
-              {% endif %}
-            </div>
-            <div class="col-md-4 mb-3">
-              <label class="form-label" for="{{ item_form.quantity_requested.id_for_label }}">Quantity</label>
-              {{ item_form.quantity_requested }}
-              {% if item_form.quantity_requested.errors %}
-                <div class="text-danger small">{{ item_form.quantity_requested.errors|striptags }}</div>
-              {% endif %}
-            </div>
+          <!-- Item Selection -->
+          <div class="mb-5">
+              <div class="d-flex align-items-center mb-4">
+                  <div class="bg-primary bg-opacity-10 p-2 rounded me-3 text-primary">
+                      <i class="bi bi-cart-plus"></i>
+                  </div>
+                  <h6 class="mb-0 fw-700 text-uppercase small text-secondary" style="letter-spacing: 0.1em;">Asset Specification</h6>
+              </div>
+              <div class="row g-4">
+                <div class="col-md-8">
+                  <label class="form-label text-secondary small fw-600 text-uppercase" for="{{ item_form.supply.id_for_label }}">Target Supply Asset</label>
+                  {{ item_form.supply }}
+                  {% if item_form.supply.errors %}
+                    <div class="text-danger xsmall mt-1">{{ item_form.supply.errors|striptags }}</div>
+                  {% endif %}
+                  <div class="xsmall text-muted mt-2">Select from authorized inventory catalog</div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label text-secondary small fw-600 text-uppercase" for="{{ item_form.quantity_requested.id_for_label }}">Required Units</label>
+                  {{ item_form.quantity_requested }}
+                  {% if item_form.quantity_requested.errors %}
+                    <div class="text-danger xsmall mt-1">{{ item_form.quantity_requested.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+              </div>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label" for="{{ req_form.notes.id_for_label }}">Notes</label>
+          <div class="mb-5">
+            <label class="form-label text-secondary small fw-600 text-uppercase" for="{{ req_form.notes.id_for_label }}">Contextual Notes / Rationalisation</label>
             {{ req_form.notes }}
             {% if req_form.notes.errors %}
-              <div class="text-danger small">{{ req_form.notes.errors|striptags }}</div>
+              <div class="text-danger xsmall mt-1">{{ req_form.notes.errors|striptags }}</div>
             {% endif %}
+            <div class="xsmall text-muted mt-2">Provide justification or specific handling requirements</div>
           </div>
 
-          <div class="d-flex justify-content-between">
-            <a href="{% url 'dashboard' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Cancel</a>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> Submit Request</button>
+          <div class="pt-4 d-flex align-items-center justify-content-between border-top border-white border-opacity-10 mt-5">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary px-4">
+                <i class="bi bi-x-circle me-1"></i> Abort
+            </a>
+            <button type="submit" class="btn btn-primary px-5 fw-600 shadow-sm">
+                <i class="bi bi-send-check me-2"></i>
+                Transmit Request
+            </button>
           </div>
         </form>
       </div>
     </div>
+    
+    <div class="mt-4 text-center xsmall text-secondary opacity-50">
+        <i class="bi bi-shield-lock me-1"></i> Submissions are logged for audit compliance
+    </div>
   </div>
 </div>
+
+<style>
+.xsmall { font-size: 0.725rem; }
+textarea.form-control { min-height: 120px; }
+.card { background-color: var(--card-bg); }
+</style>
 {% endblock %}

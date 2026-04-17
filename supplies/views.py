@@ -75,22 +75,27 @@ def customer_dashboard(request):
 
 
 def unified_dashboard(request):
-    """Route users to appropriate dashboard based on their role."""
+    """
+    Root URL dispatcher.
+    - Unauthenticated users are redirected to the single unified login page.
+    - Authenticated users are routed to their role-specific dashboard automatically.
+    """
     if not request.user.is_authenticated:
-        # Show landing page with login choices
-        return render(request, 'home.html')
-    
-    # Superusers go to manager dashboard by default
+        # Send all unauthenticated visitors directly to the unified login page.
+        # The login view handles role-based redirection after a successful sign-in.
+        return redirect('login')
+
+    # Superusers and Managers go to the manager dashboard
     if request.user.is_superuser:
         return redirect('manager_dashboard')
-    
+
     if hasattr(request.user, 'profile'):
         if request.user.profile.is_manager:
             return redirect('manager_dashboard')
         else:
             return redirect('customer_dashboard')
     else:
-        # Create profile if it doesn't exist (fallback safety)
+        # Safety fallback: create a profile if one is missing, default to Customer
         from supplies.models import UserProfile
         UserProfile.objects.get_or_create(user=request.user, defaults={'role': 'CUSTOMER'})
         return redirect('customer_dashboard')
@@ -675,9 +680,14 @@ def unified_register(request):
         form = UnifiedRegistrationForm()
     return render(request, 'supplies/customer_portal/register.html', {'form': form})
 
-
 class UnifiedLoginView(LoginView):
-    """Unified login for all users with role-based post-login redirect."""
+    """
+    Unified authentication entry point.
+    
+    This view handles the authentication for all user roles (Admin, Manager, Customer).
+    Based on the profile attributes (e.g. `is_superuser`, `profile.is_manager`),
+    it dynamically redirects the user to their respective dashboard post-login.
+    """
     template_name = 'supplies/customer_portal/login.html'
     redirect_authenticated_user = True
 
@@ -690,35 +700,6 @@ class UnifiedLoginView(LoginView):
 
 # Expose a function-compatible view for URL pattern expecting `views.unified_login`
 unified_login = UnifiedLoginView.as_view()
-
-
-class ManagerLoginView(LoginView):
-    """Supply Manager login page."""
-    template_name = 'supplies/manager_portal/login.html'
-    redirect_authenticated_user = True
-
-    def get_success_url(self):
-        user = self.request.user
-        # Managers and superusers go to manager dashboard
-        if user.is_superuser or (hasattr(user, 'profile') and user.profile.is_manager):
-            return reverse_lazy('manager_dashboard')
-        # Non-managers who used this page go to their dashboard
-        return reverse_lazy('customer_dashboard')
-
-
-class CustomerLoginView(LoginView):
-    """Customer login page."""
-    template_name = 'supplies/customer_portal/customer_login.html'
-    redirect_authenticated_user = True
-
-    def get_success_url(self):
-        user = self.request.user
-        # Customers go to customer dashboard
-        if hasattr(user, 'profile') and user.profile.is_customer and not user.is_superuser:
-            return reverse_lazy('customer_dashboard')
-        # Managers/superusers who used this page go to manager dashboard
-        return reverse_lazy('manager_dashboard')
-
 
 def customer_register(request):
     """Customer-only registration page (sets profile.role = 'CUSTOMER')."""
@@ -1622,22 +1603,6 @@ def admin_export_report_pdf(request):
     return response
 
 
-class AdminLoginView(LoginView):
-    """Administrator login view - requires superuser status."""
-    template_name = 'supplies/admin_portal/admin_login.html'
-    redirect_authenticated_user = True
-
-    def form_valid(self, form):
-        """Check if user is superuser before allowing login."""
-        user = form.get_user()
-        if not user.is_superuser:
-            form.add_error(None, "Administrator access only. Contact system administrator for access.")
-            return self.form_invalid(form)
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy('admin_dashboard')
-    
 def render_to_pdf(template_src, context_dict):
     """Generate PDF file from HTML template."""
     template = get_template(template_src)

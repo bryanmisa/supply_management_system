@@ -1,6 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'supplies/reports/reports_base.html' %}
 
-{% block title %}Low Stock Report{% endblock %}
+{% block title %}Low Stock Report - Supply Management System{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
@@ -11,69 +11,98 @@
 </nav>
 {% endblock %}
 
-{% block content %}
+{% block report_title %}Critical Inventory Levels{% endblock %}
+
+{% block report_content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h3 mb-0">Low Stock Report</h1>
-  <a href="{% url 'supply_list' %}" class="btn btn-outline-secondary"><i class="bi bi-box-seam"></i> View All Supplies</a>
+    <div class="text-secondary small fw-500">
+        <i class="bi bi-info-circle me-1"></i> List of items tracking below safety thresholds.
+    </div>
+    <a href="{% url 'supply_list' %}" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-box-seam me-1"></i> Global Inventory
+    </a>
 </div>
 
-<div class="card shadow">
-  <div class="card-body">
-    {% if supplies %}
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-light">
+{% if supplies %}
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead>
             <tr>
-              <th>Item</th>
-              <th>SKU</th>
-              <th>Category</th>
-              <th>Supplier</th>
-              <th class="text-end">Stock</th>
-              <th class="text-end">Min</th>
-              <th class="text-end">Max</th>
-              <th class="text-end">Unit Price</th>
-              <th class="text-end">Total Value</th>
-              <th></th>
+                <th>Inventory Unit</th>
+                <th>Classification</th>
+                <th>Logistics Partner</th>
+                <th class="text-end">Current</th>
+                <th class="text-end">Safety Min</th>
+                <th class="text-end">Replenish Point</th>
+                <th class="text-end">Asset Value</th>
+                <th class="text-center">Resolution</th>
             </tr>
-          </thead>
-          <tbody>
+        </thead>
+        <tbody>
             {% for s in supplies %}
-              <tr class="{% if s.current_stock == 0 %}table-danger{% else %}table-warning{% endif %}">
+            <tr class="fade-in">
                 <td>
-                  <div class="fw-semibold"><a href="{% url 'supply_detail' s.id %}" class="text-decoration-none">{{ s.name }}</a></div>
-                  <div class="text-muted small">{{ s.unit_of_measure }}</div>
+                    <div class="fw-700 text-white">
+                        <a href="{% url 'supply_detail' s.id %}" class="text-decoration-none text-white">{{ s.name }}</a>
+                    </div>
+                    <div class="xsmall text-muted">SKU: {{ s.sku }} | Base Unit: {{ s.unit_of_measure }}</div>
                 </td>
-                <td>{{ s.sku }}</td>
-                <td><span class="badge bg-light text-dark">{{ s.category.name }}</span></td>
-                <td>{{ s.supplier.name }}</td>
-                <td class="text-end"><strong>{{ s.current_stock }}</strong></td>
-                <td class="text-end">{{ s.minimum_stock }}</td>
-                <td class="text-end">{{ s.maximum_stock }}</td>
-                <td class="text-end">${{ s.unit_price|floatformat:2 }}</td>
-                <td class="text-end">${{ s.annotated_total_value|floatformat:2 }}</td>
+                <td>
+                    <span class="badge bg-secondary-subtle text-secondary small py-1 px-2 border border-white border-opacity-10">
+                        {{ s.category.name }}
+                    </span>
+                </td>
+                <td class="small text-secondary fw-500">{{ s.supplier.name }}</td>
                 <td class="text-end">
-                  <div class="btn-group">
-                    <a href="{% url 'stock_movement' s.id %}" class="btn btn-sm btn-outline-primary" title="Record Movement"><i class="bi bi-arrow-left-right"></i></a>
-                    <a href="{% url 'stock_adjustment' s.id %}" class="btn btn-sm btn-outline-secondary" title="Adjust Stock"><i class="bi bi-sliders"></i></a>
-                  </div>
+                    <span class="h6 mb-0 fw-800 {% if s.current_stock == 0 %}text-danger{% else %}text-warning{% endif %}">
+                        {{ s.current_stock }}
+                    </span>
                 </td>
-              </tr>
+                <td class="text-end text-secondary small">{{ s.minimum_stock }}</td>
+                <td class="text-end text-secondary small">{{ s.maximum_stock }}</td>
+                <td class="text-end fw-600 text-white">${{ s.annotated_total_value|floatformat:2 }}</td>
+                <td class="text-center">
+                    <div class="btn-group btn-group-sm border border-white border-opacity-10 rounded overflow-hidden shadow-sm">
+                        <a href="{% url 'stock_movement' s.id %}" class="btn btn-secondary" title="Log Transaction">
+                            <i class="bi bi-arrow-left-right text-primary"></i>
+                        </a>
+                        <a href="{% url 'stock_adjustment' s.id %}" class="btn btn-secondary" title="Direct Calibration">
+                            <i class="bi bi-sliders text-info"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
             {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <div class="text-center py-5 text-muted">
-        <i class="bi bi-check2-circle display-4"></i>
-        <p class="mt-3">No items are currently below their minimum stock levels. Great job!</p>
-      </div>
-    {% endif %}
-  </div>
+        </tbody>
+    </table>
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script>
-// Optional: future enhancements for filters or export
-</script>
+<!-- Financial Exposure Summary -->
+<div class="mt-4 p-3 rounded bg-black bg-opacity-25 border border-white border-opacity-10 fade-in">
+    <div class="row align-items-center">
+        <div class="col">
+            <div class="text-secondary xsmall text-uppercase fw-700">Stockout Risk Exposure</div>
+            <div class="h4 mb-0 fw-800 text-danger">{{ supplies|length }} Items Affected</div>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'purchase_order_create' %}" class="btn btn-primary">
+                <i class="bi bi-cart-plus me-1"></i> Draft Purchase Orders
+            </a>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="text-center py-5">
+    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex p-4 mb-3">
+        <i class="bi bi-shield-check text-success fs-1"></i>
+    </div>
+    <h5 class="fw-700">Healthy Inventory</h5>
+    <p class="text-secondary small mx-auto" style="max-width: 400px;">All assets are currently tracking within safe operational thresholds. No immediate procurement action required.</p>
+</div>
+{% endif %}
+
+<style>
+.xsmall { font-size: 0.75rem; }
+</style>
 {% endblock %}

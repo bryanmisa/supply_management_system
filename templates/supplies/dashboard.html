@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard - Supply Management System{% endblock %}
+{% block title %}Dashboard – Supply Management System{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
@@ -11,147 +11,99 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h1 class="h2 mb-4">
-            <i class="bi bi-speedometer2"></i>
-            Dashboard
+
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1 fw-700" style="letter-spacing:-0.02em;">
+            <i class="bi bi-speedometer2 me-2" style="color:var(--primary);"></i>Dashboard
         </h1>
+        <p class="mb-0" style="color:var(--text-secondary); font-size:0.875rem;">
+            Overview of your supply chain operations
+        </p>
+    </div>
+    <a href="{% url 'supply_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Add Supply
+    </a>
+</div>
+
+<!-- ── KPI Metric Cards ──────────────────────────── -->
+<div class="mb-4">
+    <div class="metric-card metric-primary d-inline-block me-3 mb-3" style="width: 260px; vertical-align: top;">
+        <div class="metric-label">Total Supplies</div>
+        <div class="metric-value">{{ stats.total_supplies }}</div>
+        <i class="bi bi-box-seam metric-icon" style="color:var(--primary);"></i>
+    </div>
+
+    <div class="metric-card metric-warning d-inline-block me-3 mb-3" style="width: 260px; vertical-align: top;">
+        <div class="metric-label">Low Stock Items</div>
+        <div class="metric-value" style="color:var(--warning);">{{ stats.low_stock_count }}</div>
+        <i class="bi bi-exclamation-triangle metric-icon" style="color:var(--warning);"></i>
+    </div>
+
+    <div class="metric-card metric-danger d-inline-block me-3 mb-3" style="width: 260px; vertical-align: top;">
+        <div class="metric-label">Out of Stock</div>
+        <div class="metric-value" style="color:var(--danger);">{{ stats.out_of_stock_count }}</div>
+        <i class="bi bi-x-circle metric-icon" style="color:var(--danger);"></i>
+    </div>
+
+    <div class="metric-card metric-success d-inline-block me-3 mb-3" style="width: 260px; vertical-align: top;">
+        <div class="metric-label">Inventory Value</div>
+        <div class="metric-value" style="color:var(--success); font-size:1.5rem;">
+            ${{ stats.total_inventory_value|floatformat:0 }}
+        </div>
+        <i class="bi bi-currency-dollar metric-icon" style="color:var(--success);"></i>
     </div>
 </div>
 
-<!-- Key Metrics -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Supplies
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {{ stats.total_supplies }}
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-box-seam text-primary" style="font-size: 2rem; opacity: 0.3;"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<!-- ── Tables Row ─────────────────────────────────── -->
+<div class="row g-3 mb-4">
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Low Stock Items
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {{ stats.low_stock_count }}
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem; opacity: 0.3;"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-danger shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                            Out of Stock
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {{ stats.out_of_stock_count }}
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-x-circle text-danger" style="font-size: 2rem; opacity: 0.3;"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Total Inventory Value
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            ${{ stats.total_inventory_value|floatformat:2 }}
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-currency-dollar text-success" style="font-size: 2rem; opacity: 0.3;"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
     <!-- Low Stock Alerts -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-warning">
-                    <i class="bi bi-exclamation-triangle"></i>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <span>
+                    <i class="bi bi-exclamation-triangle me-2" style="color:var(--warning);"></i>
                     Low Stock Alerts
-                </h6>
-                <a href="{% url 'low_stock_report' %}" class="btn btn-sm btn-outline-warning">
-                    View All
-                </a>
+                </span>
+                <a href="{% url 'low_stock_report' %}" class="btn btn-sm btn-outline-warning">View All</a>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 {% if stats.low_stock_supplies %}
                     <div class="table-responsive">
-                        <table class="table table-sm">
+                        <table class="table mb-0">
                             <thead>
                                 <tr>
                                     <th>Supply</th>
-                                    <th>Current Stock</th>
-                                    <th>Min Stock</th>
+                                    <th>Current</th>
+                                    <th>Minimum</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for supply in stats.low_stock_supplies %}
                                 <tr>
                                     <td>
-                                        <a href="{% url 'supply_detail' supply.id %}" class="text-decoration-none">
-                                            {{ supply.name }}
+                                        <a href="{% url 'supply_detail' supply.id %}" class="text-decoration-none fw-500" style="color:var(--text);">
+                                            {{ supply.name|truncatechars:28 }}
                                         </a>
-                                        <br>
-                                        <small class="text-muted">{{ supply.sku }}</small>
+                                        <br><small>{{ supply.sku }}</small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-{% if supply.current_stock == 0 %}danger{% else %}warning{% endif %}">
+                                        <span class="badge {% if supply.current_stock == 0 %}bg-danger{% else %}bg-warning{% endif %}">
                                             {{ supply.current_stock }}
                                         </span>
                                     </td>
-                                    <td>{{ supply.minimum_stock }}</td>
+                                    <td style="color:var(--text-secondary);">{{ supply.minimum_stock }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 {% else %}
-                    <div class="text-center text-muted py-3">
-                        <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
-                        <p class="mt-2">All supplies are well stocked!</p>
+                    <div class="text-center py-5">
+                        <i class="bi bi-check-circle" style="font-size:2.5rem; color:var(--success);"></i>
+                        <p class="mt-2 mb-0" style="color:var(--text-secondary);">All supplies are well stocked!</p>
                     </div>
                 {% endif %}
             </div>
@@ -159,23 +111,21 @@
     </div>
 
     <!-- Recent Stock Movements -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="bi bi-arrow-left-right"></i>
-                    Recent Stock Movements
-                </h6>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <i class="bi bi-arrow-left-right me-2" style="color:var(--primary);"></i>
+                Recent Stock Movements
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 {% if stats.recent_movements %}
                     <div class="table-responsive">
-                        <table class="table table-sm">
+                        <table class="table mb-0">
                             <thead>
                                 <tr>
                                     <th>Supply</th>
                                     <th>Type</th>
-                                    <th>Quantity</th>
+                                    <th>Qty</th>
                                     <th>Date</th>
                                 </tr>
                             </thead>
@@ -183,98 +133,67 @@
                                 {% for movement in stats.recent_movements %}
                                 <tr>
                                     <td>
-                                        <a href="{% url 'supply_detail' movement.supply.id %}" class="text-decoration-none">
-                                            {{ movement.supply.name|truncatechars:20 }}
+                                        <a href="{% url 'supply_detail' movement.supply.id %}" class="text-decoration-none" style="color:var(--text);">
+                                            {{ movement.supply.name|truncatechars:22 }}
                                         </a>
                                     </td>
                                     <td>
-                                        <span class="badge bg-{% if movement.movement_type == 'IN' %}success{% elif movement.movement_type == 'OUT' %}danger{% else %}info{% endif %}">
+                                        <span class="badge {% if movement.movement_type == 'IN' %}bg-success{% elif movement.movement_type == 'OUT' %}bg-danger{% else %}bg-info{% endif %}">
                                             {{ movement.get_movement_type_display }}
                                         </span>
                                     </td>
-                                    <td>{{ movement.quantity }}</td>
-                                    <td>
-                                        <small>{{ movement.movement_date|date:"M d, H:i" }}</small>
-                                    </td>
+                                    <td style="color:var(--text);">{{ movement.quantity }}</td>
+                                    <td><small>{{ movement.movement_date|date:"M d, H:i" }}</small></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 {% else %}
-                    <div class="text-center text-muted py-3">
-                        <i class="bi bi-arrow-left-right" style="font-size: 3rem; opacity: 0.3;"></i>
-                        <p class="mt-2">No recent stock movements</p>
+                    <div class="text-center py-5">
+                        <i class="bi bi-arrow-left-right" style="font-size:2.5rem; opacity:0.2;"></i>
+                        <p class="mt-2 mb-0" style="color:var(--text-secondary);">No recent stock movements</p>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
+
 </div>
 
-<!-- Quick Actions -->
-<div class="row">
-    <div class="col-12">
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="bi bi-lightning"></i>
-                    Quick Actions
-                </h6>
+<!-- ── Quick Actions ──────────────────────────────── -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-lightning me-2" style="color:var(--primary);"></i>Quick Actions
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <a href="{% url 'supply_create' %}" class="quick-action qa-primary">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Add Supply</span>
+                </a>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'supply_create' %}" class="btn btn-primary btn-lg w-100">
-                            <i class="bi bi-plus-circle"></i>
-                            <br>
-                            Add New Supply
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'category_create' %}" class="btn btn-info btn-lg w-100">
-                            <i class="bi bi-tags"></i>
-                            <br>
-                            Add Category
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'supplier_create' %}" class="btn btn-success btn-lg w-100">
-                            <i class="bi bi-truck"></i>
-                            <br>
-                            Add Supplier
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'supply_list' %}" class="btn btn-secondary btn-lg w-100">
-                            <i class="bi bi-search"></i>
-                            <br>
-                            Search Supplies
-                        </a>
-                    </div>
-                </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'category_create' %}" class="quick-action qa-info">
+                    <i class="bi bi-tags"></i>
+                    <span>Add Category</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'supplier_create' %}" class="quick-action qa-success">
+                    <i class="bi bi-truck"></i>
+                    <span>Add Supplier</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{% url 'purchase_order_create' %}" class="quick-action qa-warning">
+                    <i class="bi bi-cart-plus"></i>
+                    <span>New PO</span>
+                </a>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_css %}
-<style>
-.border-left-primary {
-    border-left: 0.25rem solid #4e73df !important;
-}
-.border-left-success {
-    border-left: 0.25rem solid #1cc88a !important;
-}
-.border-left-info {
-    border-left: 0.25rem solid #36b9cc !important;
-}
-.border-left-warning {
-    border-left: 0.25rem solid #f6c23e !important;
-}
-.border-left-danger {
-    border-left: 0.25rem solid #e74a3b !important;
-}
-</style>
 {% endblock %}

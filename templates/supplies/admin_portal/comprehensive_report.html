@@ -12,191 +12,187 @@
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <h1 class="h2"><i class="bi bi-file-pdf"></i> System Report</h1>
-  <a href="{% url 'admin_export_report_pdf' %}" class="btn btn-danger">
-    <i class="bi bi-download"></i>
-    Export PDF
-  </a>
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1 fw-700" style="letter-spacing:-0.02em;">
+            <i class="bi bi-file-earmark-bar-graph me-2" style="color:var(--primary);"></i>Comprehensive Analytics
+        </h1>
+        <p class="mb-0" style="color:var(--text-secondary); font-size:0.875rem;">
+            Deep dive into system-wide supply chain performance
+        </p>
+    </div>
+    <a href="{% url 'admin_export_report_pdf' %}" class="btn btn-danger">
+        <i class="bi bi-file-pdf me-2"></i>Export Final PDF
+    </a>
 </div>
 
 <!-- Date Range Filter -->
-<div class="card mb-4">
+<div class="card mb-4 border">
   <div class="card-body">
-    <form method="GET" class="row g-3">
+    <form method="GET" class="row g-3 align-items-end">
       <div class="col-md-3">
-        <label class="form-label">Start Date</label>
+        <label class="form-label small fw-600 text-muted">Analysis Start</label>
         <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
       </div>
       <div class="col-md-3">
-        <label class="form-label">End Date</label>
+        <label class="form-label small fw-600 text-muted">Analysis End</label>
         <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
       </div>
       <div class="col-md-6">
-        <label class="form-label">&nbsp;</label>
-        <button type="submit" class="btn btn-primary w-100">Generate Report</button>
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-arrow-repeat me-2"></i>Recalculate Reporting Metrics
+        </button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Summary Statistics -->
-<div class="row mb-4">
-  <div class="col-md-3 mb-3">
-    <div class="card">
-      <div class="card-body text-center">
-        <h6 class="text-muted">Total Users</h6>
-        <h3>{{ summary.total_users }}</h3>
-        <small class="text-muted">M: {{ summary.total_managers }} | C: {{ summary.total_customers }}</small>
-      </div>
+<!-- Summary Statistics Cards -->
+<div class="row g-3 mb-4 fade-in">
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card metric-primary">
+            <div class="metric-label">System Users</div>
+            <div class="metric-value">{{ summary.total_users }}</div>
+            <div class="mt-2 text-xs text-secondary">M: {{ summary.total_managers }} | C: {{ summary.total_customers }}</div>
+            <i class="bi bi-people metric-icon" style="color:var(--primary);"></i>
+        </div>
     </div>
-  </div>
-  <div class="col-md-3 mb-3">
-    <div class="card">
-      <div class="card-body text-center">
-        <h6 class="text-muted">Total Supplies</h6>
-        <h3>{{ summary.total_supplies }}</h3>
-      </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card metric-success">
+            <div class="metric-label">Unique Supplies</div>
+            <div class="metric-value">{{ summary.total_supplies }}</div>
+            <i class="bi bi-box-seam metric-icon" style="color:var(--success);"></i>
+        </div>
     </div>
-  </div>
-  <div class="col-md-3 mb-3">
-    <div class="card">
-      <div class="card-body text-center">
-        <h6 class="text-muted">Inventory Value</h6>
-        <h3>${{ summary.total_inventory_value|floatformat:2 }}</h3>
-      </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card metric-info">
+            <div class="metric-label">Inventory Assets</div>
+            <div class="metric-value" style="font-size: 1.5rem;">${{ summary.total_inventory_value|floatformat:0 }}</div>
+            <i class="bi bi-currency-dollar metric-icon" style="color:var(--info);"></i>
+        </div>
     </div>
-  </div>
-  <div class="col-md-3 mb-3">
-    <div class="card">
-      <div class="card-body text-center">
-        <h6 class="text-muted">Low Stock</h6>
-        <h3>{{ summary.low_stock_count }}</h3>
-      </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="metric-card metric-danger">
+            <div class="metric-label">Low Stock Alerts</div>
+            <div class="metric-value" style="color:var(--danger);">{{ summary.low_stock_count }}</div>
+            <i class="bi bi-exclamation-octagon metric-icon" style="color:var(--danger);"></i>
+        </div>
     </div>
-  </div>
 </div>
 
-<!-- Purchase Orders Summary -->
-<div class="row mb-4">
-  <div class="col-12">
-    <div class="card shadow">
-      <div class="card-header">
-        <h6 class="m-0 font-weight-bold">Purchase Orders Summary</h6>
-      </div>
-      <div class="card-body">
-        <div class="row text-center">
-          <div class="col-md-2">
-            <h6 class="text-muted">Total Orders</h6>
-            <h3>{{ purchase_order_stats.total_orders }}</h3>
-          </div>
-          <div class="col-md-2">
-            <h6 class="text-muted">Pending</h6>
-            <h3>{{ purchase_order_stats.pending }}</h3>
-          </div>
-          <div class="col-md-2">
-            <h6 class="text-muted">Approved</h6>
-            <h3>{{ purchase_order_stats.approved }}</h3>
-          </div>
-          <div class="col-md-2">
-            <h6 class="text-muted">Sent</h6>
-            <h3>{{ purchase_order_stats.sent }}</h3>
-          </div>
-          <div class="col-md-2">
-            <h6 class="text-muted">Received</h6>
-            <h3>{{ purchase_order_stats.received }}</h3>
-          </div>
-          <div class="col-md-2">
-            <h6 class="text-muted">Total $</h6>
-            <h3>${{ purchase_order_stats.total_amount|floatformat:2 }}</h3>
-          </div>
+<!-- Two Column Secondary Stats -->
+<div class="row g-4 mb-4">
+    <!-- Purchase Orders -->
+    <div class="col-lg-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-transparent border-white border-opacity-10 py-3">
+                <i class="bi bi-cart me-2" style="color:var(--primary);"></i>
+                <span class="fw-700">Procurement Summary</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 text-center">
+                    <div class="col-4">
+                        <div class="text-xs text-muted text-uppercase fw-600 mb-1">Orders</div>
+                        <div class="h5 mb-0 fw-700">{{ purchase_order_stats.total_orders }}</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-xs text-muted text-uppercase fw-600 mb-1">Approved</div>
+                        <div class="h5 mb-0 fw-700 text-info">{{ purchase_order_stats.approved }}</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-xs text-muted text-uppercase fw-600 mb-1">Received</div>
+                        <div class="h5 mb-0 fw-700 text-success">{{ purchase_order_stats.received }}</div>
+                    </div>
+                </div>
+                <div class="mt-4 p-3 rounded-lg bg-black bg-opacity-25 text-center">
+                    <div class="text-xs text-muted text-uppercase fw-600 mb-1">Total Procurement Value</div>
+                    <div class="h3 mb-0 fw-800 text-white">${{ purchase_order_stats.total_amount|floatformat:0 }}</div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- Customer Requests Summary -->
-<div class="row mb-4">
-  <div class="col-12">
-    <div class="card shadow">
-      <div class="card-header">
-        <h6 class="m-0 font-weight-bold">Customer Requests Summary</h6>
-      </div>
-      <div class="card-body">
-        <div class="row text-center">
-          <div class="col-md-2">
-            <h6 class="text-muted">Total Requests</h6>
-            <h3>{{ request_stats.total_requests }}</h3>
-          </div>
-          <div class="col-md-2">
-            <h6 class="text-muted">Pending</h6>
-            <h3>{{ request_stats.pending }}</h3>
-          </div>
-          <div class="col-md-2">
-            <h6 class="text-muted">Approved</h6>
-            <h3>{{ request_stats.approved }}</h3>
-          </div>
-          <div class="col-md-2">
-            <h6 class="text-muted">In Transit</h6>
-            <h3>{{ request_stats.out_for_delivery }}</h3>
-          </div>
-          <div class="col-md-2">
-            <h6 class="text-muted">Delivered</h6>
-            <h3>{{ request_stats.delivered }}</h3>
-          </div>
-          <div class="col-md-2">
-            <h6 class="text-muted">Cancelled</h6>
-            <h3>{{ request_stats.cancelled }}</h3>
-          </div>
+    <!-- Customer Requests -->
+    <div class="col-lg-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-header bg-transparent border-white border-opacity-10 py-3">
+                <i class="bi bi-bag me-2" style="color:var(--primary);"></i>
+                <span class="fw-700">Fulfillment Summary</span>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 text-center">
+                    <div class="col-4">
+                        <div class="text-xs text-muted text-uppercase fw-600 mb-1">Requests</div>
+                        <div class="h5 mb-0 fw-700">{{ request_stats.total_requests }}</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-xs text-muted text-uppercase fw-600 mb-1">Pending</div>
+                        <div class="h5 mb-0 fw-700 text-warning">{{ request_stats.pending }}</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-xs text-muted text-uppercase fw-600 mb-1">Delivered</div>
+                        <div class="h5 mb-0 fw-700 text-success">{{ request_stats.delivered }}</div>
+                    </div>
+                </div>
+                <div class="row g-3 text-center mt-3">
+                    <div class="col-6">
+                        <div class="text-xs text-muted text-uppercase fw-600 mb-1">Approved</div>
+                        <div class="h6 mb-0">{{ request_stats.approved }}</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-xs text-muted text-uppercase fw-600 mb-1">Cancelled</div>
+                        <div class="h6 mb-0 text-danger">{{ request_stats.cancelled }}</div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
 <!-- Recent Stock Movements -->
-<div class="row">
-  <div class="col-12">
-    <div class="card shadow">
-      <div class="card-header">
-        <h6 class="m-0 font-weight-bold">Stock Movements ({{ start_date }} - {{ end_date }})</h6>
-      </div>
-      <div class="card-body">
-        {% if movements %}
-          <div class="table-responsive">
-            <table class="table table-sm">
-              <thead class="table-light">
-                <tr>
-                  <th>Date</th>
-                  <th>Supply</th>
-                  <th>Type</th>
-                  <th class="text-end">Qty</th>
-                  <th>Reason</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for movement in movements %}
-                  <tr>
-                    <td><small>{{ movement.movement_date|date:"M d, Y H:i" }}</small></td>
-                    <td>{{ movement.supply.name }}</td>
-                    <td>
-                      <span class="badge bg-{% if movement.movement_type == 'IN' %}success{% else %}danger{% endif %}">
-                        {{ movement.get_movement_type_display }}
-                      </span>
-                    </td>
-                    <td class="text-end">{{ movement.quantity }}</td>
-                    <td><small>{{ movement.reason }}</small></td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% else %}
-          <p class="text-muted mb-0">No stock movements in this period</p>
-        {% endif %}
-      </div>
+<div class="card border-0 shadow-sm">
+    <div class="card-header bg-transparent border-white border-opacity-10 py-3">
+        <i class="bi bi-arrow-left-right me-2" style="color:var(--primary);"></i>
+        <span class="fw-700">Movement History ({{ start_date }} to {{ end_date }})</span>
     </div>
-  </div>
+    <div class="card-body p-0">
+        {% if movements %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Supply Name</th>
+                            <th>Type</th>
+                            <th class="text-end">Quantity</th>
+                            <th>Narrative / Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movement in movements %}
+                        <tr>
+                            <td><small class="text-secondary">{{ movement.movement_date|date:"M d, Y H:i" }}</small></td>
+                            <td class="fw-600">{{ movement.supply.name }}</td>
+                            <td>
+                                <span class="badge {% if movement.movement_type == 'IN' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ movement.get_movement_type_display }}
+                                </span>
+                            </td>
+                            <td class="text-end fw-600">{{ movement.quantity }}</td>
+                            <td><small class="text-secondary">{{ movement.reason|truncatechars:50 }}</small></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="bi bi-clock-history" style="font-size: 3rem; opacity: 0.15;"></i>
+                <h5 class="mt-3">No activity detected</h5>
+                <p class="text-secondary small">Adjust your analysis range to see more data.</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

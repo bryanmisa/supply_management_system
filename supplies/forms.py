@@ -1,5 +1,10 @@
 """
 Django forms for the supplies app.
+
+This module is responsible for capturing, validating, and shaping data boundaries 
+from user input before passing it to the database models.
+It includes customized clean() methodologies (like `CustomerRequestItemForm.clean()`) 
+that intercept logic conditionally (e.g. out-of-stock validation).
 """
 from django import forms
 from django.core.exceptions import ValidationError

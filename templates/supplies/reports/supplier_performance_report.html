@@ -1,58 +1,92 @@
 {% extends 'supplies/reports/reports_base.html' %}
 
-{% block report_title %}Supplier Performance Report{% endblock %}
+{% block report_title %}Vendor Performance Analytics{% endblock %}
 
 {% block report_content %}
-<div class="mb-3">
-    <form method="get" class="row g-3">
+<!-- Filter Section -->
+<div class="bg-black bg-opacity-25 rounded p-3 mb-4 border border-white border-opacity-10 shadow-sm fade-in">
+    <form method="get" class="row g-3 align-items-end">
         <div class="col-md-3">
-            <label for="start_date" class="form-label">Start Date</label>
-            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+            <label for="start_date" class="form-label text-secondary small fw-600 text-uppercase">Start Point</label>
+            <input type="date" class="form-control shadow-inner" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
         </div>
         <div class="col-md-3">
-            <label for="end_date" class="form-label">End Date</label>
-            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+            <label for="end_date" class="form-label text-secondary small fw-600 text-uppercase">End Point</label>
+            <input type="date" class="form-control shadow-inner" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
         </div>
-        <div class="col-md-3">
-            <label for="supplier" class="form-label">Supplier (Optional)</label>
-            <select class="form-select" id="supplier" name="supplier">
-                <option value="">All Suppliers</option>
+        <div class="col-md-4">
+            <label for="supplier" class="form-label text-secondary small fw-600 text-uppercase">Partner Analysis</label>
+            <select class="form-select shadow-inner" id="supplier" name="supplier">
+                <option value="">All Logistics Partners</option>
                 {% for sup in suppliers %}
                 <option value="{{ sup.id }}" {% if selected_supplier == sup.id %}selected{% endif %}>{{ sup.name }}</option>
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-3">
-            <label class="form-label">&nbsp;</label>
-            <button type="submit" class="btn btn-primary d-block">Generate Report</button>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100 fw-600 shadow-sm">
+                <i class="bi bi-person-check me-1"></i> Analyze
+            </button>
         </div>
     </form>
 </div>
 
-<div class="table-responsive">
-    <table class="table table-striped">
+<!-- Performance Metrics Table -->
+<div class="table-responsive fade-in">
+    <table class="table table-hover align-middle mb-0">
         <thead>
             <tr>
-                <th>Supplier</th>
-                <th>Total Orders</th>
-                <th>Total Items</th>
-                <th>Average Delivery Time</th>
-                <th>On-Time Delivery %</th>
-                <th>Order Value</th>
+                <th>Logistics Partner</th>
+                <th class="text-center">Order Volume</th>
+                <th class="text-center">Asset Flow</th>
+                <th class="text-end">Mean Lead Time</th>
+                <th class="text-end">Fulfillment Precision</th>
+                <th class="text-end">Financial obligation</th>
             </tr>
         </thead>
         <tbody>
             {% for performance in supplier_performance %}
             <tr>
-                <td>{{ performance.supplier.name }}</td>
-                <td>{{ performance.total_orders }}</td>
-                <td>{{ performance.total_items }}</td>
-                <td>{{ performance.avg_delivery_time|floatformat:1 }} days</td>
-                <td>{{ performance.on_time_delivery_percentage|floatformat:1 }}%</td>
-                <td>${{ performance.total_order_value|floatformat:2 }}</td>
+                <td>
+                    <div class="fw-700 text-white">{{ performance.supplier.name }}</div>
+                    <div class="xsmall text-muted">Primary Vendor</div>
+                </td>
+                <td class="text-center fw-600 text-secondary">{{ performance.total_orders }} orders</td>
+                <td class="text-center fw-600 text-secondary">{{ performance.total_items }} units</td>
+                <td class="text-end">
+                    <span class="fw-800 text-white">{{ performance.avg_delivery_time|floatformat:1 }}</span>
+                    <span class="xsmall text-secondary"> days</span>
+                </td>
+                <td class="text-end">
+                    <div class="d-flex align-items-center justify-content-end gap-2">
+                        <div class="progress flex-grow-1" style="height: 4px; min-width: 60px; background: rgba(255,255,255,0.05);">
+                            <div class="progress-bar {% if performance.on_time_delivery_percentage > 90 %}bg-success{% elif performance.on_time_delivery_percentage > 75 %}bg-info{% else %}bg-warning{% endif %}" 
+                                 role="progressbar" style="width: {{ performance.on_time_delivery_percentage }}%" 
+                                 aria-valuenow="{{ performance.on_time_delivery_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <span class="fw-800 {% if performance.on_time_delivery_percentage > 90 %}text-success{% elif performance.on_time_delivery_percentage > 75 %}text-info{% else %}text-warning{% endif %}">
+                            {{ performance.on_time_delivery_percentage|floatformat:1 }}%
+                        </span>
+                    </div>
+                </td>
+                <td class="text-end fw-800 text-white">
+                    ${{ performance.total_order_value|floatformat:2 }}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-5">
+                    <i class="bi bi-building-dash fs-1 opacity-10"></i>
+                    <p class="mt-2 text-secondary">No vendor performance data identified.</p>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<style>
+.xsmall { font-size: 0.75rem; }
+.shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4); }
+</style>
 {% endblock %}

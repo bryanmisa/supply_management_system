@@ -1,6 +1,12 @@
 """
 Django models for the supplies app.
-Traditional Django approach with business logic in models and managers.
+This file encapsulates all data tier logic (Fat Models). 
+Key relationships:
+- UserProfile (1:1 with User) -> role definition.
+- Supply -> connected to Category (M:1) and Supplier (M:1)
+- StockMovement -> Immutable audit ledger of Supply quantity mutations.
+- PurchaseOrder -> Tracks restocking inbound from Suppliers.
+- CustomerRequest -> Tracks outbound inventory allocations.
 """
 from django.db import models
 from django.core.validators import MinValueValidator
@@ -224,7 +230,8 @@ class Supply(models.Model):
         previous_stock = self.current_stock
         quantity_change = new_quantity - previous_stock
         
-        # Create stock movement record
+        # Enforce consistency in StockMovement log
+        # Any change to inventory is explicitly captured here for auditability.
         StockMovement.objects.create(
             supply=self,
             movement_type=movement_type,
@@ -416,6 +423,8 @@ class PurchaseOrder(models.Model):
                 item.receive_quantity(remaining, f"Auto-received for PO {self.order_number}")
         
         self.status = 'RECEIVED'
+        
+        # Automatically timestamp the delivery conclusion
         self.actual_delivery_date = timezone.now().date()
         self.save()
     

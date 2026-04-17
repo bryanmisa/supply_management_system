@@ -1,70 +1,94 @@
 {% extends 'base.html' %}
-{% block title %}Customer Requests{% endblock %}
+{% block title %}Acquisition Protocols - Customer Requests{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item">
-      <a href="{% url 'dashboard' %}">Dashboard</a>
-    </li>
+    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item active">Operational Requests</li>
   </ol>
 </nav>
 {% endblock %}
 
 {% block content %}
-<div class="card shadow">
-  <div class="card-header d-flex justify-content-between align-items-center">
-    <h6 class="m-0 font-weight-bold text-primary"><i class="bi bi-people"></i> Customer Requests</h6>
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4 fade-in">
+    <div>
+        <h1 class="h3 mb-1 fw-700 text-white">
+            <i class="bi bi-people-fill me-2" style="color:var(--primary);"></i>
+            Customer Acquisition Protocols
+        </h1>
+        <p class="mb-0 text-secondary small">Centralised management of inventory disbursement requests</p>
+    </div>
+</div>
+
+<div class="card shadow-sm border fade-in">
+  <div class="card-header d-flex justify-content-between align-items-center py-3">
+    <span class="fw-700">
+        <i class="bi bi-funnel me-2 text-primary"></i>Operational Filter
+    </span>
     <form method="get" class="d-flex gap-2">
-      <select name="status" class="form-select">
-        <option value="">All</option>
-        <option value="PENDING" {% if selected_status == 'PENDING' %}selected{% endif %}>Pending</option>
-        <option value="APPROVED" {% if selected_status == 'APPROVED' %}selected{% endif %}>Approved</option>
-        <option value="OUT_FOR_DELIVERY" {% if selected_status == 'OUT_FOR_DELIVERY' %}selected{% endif %}>Out for Delivery</option>
-        <option value="DELIVERED" {% if selected_status == 'DELIVERED' %}selected{% endif %}>Delivered</option>
-        <option value="CANCELLED" {% if selected_status == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+      <select name="status" class="form-select form-select-sm bg-black bg-opacity-25 border-white border-opacity-10 shadow-inner" style="min-width: 180px;">
+        <option value="">All Fulfillment States</option>
+        <option value="PENDING" {% if selected_status == 'PENDING' %}selected{% endif %}>Pending Verification</option>
+        <option value="APPROVED" {% if selected_status == 'APPROVED' %}selected{% endif %}>Authenticated</option>
+        <option value="OUT_FOR_DELIVERY" {% if selected_status == 'OUT_FOR_DELIVERY' %}selected{% endif %}>In Transit</option>
+        <option value="DELIVERED" {% if selected_status == 'DELIVERED' %}selected{% endif %}>Fulfilled</option>
+        <option value="CANCELLED" {% if selected_status == 'CANCELLED' %}selected{% endif %}>Terminated</option>
       </select>
-      <button class="btn btn-outline-primary" type="submit"><i class="bi bi-filter"></i> Filter</button>
+      <button class="btn btn-sm btn-primary px-3" type="submit">
+          <i class="bi bi-filter me-1"></i> Apply
+      </button>
     </form>
   </div>
-  <div class="card-body">
+  <div class="card-body p-0">
     {% if requests %}
       <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-light">
+        <table class="table table-hover align-middle mb-0">
+          <thead>
             <tr>
-              <th>Request #</th>
-              <th>Customer</th>
-              <th>Status</th>
-              <th>Item(s)</th>
-              <th>Date</th>
-              <th></th>
+              <th>Protocol #</th>
+              <th>Requestor Identity</th>
+              <th>Fulfillment Status</th>
+              <th>Asset Manifest</th>
+              <th>Submission Timeline</th>
+              <th class="text-center">Operations</th>
             </tr>
           </thead>
           <tbody>
             {% for r in requests %}
               <tr>
-                <td><strong>{{ r.request_number }}</strong></td>
                 <td>
-                  {{ r.customer_name }}<br>
-                  <small class="text-muted">{{ r.customer_email|default:"" }}</small>
+                    <div class="fw-800 text-white h6 mb-0">#{{ r.request_number }}</div>
                 </td>
                 <td>
-                  <span class="badge bg-{% if r.status == 'PENDING' %}warning{% elif r.status == 'APPROVED' %}info{% elif r.status == 'OUT_FOR_DELIVERY' %}primary{% elif r.status == 'DELIVERED' %}success{% else %}secondary{% endif %}">
+                  <div class="fw-600 text-white small">{{ r.customer_name }}</div>
+                  <div class="xsmall text-muted">{{ r.customer_email|default:"No verified email" }}</div>
+                </td>
+                <td>
+                  <span class="badge {% if r.status == 'PENDING' %}bg-warning-subtle text-warning border-warning{% elif r.status == 'APPROVED' %}bg-info-subtle text-info border-info{% elif r.status == 'OUT_FOR_DELIVERY' %}bg-primary-subtle text-primary border-primary{% elif r.status == 'DELIVERED' %}bg-success-subtle text-success border-success{% else %}bg-secondary-subtle text-secondary border-white{% endif %} py-1 px-2 border border-opacity-25 rounded-pill xsmall">
                     {{ r.get_status_display }}
                   </span>
                 </td>
                 <td>
-                  {% for it in r.items.all %}
-                    <div>{{ it.supply.name }} x {{ it.quantity_requested }}</div>
-                  {% empty %}
-                    <em class="text-muted">No items</em>
-                  {% endfor %}
+                  <div class="xsmall text-secondary">
+                      {% for it in r.items.all|slice:":2" %}
+                        <div class="mb-1"><i class="bi bi-dot"></i> {{ it.supply.name }} <span class="text-white fw-600">x{{ it.quantity_requested }}</span></div>
+                      {% empty %}
+                        <em class="text-muted italic">Empty manifest</em>
+                      {% endfor %}
+                      {% if r.items.count > 2 %}
+                        <div class="text-primary mt-1">+ {{ r.items.count|add:"-2" }} more line items</div>
+                      {% endif %}
+                  </div>
                 </td>
-                <td><small>{{ r.created_at|date:"M d, Y H:i" }}</small></td>
-                <td class="text-end">
-                  <a href="{% url 'customer_request_detail' r.id %}" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-eye"></i>
+                <td>
+                    <div class="small fw-500 text-white">{{ r.created_at|date:"M d, Y" }}</div>
+                    <div class="xsmall text-secondary">{{ r.created_at|date:"H:i" }}</div>
+                </td>
+                <td class="text-center">
+                  <a href="{% url 'customer_request_detail' r.id %}" class="btn btn-sm btn-secondary shadow-sm">
+                    <i class="bi bi-eye"></i> Details
                   </a>
                 </td>
               </tr>
@@ -73,11 +97,17 @@
         </table>
       </div>
     {% else %}
-      <div class="text-center text-muted py-4">
-        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
-        <p class="mt-2 mb-0">No customer requests found.</p>
+      <div class="text-center py-5">
+        <i class="bi bi-inbox fs-1 opacity-10"></i>
+        <p class="mt-3 text-secondary small">No customer request protocols identified in this segment.</p>
       </div>
     {% endif %}
   </div>
 </div>
+
+<style>
+.xsmall { font-size: 0.725rem; }
+.italic { font-style: italic; }
+.shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.4); }
+</style>
 {% endblock %}

@@ -11,95 +11,59 @@
 {% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h1 class="h2 mb-4">
-            <i class="bi bi-speedometer2"></i>
+<!-- Page Header -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="h3 mb-1 fw-700" style="letter-spacing:-0.02em;">
+            <i class="bi bi-speedometer2 me-2" style="color:var(--primary);"></i>
             Welcome, {{ request.user.get_full_name|default:request.user.username }}!
         </h1>
+        <p class="mb-0" style="color:var(--text-secondary); font-size:0.875rem;">
+            Track your supply requests and browse available items
+        </p>
+    </div>
+    <a href="{% url 'customer_request_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> New Request
+    </a>
+</div>
+
+<!-- ── KPI Metric Cards ──────────────────────────── -->
+<div class="mb-4">
+    <div class="metric-card metric-primary d-inline-block me-3 mb-3" style="width: 260px; vertical-align: top;">
+        <div class="metric-label">Total Requests</div>
+        <div class="metric-value">{{ total_requests }}</div>
+        <i class="bi bi-list-ul metric-icon" style="color:var(--primary);"></i>
+    </div>
+
+    <div class="metric-card metric-warning d-inline-block me-3 mb-3" style="width: 260px; vertical-align: top;">
+        <div class="metric-label">Pending Requests</div>
+        <div class="metric-value" style="color:var(--warning);">{{ pending_requests }}</div>
+        <i class="bi bi-clock metric-icon" style="color:var(--warning);"></i>
+    </div>
+
+    <div class="metric-card metric-success d-inline-block me-3 mb-3" style="width: 260px; vertical-align: top;">
+        <div class="metric-label">Status Overview</div>
+        <div class="metric-value" style="font-size: 1.2rem; color: var(--success);">All Systems OK</div>
+        <i class="bi bi-shield-check metric-icon" style="color:var(--success);"></i>
     </div>
 </div>
 
-<!-- Customer Stats -->
-<div class="row mb-4">
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Requests
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {{ total_requests }}
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-list-ul fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Pending Requests
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            {{ pending_requests }}
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-clock fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-4 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Quick Actions
-                        </div>
-                        <div class="mt-2">
-                            <a href="{% url 'customer_request_create' %}" class="btn btn-success btn-sm">
-                                <i class="bi bi-plus-circle"></i> New Request
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="bi bi-bag-plus fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
+<div class="row g-4 mb-4">
     <!-- Recent Requests -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="bi bi-clock-history"></i> Recent Requests
-                </h6>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="bi bi-clock-history me-2" style="color:var(--primary);"></i>
+                    Recent Requests
+                </span>
                 <a href="{% url 'customer_my_requests' %}" class="btn btn-sm btn-outline-primary">View All</a>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 {% if recent_requests %}
                     <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead class="table-light">
+                        <table class="table mb-0">
+                            <thead>
                                 <tr>
                                     <th>Request #</th>
                                     <th>Status</th>
@@ -111,17 +75,17 @@
                                     <tr>
                                         <td>
                                             <a href="{% url 'customer_request_detail_mine' request_obj.id %}" 
-                                               class="text-decoration-none">
+                                               class="text-decoration-none fw-500" style="color:var(--text);">
                                                 {{ request_obj.request_number }}
                                             </a>
                                         </td>
                                         <td>
-                                            <span class="badge bg-{% if request_obj.status == 'PENDING' %}warning{% elif request_obj.status == 'APPROVED' %}info{% elif request_obj.status == 'OUT_FOR_DELIVERY' %}primary{% elif request_obj.status == 'DELIVERED' %}success{% else %}secondary{% endif %} badge-sm">
+                                            <span class="badge {% if request_obj.status == 'PENDING' %}bg-warning{% elif request_obj.status == 'APPROVED' %}bg-info{% elif request_obj.status == 'OUT_FOR_DELIVERY' %}bg-primary{% elif request_obj.status == 'DELIVERED' %}bg-success{% else %}bg-secondary{% endif %}">
                                                 {{ request_obj.get_status_display }}
                                             </span>
                                         </td>
                                         <td>
-                                            <small>{{ request_obj.created_at|date:"M d" }}</small>
+                                            <small class="text-secondary">{{ request_obj.created_at|date:"M d" }}</small>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -129,11 +93,11 @@
                         </table>
                     </div>
                 {% else %}
-                    <div class="text-center text-muted py-3">
-                        <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.3;"></i>
-                        <p class="mt-2 mb-1">No requests yet</p>
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox" style="font-size: 2.5rem; opacity: 0.2;"></i>
+                        <p class="mt-2 mb-3 text-secondary">No requests yet</p>
                         <a href="{% url 'customer_request_create' %}" class="btn btn-sm btn-primary">
-                            Create Your First Request
+                            Create First Request
                         </a>
                     </div>
                 {% endif %}
@@ -142,37 +106,39 @@
     </div>
 
     <!-- Available Supplies -->
-    <div class="col-lg-6 mb-4">
-        <div class="card shadow">
-            <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="bi bi-box-seam"></i> Available Supplies
-                </h6>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>
+                    <i class="bi bi-box-seam me-2" style="color:var(--success);"></i>
+                    Available Supplies
+                </span>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 {% if available_supplies %}
                     <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead class="table-light">
+                        <table class="table mb-0">
+                            <thead>
                                 <tr>
                                     <th>Item</th>
-                                    <th>Stock</th>
                                     <th>Category</th>
+                                    <th>Stock</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for supply in available_supplies %}
                                     <tr>
-                                        <td>
-                                            {{ supply.name }}
+                                        <td class="fw-500 text-white">
+                                            {{ supply.name|truncatechars:30 }}
+                                        </td>
+                                        <td class="text-secondary small">
+                                            {{ supply.category.name }}
                                         </td>
                                         <td>
-                                            <span class="badge bg-{% if supply.current_stock > supply.minimum_stock %}success{% else %}warning{% endif %} badge-sm">
-                                                {{ supply.current_stock }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <small>{{ supply.category.name }}</small>
+                                            <div class="d-flex align-items-center">
+                                                <span class="stock-indicator {% if supply.current_stock > supply.minimum_stock %}in-stock{% else %}low-stock{% endif %}"></span>
+                                                <span class="small">{{ supply.current_stock }}</span>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -180,9 +146,9 @@
                         </table>
                     </div>
                 {% else %}
-                    <div class="text-center text-muted py-3">
-                        <i class="bi bi-box" style="font-size: 2rem; opacity: 0.3;"></i>
-                        <p class="mt-2 mb-0">No supplies currently available</p>
+                    <div class="text-center py-5">
+                        <i class="bi bi-box" style="font-size: 2.5rem; opacity: 0.2;"></i>
+                        <p class="mt-2 mb-0 text-secondary">No supplies currently available</p>
                     </div>
                 {% endif %}
             </div>
@@ -190,46 +156,30 @@
     </div>
 </div>
 
-<!-- Quick Action Cards -->
-<div class="row">
-    <div class="col-12">
-        <div class="card shadow">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">
-                    <i class="bi bi-lightning"></i> Quick Actions
-                </h6>
+<!-- ── Quick Actions Grid ────────────────────────── -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-lightning me-2" style="color:var(--primary);"></i>Ready to help?
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <a href="{% url 'customer_request_create' %}" class="quick-action qa-primary h-100 flex-row justify-content-start px-4">
+                    <i class="bi bi-bag-plus me-3"></i>
+                    <div class="text-start">
+                        <div class="fw-bold">Request Supplies</div>
+                        <div class="text-muted small">Submit a new request for items you need</div>
+                    </div>
+                </a>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <div class="card bg-light h-100">
-                            <div class="card-body text-center">
-                                <div class="mb-3">
-                                    <i class="bi bi-bag-plus text-primary" style="font-size: 2rem;"></i>
-                                </div>
-                                <h6>Request Supplies</h6>
-                                <p class="card-text text-muted small">Submit a new request for supplies you need</p>
-                                <a href="{% url 'customer_request_create' %}" class="btn btn-primary btn-sm">
-                                    Create Request
-                                </a>
-                            </div>
-                        </div>
+            <div class="col-md-6">
+                <a href="{% url 'customer_my_requests' %}" class="quick-action qa-success h-100 flex-row justify-content-start px-4">
+                    <i class="bi bi-list-check me-3"></i>
+                    <div class="text-start">
+                        <div class="fw-bold">My Requests</div>
+                        <div class="text-muted small">Track and manage your existing requests</div>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="card bg-light h-100">
-                            <div class="card-body text-center">
-                                <div class="mb-3">
-                                    <i class="bi bi-list-check text-success" style="font-size: 2rem;"></i>
-                                </div>
-                                <h6>My Requests</h6>
-                                <p class="card-text text-muted small">Track status of all your requests</p>
-                                <a href="{% url 'customer_my_requests' %}" class="btn btn-success btn-sm">
-                                    View Requests
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </a>
             </div>
         </div>
     </div>

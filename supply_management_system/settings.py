@@ -154,3 +154,10 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'danger',
 }
+
+# Authentication URLs
+# CRITICAL: Override Django's default /accounts/login/ with the project's unified login page.
+# Without this, @login_required and all role decorators redirect unauthenticated users to a 404.
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'      # Fallback; UnifiedLoginView.get_success_url() takes priority
+LOGOUT_REDIRECT_URL = '/login/'
