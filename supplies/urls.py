@@ -48,6 +48,7 @@ urlpatterns = [
     path('customer/requests/', views.customer_my_requests, name='customer_my_requests'),
     path('customer/requests/new/', views.customer_request_create, name='customer_request_create'),
     path('customer/requests/<int:request_id>/', views.customer_request_detail_mine, name='customer_request_detail_mine'),
+    path('customer/requests/<int:request_id>/invoice/', views.customer_request_invoice_pdf, name='customer_request_invoice_pdf'),
     path('customer/requests/thanks/<str:request_number>/', views.customer_request_thanks, name='customer_request_thanks'),
 
     # Categories

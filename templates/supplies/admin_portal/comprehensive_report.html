@@ -16,14 +16,14 @@
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
         <h1 class="h3 mb-1 fw-700" style="letter-spacing:-0.02em;">
-            <i class="bi bi-file-earmark-bar-graph me-2" style="color:var(--primary);"></i>Comprehensive Analytics
+            <i class="bi bi-file-earmark-bar-graph me-2" style="color:var(--primary);"></i>Summary Report
         </h1>
         <p class="mb-0" style="color:var(--text-secondary); font-size:0.875rem;">
-            Deep dive into system-wide supply chain performance
+            Overall system overview and performance
         </p>
     </div>
     <a href="{% url 'admin_export_report_pdf' %}" class="btn btn-danger">
-        <i class="bi bi-file-pdf me-2"></i>Export Final PDF
+        <i class="bi bi-file-pdf me-2"></i>Download PDF
     </a>
 </div>
 
@@ -32,16 +32,16 @@
   <div class="card-body">
     <form method="GET" class="row g-3 align-items-end">
       <div class="col-md-3">
-        <label class="form-label small fw-600 text-muted">Analysis Start</label>
+        <label class="form-label small fw-600 text-muted">From</label>
         <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
       </div>
       <div class="col-md-3">
-        <label class="form-label small fw-600 text-muted">Analysis End</label>
+        <label class="form-label small fw-600 text-muted">To</label>
         <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
       </div>
       <div class="col-md-6">
         <button type="submit" class="btn btn-primary w-100">
-            <i class="bi bi-arrow-repeat me-2"></i>Recalculate Reporting Metrics
+            <i class="bi bi-arrow-repeat me-2"></i>Refresh Report
         </button>
       </div>
     </form>
@@ -52,7 +52,7 @@
 <div class="row g-3 mb-4 fade-in">
     <div class="col-xl-3 col-md-6">
         <div class="metric-card metric-primary">
-            <div class="metric-label">System Users</div>
+            <div class="metric-label">Users</div>
             <div class="metric-value">{{ summary.total_users }}</div>
             <div class="mt-2 text-xs text-secondary">M: {{ summary.total_managers }} | C: {{ summary.total_customers }}</div>
             <i class="bi bi-people metric-icon" style="color:var(--primary);"></i>
@@ -60,14 +60,14 @@
     </div>
     <div class="col-xl-3 col-md-6">
         <div class="metric-card metric-success">
-            <div class="metric-label">Unique Supplies</div>
+            <div class="metric-label">Items</div>
             <div class="metric-value">{{ summary.total_supplies }}</div>
             <i class="bi bi-box-seam metric-icon" style="color:var(--success);"></i>
         </div>
     </div>
     <div class="col-xl-3 col-md-6">
         <div class="metric-card metric-info">
-            <div class="metric-label">Inventory Assets</div>
+            <div class="metric-label">Total Inventory Value</div>
             <div class="metric-value" style="font-size: 1.5rem;">${{ summary.total_inventory_value|floatformat:0 }}</div>
             <i class="bi bi-currency-dollar metric-icon" style="color:var(--info);"></i>
         </div>
@@ -88,7 +88,7 @@
         <div class="card h-100 border-0 shadow-sm">
             <div class="card-header bg-transparent border-white border-opacity-10 py-3">
                 <i class="bi bi-cart me-2" style="color:var(--primary);"></i>
-                <span class="fw-700">Procurement Summary</span>
+                <span class="fw-700">Purchase Orders</span>
             </div>
             <div class="card-body">
                 <div class="row g-3 text-center">
@@ -106,7 +106,7 @@
                     </div>
                 </div>
                 <div class="mt-4 p-3 rounded-lg bg-black bg-opacity-25 text-center">
-                    <div class="text-xs text-muted text-uppercase fw-600 mb-1">Total Procurement Value</div>
+                    <div class="text-xs text-muted text-uppercase fw-600 mb-1">Total Order Value</div>
                     <div class="h3 mb-0 fw-800 text-white">${{ purchase_order_stats.total_amount|floatformat:0 }}</div>
                 </div>
             </div>
@@ -118,7 +118,7 @@
         <div class="card h-100 border-0 shadow-sm">
             <div class="card-header bg-transparent border-white border-opacity-10 py-3">
                 <i class="bi bi-bag me-2" style="color:var(--primary);"></i>
-                <span class="fw-700">Fulfillment Summary</span>
+                <span class="fw-700">Customer Requests</span>
             </div>
             <div class="card-body">
                 <div class="row g-3 text-center">
@@ -154,7 +154,7 @@
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-transparent border-white border-opacity-10 py-3">
         <i class="bi bi-arrow-left-right me-2" style="color:var(--primary);"></i>
-        <span class="fw-700">Movement History ({{ start_date }} to {{ end_date }})</span>
+        <span class="fw-700">Activity Log ({{ start_date }} to {{ end_date }})</span>
     </div>
     <div class="card-body p-0">
         {% if movements %}
@@ -166,7 +166,7 @@
                             <th>Supply Name</th>
                             <th>Type</th>
                             <th class="text-end">Quantity</th>
-                            <th>Narrative / Reason</th>
+                            <th>Reason</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -189,8 +189,8 @@
         {% else %}
             <div class="text-center py-5">
                 <i class="bi bi-clock-history" style="font-size: 3rem; opacity: 0.15;"></i>
-                <h5 class="mt-3">No activity detected</h5>
-                <p class="text-secondary small">Adjust your analysis range to see more data.</p>
+                <h5 class="mt-3">No activity found</h5>
+                <p class="text-secondary small">Change your date range to see more data.</p>
             </div>
         {% endif %}
     </div>

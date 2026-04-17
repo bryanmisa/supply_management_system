@@ -804,6 +804,38 @@ def customer_request_thanks(request, request_number):
     })
 
 
+@login_required
+def customer_request_invoice_pdf(request, request_id):
+    """Generate a PDF invoice for a customer request."""
+    # Retrieve the request, ensuring users only see their own unless they are manager/admin
+    if request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.is_manager):
+        req = get_object_or_404(CustomerRequest, id=request_id)
+    else:
+        req = get_object_or_404(CustomerRequest, id=request_id, user=request.user)
+    
+    # Ensure totals are calculated (migration fallback)
+    if req.total_amount == 0 and req.items.exists():
+        req.calculate_total()
+
+    html = render_to_string('supplies/customer_portal/invoice_pdf.html', {
+        'request_obj': req,
+        'generated_at': timezone.now(),
+        'company_name': "Supply Management System",
+    })
+    
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Invoice-{req.request_number}.pdf"'
+    
+    result = pisa.CreatePDF(src=html, dest=response)
+    if result.err:
+        messages.error(request, 'Failed to generate PDF for this invoice.')
+        if hasattr(request.user, 'profile') and request.user.profile.is_manager:
+            return redirect('customer_request_detail', request_id=request_id)
+        return redirect('customer_request_detail_mine', request_id=request_id)
+        
+    return response
+
+
 @manager_required
 def customer_request_list(request):
     """Manager page: list and filter customer requests."""

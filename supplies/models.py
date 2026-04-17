@@ -537,6 +537,9 @@ class CustomerRequest(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
                              on_delete=models.SET_NULL, related_name='customer_requests')
 
+    # Financial info
+    total_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0, validators=[MinValueValidator(0)])
+
     objects = CustomerRequestManager()
 
     class Meta:
@@ -553,6 +556,14 @@ class CustomerRequest(models.Model):
         if not self.request_number:
             self.request_number = timezone.now().strftime("CR%Y%m%d%H%M%S")
         super().save(*args, **kwargs)
+
+    def calculate_total(self):
+        """Calculate total amount from request items."""
+        total = sum((item.unit_price or 0) * item.quantity_requested for item in self.items.all())
+        # Use update_fields to avoid triggering save() recursively if called from item save
+        self.total_amount = total
+        CustomerRequest.objects.filter(id=self.id).update(total_amount=total)
+        return total
 
     def approve(self, approver='Manager'):
         if self.status != 'PENDING':
@@ -590,9 +601,23 @@ class CustomerRequestItem(models.Model):
     request = models.ForeignKey(CustomerRequest, on_delete=models.CASCADE, related_name='items')
     supply = models.ForeignKey(Supply, on_delete=models.PROTECT, related_name='customer_request_items')
     quantity_requested = models.IntegerField(validators=[MinValueValidator(1)])
+    
+    # Pricing (captured at time of request)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)], null=True, blank=True)
 
     class Meta:
         ordering = ['id']
 
     def __str__(self):
         return f"{self.supply.name} x {self.quantity_requested}"
+
+    @property
+    def total_price(self):
+        return self.quantity_requested * (self.unit_price or 0)
+
+    def save(self, *args, **kwargs):
+        if self.unit_price is None and self.supply:
+            self.unit_price = self.supply.unit_price
+        super().save(*args, **kwargs)
+        # Refresh the parent total
+        self.request.calculate_total()

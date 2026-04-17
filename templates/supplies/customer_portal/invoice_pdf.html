@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Invoice - {{ request_obj.request_number }}</title>
+  <style>
+    @page { size: A4; margin: 30pt 30pt; }
+    body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 10pt; color: #111; line-height: 1.5; }
+    .header { border-bottom: 2pt solid #161928; padding-bottom: 12pt; margin-bottom: 20pt; }
+    .header h1 { font-size: 22pt; margin: 0; color: #161928; letter-spacing: -0.02em; }
+    .header .subtitle { font-size: 10pt; color: #64748b; margin-top: 4pt; }
+    
+    .grid { width: 100%; border-collapse: collapse; margin-bottom: 20pt; }
+    .grid td { vertical-align: top; }
+    
+    .box { border: 1pt solid #e2e8f0; padding: 12pt; border-radius: 6pt; background: #f8fafc; }
+    .section-title { font-size: 9pt; font-weight: bold; text-transform: uppercase; color: #64748b; margin-bottom: 6pt; letter-spacing: 0.05em; }
+    
+    table.items { width: 100%; border-collapse: collapse; margin-top: 10pt; }
+    table.items th { background: #161928; color: #ffffff; text-align: left; padding: 10pt; font-size: 9pt; text-transform: uppercase; border: none; }
+    table.items td { padding: 10pt; border-bottom: 1pt solid #f1f5f9; }
+    
+    .text-right { text-align: right; }
+    .fw-bold { font-weight: bold; }
+    
+    .totals-area { margin-top: 20pt; width: 100%; }
+    .totals-table { width: 250pt; margin-left: auto; border-top: 2pt solid #161928; }
+    .totals-table td { padding: 8pt 0; font-size: 11pt; }
+    
+    .badge { display: inline-block; padding: 3pt 8pt; border-radius: 4pt; font-size: 8pt; font-weight: bold; color: #ffffff; text-transform: uppercase; }
+    .badge-pending { background: #f59e0b; }
+    .badge-approved { background: #0ea5e9; }
+    .badge-delivered { background: #10b981; }
+    .badge-cancelled { background: #ef4444; }
+    .badge-secondary { background: #64748b; }
+
+    .footer { position: fixed; bottom: 0; width: 100%; border-top: 1pt solid #f1f5f9; padding-top: 10pt; font-size: 8pt; color: #94a3b8; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <table width="100%">
+      <tr>
+        <td>
+          <h1>INVOICE</h1>
+          <div class="subtitle">{{ company_name|default:"Supply Management System" }}</div>
+        </td>
+        <td class="text-right">
+          <div class="fw-bold" style="font-size: 14pt;">#{{ request_obj.request_number }}</div>
+          <div class="subtitle">Date: {{ request_obj.created_at|date:"M d, Y" }}</div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <table class="grid">
+    <tr>
+      <td width="55%">
+        <div class="section-title">Bill To</div>
+        <div class="box">
+          <div class="fw-bold" style="font-size: 12pt; margin-bottom: 4pt;">{{ request_obj.customer_name }}</div>
+          {% if request_obj.customer_email %}<div>{{ request_obj.customer_email }}</div>{% endif %}
+          {% if request_obj.customer_phone %}<div>{{ request_obj.customer_phone }}</div>{% endif %}
+        </div>
+      </td>
+      <td width="5px"></td>
+      <td width="40%">
+        <div class="section-title">Status & Metadata</div>
+        <div class="box">
+          <table width="100%">
+            <tr>
+              <td class="small" style="padding-bottom: 4pt;">Request Status:</td>
+              <td class="text-right" style="padding-bottom: 4pt;">
+                <span class="badge badge-{{ request_obj.status|lower }}">
+                   {{ request_obj.get_status_display }}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <td class="small">Method:</td>
+              <td class="text-right fw-bold">Internal Allocation</td>
+            </tr>
+          </table>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <div class="section-title">Itemized Details</div>
+  <table class="items">
+    <thead>
+      <tr>
+        <th width="50%">Description</th>
+        <th class="text-right">Quantity</th>
+        <th class="text-right">Unit Price ($)</th>
+        <th class="text-right">Total ($)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in request_obj.items.all %}
+      <tr>
+        <td>
+          <div class="fw-bold">{{ item.supply.name }}</div>
+          <div style="font-size: 8pt; color: #64748b; margin-top: 2pt;">SKU: {{ item.supply.sku }}</div>
+        </td>
+        <td class="text-right">{{ item.quantity_requested }}</td>
+        <td class="text-right">{{ item.unit_price|floatformat:2 }}</td>
+        <td class="text-right fw-bold">{{ item.total_price|floatformat:2 }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 20pt;">No items found in this request.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="totals-area">
+    <table class="totals-table">
+      <tr>
+        <td class="fw-bold">Grand Total</td>
+        <td class="text-right fw-bold" style="font-size: 16pt;">${{ request_obj.total_amount|floatformat:2 }}</td>
+      </tr>
+    </table>
+  </div>
+
+  {% if request_obj.notes %}
+  <div style="margin-top: 30pt;">
+    <div class="section-title">Notes & Terms</div>
+    <div style="font-size: 9pt; color: #475569; white-space: pre-line;">{{ request_obj.notes }}</div>
+  </div>
+  {% endif %}
+
+  <div class="footer">
+    This document is a formal record of supply allocation. Generated on {{ generated_at|date:"M d, Y H:i" }}
+  </div>
+</body>
+</html>

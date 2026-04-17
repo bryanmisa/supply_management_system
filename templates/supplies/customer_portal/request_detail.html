@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Request Protocol - #{{ request_obj.request_number }}{% endblock %}
+{% block title %}Request Details - #{{ request_obj.request_number }}{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
@@ -34,7 +34,7 @@
     <!-- Request Information -->
     <div class="card mb-4 border shadow-sm">
       <div class="card-header py-3 bg-black bg-opacity-10">
-          <span class="fw-700 small text-uppercase" style="letter-spacing: 0.1em;">Communication & Logistics</span>
+          <span class="fw-700 small text-uppercase" style="letter-spacing: 0.1em;">Contact Information</span>
       </div>
       <div class="card-body">
         <div class="row g-4">
@@ -42,7 +42,7 @@
             <div class="d-flex align-items-center gap-3 p-2 rounded bg-white bg-opacity-5">
                 <i class="bi bi-envelope text-primary"></i>
                 <div>
-                    <div class="xsmall text-secondary text-uppercase fw-600">Electronic Mail</div>
+                    <div class="xsmall text-secondary text-uppercase fw-600">Email</div>
                     <div class="fw-500 text-white">{{ request_obj.customer_email|default:"—" }}</div>
                 </div>
             </div>
@@ -51,7 +51,7 @@
             <div class="d-flex align-items-center gap-3 p-2 rounded bg-white bg-opacity-5">
                 <i class="bi bi-telephone text-primary"></i>
                 <div>
-                    <div class="xsmall text-secondary text-uppercase fw-600">Contact Line</div>
+                    <div class="xsmall text-secondary text-uppercase fw-600">Phone</div>
                     <div class="fw-500 text-white">{{ request_obj.customer_phone|default:"—" }}</div>
                 </div>
             </div>
@@ -59,7 +59,7 @@
         </div>
         {% if request_obj.notes %}
           <div class="mt-4 pt-4 border-top border-white border-opacity-10">
-            <div class="xsmall text-secondary text-uppercase fw-700 mb-2">Requestor Narrative</div>
+            <div class="xsmall text-secondary text-uppercase fw-700 mb-2">Notes</div>
             <p class="text-secondary small mb-0 p-3 rounded bg-black bg-opacity-25 border border-white border-opacity-5" style="white-space: pre-wrap;">{{ request_obj.notes }}</p>
           </div>
         {% endif %}
@@ -69,7 +69,7 @@
     <!-- Line Items Table -->
     <div class="card border shadow-sm">
       <div class="card-header d-flex justify-content-between align-items-center py-3">
-          <span class="fw-700"><i class="bi bi-grid-3x3-gap me-2 text-primary"></i>Resource Allocation</span>
+          <span class="fw-700"><i class="bi bi-grid-3x3-gap me-2 text-primary"></i>Requested Items</span>
           <span class="badge bg-secondary-subtle text-secondary xsmall">Total qty: {{ request_obj.total_items }}</span>
       </div>
       <div class="card-body p-0">
@@ -78,10 +78,11 @@
             <table class="table table-hover align-middle mb-0">
               <thead>
                 <tr>
-                  <th>Inventory Asset</th>
-                  <th>SKU Identifier</th>
+                  <th>Item Name</th>
+                  <th>SKU</th>
                   <th class="text-end">Requested</th>
-                  <th class="text-end">Buffer (On-Hand)</th>
+                  <th class="text-end">Unit Price</th>
+                  <th class="text-end">Subtotal</th>
                 </tr>
               </thead>
               <tbody>
@@ -96,35 +97,48 @@
                     </td>
                     <td><code class="xsmall">{{ it.supply.sku }}</code></td>
                     <td class="text-end fw-800 text-primary">{{ it.quantity_requested }}</td>
-                    <td class="text-end text-secondary fw-500">{{ it.supply.current_stock }}</td>
+                    <td class="text-end text-secondary small">${{ it.unit_price|floatformat:2 }}</td>
+                    <td class="text-end fw-700 text-white">${{ it.total_price|floatformat:2 }}</td>
                   </tr>
                 {% endfor %}
               </tbody>
+              <tfoot class="bg-black bg-opacity-25">
+                <tr>
+                  <td colspan="5" class="text-end fw-600 py-3">Grand Total:</td>
+                  <td class="text-end fw-800 h5 mb-0 text-white py-3">${{ request_obj.total_amount|floatformat:2 }}</td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         {% else %}
           <div class="text-center py-5">
               <i class="bi bi-box-seam fs-1 opacity-10"></i>
-              <p class="mt-2 text-secondary small">No items declared in this request protocol.</p>
+              <p class="mt-2 text-secondary small">No items found in this request.</p>
           </div>
         {% endif %}
       </div>
     </div>
   </div>
 
-  <!-- Operational Actions Sidebar -->
+  <!-- Actions Sidebar -->
   <div class="col-lg-4">
     {% if not readonly %}
       <div class="card border shadow-sm sticky-top" style="top: 1rem;">
         <div class="card-header py-3">
-            <span class="fw-700 small text-uppercase" style="letter-spacing: 0.1em;"><i class="bi bi-gear-wide-connected me-2 text-primary"></i>Operations Matrix</span>
+            <span class="fw-700 small text-uppercase" style="letter-spacing: 0.1em;"><i class="bi bi-gear-wide-connected me-2 text-primary"></i>Actions</span>
         </div>
         <div class="card-body">
+          <div class="d-grid gap-2 mb-4">
+            <a href="{% url 'customer_request_invoice_pdf' request_obj.id %}" class="btn btn-secondary fw-700">
+                <i class="bi bi-file-earmark-pdf me-1 text-danger"></i> View Invoice
+            </a>
+          </div>
+
           {% if request_obj.status == 'PENDING' %}
             <form method="post" action="{% url 'customer_request_approve' request_obj.id %}" class="d-grid gap-2 mb-3">
               {% csrf_token %}
-              <button class="btn btn-success fw-700" onclick="return confirm('Authorize this request?')">
-                  <i class="bi bi-check-circle me-1"></i> Authenticate Request
+              <button class="btn btn-success fw-700" onclick="return confirm('Approve this request?')">
+                  <i class="bi bi-check-circle me-1"></i> Approve Request
               </button>
             </form>
           {% endif %}
@@ -132,8 +146,8 @@
           {% if request_obj.status == 'APPROVED' %}
             <form method="post" action="{% url 'customer_request_out_for_delivery' request_obj.id %}" class="d-grid gap-2 mb-3">
               {% csrf_token %}
-              <button class="btn btn-primary fw-700" onclick="return confirm('Initialize logistics?')">
-                  <i class="bi bi-truck me-2"></i> Deploy for Delivery
+              <button class="btn btn-primary fw-700" onclick="return confirm('Ship this order?')">
+                  <i class="bi bi-truck me-2"></i> Ship Request
               </button>
             </form>
           {% endif %}
@@ -141,8 +155,8 @@
           {% if request_obj.status == 'OUT_FOR_DELIVERY' %}
             <form method="post" action="{% url 'customer_request_delivered' request_obj.id %}" class="d-grid gap-2 mb-3">
               {% csrf_token %}
-              <button class="btn btn-success fw-700" onclick="return confirm('Confirm fulfillment?')">
-                  <i class="bi bi-box-seam me-2"></i> Finalise Fulfillment
+              <button class="btn btn-success fw-700" onclick="return confirm('Mark as delivered?')">
+                  <i class="bi bi-box-seam me-2"></i> Mark as Delivered
               </button>
             </form>
           {% endif %}
@@ -151,8 +165,8 @@
             <div class="pt-3 border-top border-white border-opacity-10 mt-3">
                 <form method="post" action="{% url 'customer_request_cancel' request_obj.id %}" class="d-grid gap-2">
                   {% csrf_token %}
-                  <button class="btn btn-outline-danger btn-sm fw-600" onclick="return confirm('Abort this request protocol?')">
-                      <i class="bi bi-x-circle me-1"></i> Terminate Protocol
+                  <button class="btn btn-outline-danger btn-sm fw-600" onclick="return confirm('Cancel this request?')">
+                      <i class="bi bi-x-circle me-1"></i> Cancel Request
                   </button>
                 </form>
             </div>
@@ -161,18 +175,26 @@
           {% if request_obj.status == 'DELIVERED' %}
             <div class="alert alert-success bg-success bg-opacity-10 border-0 mb-0 d-flex align-items-center">
                 <i class="bi bi-shield-check fs-4 me-3"></i>
-                <div class="small fw-600">This protocol is fully realized and stock has been incremented/deducted accordingly.</div>
+                <div class="small fw-600">This request is delivered. Stock has been updated.</div>
             </div>
           {% endif %}
         </div>
       </div>
     {% else %}
-      <div class="alert alert-primary bg-primary bg-opacity-10 border-0 shadow-sm fade-in d-flex align-items-start">
-          <i class="bi bi-info-circle-fill fs-4 me-3 mt-1"></i>
-          <div>
-              <h6 class="fw-700 mb-1">Request Transmitted</h6>
-              <p class="mb-0 small opacity-75 text-secondary">Your inventory request has been received by the logistics department and is awaiting verification.</p>
-          </div>
+      <div class="card border shadow-sm sticky-top" style="top: 1rem;">
+        <div class="card-header py-3 bg-black bg-opacity-10">
+            <span class="fw-700 small text-uppercase" style="letter-spacing: 0.1em;"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>Documents</span>
+        </div>
+        <div class="card-body d-grid gap-2">
+            <a href="{% url 'customer_request_invoice_pdf' request_obj.id %}" class="btn btn-secondary fw-700 w-100">
+                <i class="bi bi-download me-1"></i> Download Invoice
+            </a>
+            
+            <div class="alert alert-primary bg-primary bg-opacity-10 border-0 shadow-sm fade-in d-flex align-items-start mt-2">
+                <i class="bi bi-info-circle-fill fs-5 me-3 mt-1"></i>
+                <div class="small text-secondary">Your request has been received and is awaiting review.</div>
+            </div>
+        </div>
       </div>
     {% endif %}
   </div>

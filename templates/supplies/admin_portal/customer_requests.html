@@ -106,7 +106,7 @@
 <!-- Requests Table -->
 <div class="card shadow fade-in">
     <div class="card-header d-flex align-items-center justify-content-between">
-        <span class="fw-600">Request Registry</span>
+        <span class="fw-600">Requests List</span>
     </div>
     <div class="card-body p-0">
         {% if page_obj %}
@@ -115,10 +115,10 @@
                     <thead>
                         <tr>
                             <th>Request ID</th>
-                            <th>Customer Identity</th>
+                            <th>Customer</th>
                             <th class="text-center">Items</th>
                             <th>Status</th>
-                            <th>Submission Date</th>
+                            <th>Date</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
@@ -144,9 +144,14 @@
                                 <small class="text-secondary">{{ req.created_at|date:"M d, Y H:i" }}</small>
                             </td>
                             <td class="text-center">
-                                <a href="{% url 'customer_request_detail' req.id %}" class="btn btn-sm btn-secondary">
-                                    <i class="bi bi-eye me-1"></i> Review
-                                </a>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'customer_request_detail' req.id %}" class="btn btn-secondary" title="Review Request">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'customer_request_invoice_pdf' req.id %}" class="btn btn-secondary" title="View Invoice">
+                                        <i class="bi bi-file-earmark-pdf text-danger"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Administrator Dashboard – Supply Management System{% endblock %}
+{% block title %}Admin Dashboard – Supply Management System{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
@@ -15,10 +15,10 @@
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
         <h1 class="h3 mb-1 fw-700" style="letter-spacing:-0.02em;">
-            <i class="bi bi-shield-lock me-2" style="color:var(--primary);"></i>Administrator Dashboard
+            <i class="bi bi-shield-lock me-2" style="color:var(--primary);"></i>Admin Dashboard
         </h1>
         <p class="mb-0" style="color:var(--text-secondary); font-size:0.875rem;">
-            System-wide overview and infrastructure management
+            Manage users, inventory, and orders
         </p>
     </div>
     <div class="d-flex gap-2">
@@ -26,7 +26,7 @@
             <i class="bi bi-person-plus me-1"></i> New User
         </a>
         <a href="{% url 'admin_comprehensive_report' %}" class="btn btn-primary">
-            <i class="bi bi-file-pdf me-1"></i> System Report
+            <i class="bi bi-file-pdf me-1"></i> Reports
         </a>
     </div>
 </div>
@@ -112,7 +112,7 @@
 <div class="card mb-4">
   <div class="card-header">
     <i class="bi bi-arrow-left-right me-2" style="color:var(--primary);"></i>
-    Recent Stock Movements (Global)
+    Recent Activity
   </div>
   <div class="card-body p-0">
     {% if stats.recent_movements %}
@@ -161,7 +161,7 @@
   <div class="card-header d-flex align-items-center justify-content-between">
     <span>
         <i class="bi bi-box-seam me-2" style="color:var(--success);"></i>
-        Supplies Inventory
+        Inventory
     </span>
     <a href="{% url 'admin_inventory_overview' %}" class="btn btn-sm btn-outline-primary">Full Overview</a>
   </div>
@@ -216,7 +216,7 @@
 <!-- ── Quick Actions Grid ────────────────────────── -->
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-lightning me-2" style="color:var(--primary);"></i>System Administration Actions
+        <i class="bi bi-lightning me-2" style="color:var(--primary);"></i>Quick Actions
     </div>
     <div class="card-body">
         <div class="row g-3">

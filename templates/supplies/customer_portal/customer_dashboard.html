@@ -67,25 +67,32 @@
                                 <tr>
                                     <th>Request #</th>
                                     <th>Status</th>
-                                    <th>Date</th>
+                                    <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for request_obj in recent_requests %}
-                                    <tr>
+                                    <tr class="align-middle">
                                         <td>
-                                            <a href="{% url 'customer_request_detail_mine' request_obj.id %}" 
-                                               class="text-decoration-none fw-500" style="color:var(--text);">
-                                                {{ request_obj.request_number }}
-                                            </a>
+                                            <div class="fw-700 text-white">#{{ request_obj.request_number }}</div>
+                                            <div class="xsmall text-secondary">{{ request_obj.created_at|date:"M d, Y" }}</div>
                                         </td>
                                         <td>
-                                            <span class="badge {% if request_obj.status == 'PENDING' %}bg-warning{% elif request_obj.status == 'APPROVED' %}bg-info{% elif request_obj.status == 'OUT_FOR_DELIVERY' %}bg-primary{% elif request_obj.status == 'DELIVERED' %}bg-success{% else %}bg-secondary{% endif %}">
+                                            <span class="status-neon {% if request_obj.status == 'PENDING' %}status-neon-warning{% elif request_obj.status == 'APPROVED' %}status-neon-info{% elif request_obj.status == 'OUT_FOR_DELIVERY' %}status-neon-primary{% elif request_obj.status == 'DELIVERED' %}status-neon-success{% else %}status-neon-secondary{% endif %}">
                                                 {{ request_obj.get_status_display }}
                                             </span>
                                         </td>
-                                        <td>
-                                            <small class="text-secondary">{{ request_obj.created_at|date:"M d" }}</small>
+                                        <td class="text-end">
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'customer_request_detail_mine' request_obj.id %}" 
+                                                   class="btn btn-secondary shadow-sm" title="View Details">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{% url 'customer_request_invoice_pdf' request_obj.id %}" 
+                                                   class="btn btn-secondary shadow-sm" title="Invoice">
+                                                    <i class="bi bi-file-earmark-pdf text-danger"></i>
+                                                </a>
+                                            </div>
                                         </td>
                                     </tr>
                                 {% endfor %}

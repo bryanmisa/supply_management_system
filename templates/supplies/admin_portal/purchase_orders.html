@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}Procurement Intelligence - Admin Oversight{% endblock %}
+{% block title %}Purchase Orders - Admin{% endblock %}
 
 {% block breadcrumb %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin Control</a></li>
-    <li class="breadcrumb-item active">Procurement Log</li>
+    <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Admin</a></li>
+    <li class="breadcrumb-item active">Purchase Orders</li>
   </ol>
 </nav>
 {% endblock %}
@@ -16,44 +16,44 @@
     <div>
         <h1 class="h3 mb-1 fw-700 text-white">
             <i class="bi bi-cart-check-fill me-2" style="color:var(--primary);"></i>
-            Global Procurement Intelligence
+            Purchase Orders
         </h1>
-        <p class="mb-0 text-secondary small">Comprehensive audit and management of all vertical supply acquisition protocols</p>
+        <p class="mb-0 text-secondary small">Manage and track all supply purchase orders</p>
     </div>
 </div>
 
 <!-- Analytical Filters -->
 <div class="card shadow-sm border mb-4 fade-in">
   <div class="card-header py-3 bg-black bg-opacity-10">
-      <span class="fw-700 small text-uppercase" style="letter-spacing: 0.1em;"><i class="bi bi-funnel me-2 text-primary"></i>Operational Filters</span>
+      <span class="fw-700 small text-uppercase" style="letter-spacing: 0.1em;"><i class="bi bi-funnel me-2 text-primary"></i>Filters</span>
   </div>
   <div class="card-body">
     <form method="GET" class="row g-3">
       <div class="col-md-3">
-        <label class="xsmall text-uppercase fw-700 text-secondary mb-2 d-block">Status Sector</label>
+        <label class="xsmall text-uppercase fw-700 text-secondary mb-2 d-block">Status</label>
         <select name="status" class="form-select shadow-inner">
-          <option value="">All Fulfillment States</option>
+          <option value="">All Statuses</option>
           {% for status_val, status_label in status_choices %}
             <option value="{{ status_val }}" {% if selected_status == status_val %}selected{% endif %}>{{ status_label }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="col-md-3">
-        <label class="xsmall text-uppercase fw-700 text-secondary mb-2 d-block">Logistics Partner</label>
+        <label class="xsmall text-uppercase fw-700 text-secondary mb-2 d-block">Supplier</label>
         <select name="supplier" class="form-select shadow-inner">
-          <option value="">All Partners</option>
+          <option value="">All Suppliers</option>
           {% for supplier in suppliers %}
             <option value="{{ supplier.id }}" {% if selected_supplier|stringformat:"s" == supplier.id|stringformat:"s" %}selected{% endif %}>{{ supplier.name }}</option>
           {% endfor %}
         </select>
       </div>
       <div class="col-md-3">
-        <label class="xsmall text-uppercase fw-700 text-secondary mb-2 d-block">Start Bound</label>
+        <label class="xsmall text-uppercase fw-700 text-secondary mb-2 d-block">Date</label>
         <input type="date" name="start_date" class="form-control shadow-inner" value="{{ start_date }}">
       </div>
       <div class="col-md-3 d-flex align-items-end">
         <button type="submit" class="btn btn-primary w-100 fw-600">
-            <i class="bi bi-activity me-2"></i> Update Stream
+            <i class="bi bi-activity me-2"></i> Filter
         </button>
       </div>
     </form>
@@ -68,12 +68,12 @@
         <table class="table table-hover align-middle mb-0">
           <thead>
             <tr>
-              <th>Protocol #</th>
-              <th>Logistics Partner</th>
-              <th class="text-center">Asset Flow</th>
-              <th class="text-end">Financial Value</th>
-              <th class="text-center">Lifecycle</th>
-              <th>Timeline</th>
+              <th>Order #</th>
+              <th>Supplier</th>
+              <th class="text-center">Items</th>
+              <th class="text-end">Total</th>
+              <th class="text-center">Status</th>
+              <th>Date</th>
               <th class="text-center">Actions</th>
             </tr>
           </thead>
@@ -114,7 +114,7 @@
     {% else %}
       <div class="text-center py-5">
           <i class="bi bi-cart-x fs-1 opacity-10"></i>
-          <p class="text-secondary mt-3">No acquisition protocols identified within current audit scope.</p>
+          <p class="text-secondary mt-3">No orders found with the current filters.</p>
       </div>
     {% endif %}
   </div>

@@ -19,9 +19,9 @@
     <div class="mb-4 text-center fade-in">
         <h1 class="h3 mb-1 fw-700 text-white">
             <i class="bi bi-arrow-left-right me-2" style="color:var(--primary);"></i>
-            Transaction Registry
+            Record Stock Movement
         </h1>
-        <p class="text-secondary small">Record individual stock entries, issues, or logistical returns</p>
+        <p class="text-secondary small">Record stock entries, issues, or returns</p>
     </div>
 
     <div class="card shadow border fade-in">
@@ -34,21 +34,21 @@
         <div class="row g-2 mb-5">
           <div class="col-md-4">
             <div class="bg-black bg-opacity-25 rounded p-3 border border-white border-opacity-10 text-center h-100">
-                <div class="text-secondary xsmall text-uppercase fw-700 mb-1">Current On-Hand</div>
+                <div class="text-secondary xsmall text-uppercase fw-700 mb-1">Current Stock</div>
                 <div class="h4 mb-0 fw-800 text-white">{{ supply.current_stock }}</div>
                 <div class="xsmall text-muted">{{ supply.unit_of_measure }}</div>
             </div>
           </div>
           <div class="col-md-4">
             <div class="bg-black bg-opacity-25 rounded p-3 border border-white border-opacity-10 text-center h-100">
-                <div class="text-secondary xsmall text-uppercase fw-700 mb-1">Operational Bounds</div>
+                <div class="text-secondary xsmall text-uppercase fw-700 mb-1">Stock Limits</div>
                 <div class="h4 mb-0 fw-800 text-info">{{ supply.minimum_stock }} / {{ supply.maximum_stock }}</div>
                 <div class="xsmall text-muted">Min / Max</div>
             </div>
           </div>
           <div class="col-md-4">
             <div class="bg-black bg-opacity-25 rounded p-3 border border-white border-opacity-10 text-center h-100">
-                <div class="text-secondary xsmall text-uppercase fw-700 mb-1">Valuation Basis</div>
+                <div class="text-secondary xsmall text-uppercase fw-700 mb-1">Price</div>
                 <div class="h4 mb-0 fw-800 text-white">${{ supply.unit_price|floatformat:2 }}</div>
                 <div class="xsmall text-muted">Per Unit</div>
             </div>
@@ -59,30 +59,30 @@
           {% csrf_token %}
           <div class="row g-4">
             <div class="col-md-6">
-              <label class="form-label text-secondary small fw-600 text-uppercase" for="{{ form.movement_type.id_for_label }}">Transaction Vector</label>
+              <label class="form-label text-secondary small fw-600 text-uppercase" for="{{ form.movement_type.id_for_label }}">Movement Type</label>
               {{ form.movement_type }}
               {% if form.movement_type.errors %}
                 <div class="text-danger xsmall mt-1">{{ form.movement_type.errors }}</div>
               {% endif %}
-              <div class="xsmall text-muted mt-2">Specify if stock is entering or exiting the hub</div>
+              <div class="xsmall text-muted mt-2">Choose if stock is coming in or going out</div>
             </div>
             <div class="col-md-6">
-              <label class="form-label text-secondary small fw-600 text-uppercase" for="{{ form.quantity.id_for_label }}">Transaction Magnitude</label>
+              <label class="form-label text-secondary small fw-600 text-uppercase" for="{{ form.quantity.id_for_label }}">Quantity</label>
               {{ form.quantity }}
               {% if form.quantity.errors %}
                 <div class="text-danger xsmall mt-1">{{ form.quantity.errors }}</div>
               {% endif %}
-              <div class="xsmall text-muted mt-2">Number of physical units being moved</div>
+              <div class="xsmall text-muted mt-2">Number of units being moved</div>
             </div>
             <div class="col-md-6">
-              <label class="form-label text-secondary small fw-600 text-uppercase" for="{{ form.reason.id_for_label }}">Movement Narrative</label>
+              <label class="form-label text-secondary small fw-600 text-uppercase" for="{{ form.reason.id_for_label }}">Reason</label>
               {{ form.reason }}
               {% if form.reason.errors %}
                 <div class="text-danger xsmall mt-1">{{ form.reason.errors }}</div>
               {% endif %}
             </div>
             <div class="col-md-6">
-              <label class="form-label text-secondary small fw-600 text-uppercase" for="{{ form.reference_number.id_for_label }}">Reference Protocol / ID</label>
+              <label class="form-label text-secondary small fw-600 text-uppercase" for="{{ form.reference_number.id_for_label }}">Reference #</label>
               {{ form.reference_number }}
               {% if form.reference_number.errors %}
                 <div class="text-danger xsmall mt-1">{{ form.reference_number.errors }}</div>
@@ -92,10 +92,10 @@
 
           <div class="pt-4 d-flex align-items-center justify-content-between border-top border-white border-opacity-10 mt-5">
             <a class="btn btn-secondary px-4" href="{% url 'supply_detail' supply.id %}">
-                <i class="bi bi-arrow-left me-1"></i> Abort
+                <i class="bi bi-arrow-left me-1"></i> Cancel
             </a>
             <button type="submit" class="btn btn-primary px-5 fw-600 shadow-sm">
-                <i class="bi bi-journal-plus me-1"></i> Commit Transaction
+                <i class="bi bi-journal-plus me-1"></i> Record Movement
             </button>
           </div>
         </form>
@@ -104,8 +104,8 @@
         <div class="alert alert-primary bg-primary bg-opacity-10 border-0 mt-5 fade-in d-flex align-items-start shadow-sm">
           <i class="bi bi-info-circle-fill fs-4 me-3 mt-1 text-primary"></i>
           <div>
-              <h6 class="fw-700 mb-1 text-primary">Logistics Compliance</h6>
-              <p class="small opacity-75 text-primary mb-0">For 'OUT' or 'RETURN' vectors, the system will validate against current on-hand balance. Negative inventory positions will be blocked by the validation engine.</p>
+              <h6 class="fw-700 mb-1 text-primary">Note</h6>
+              <p class="small opacity-75 text-primary mb-0">For 'OUT' or 'RETURN' types, the system will check against current stock. You cannot move more than is available.</p>
           </div>
         </div>
       </div>

@@ -17,12 +17,39 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
 
     {% load static %}
-    <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+    <link href="{% static 'css/custom.css' %}?v=1.3" rel="stylesheet">
 
     <!-- TomSelect CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 
     {% block extra_css %}{% endblock %}
+
+    <style>
+        /* Cross-browser high-visibility calendar icon */
+        :root { color-scheme: dark; }
+        
+        input[type="date"] {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23ffffff' class='bi bi-calendar-event' viewBox='0 0 16 16'%3E%3Cpath d='M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z'/%3E%3Cpath d='M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: calc(100% - 0.75rem) center !important;
+            background-size: 1.1rem !important;
+            padding-right: 2.5rem !important;
+            position: relative;
+        }
+
+        /* Hide native Chrome indicator while keeping the area clickable */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 2.5rem;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            opacity: 0 !important;
+            cursor: pointer !important;
+        }
+    </style>
 </head>
 <body>
 
