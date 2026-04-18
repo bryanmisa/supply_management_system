@@ -1,4 +1,4 @@
-# Supply Management System version 1.0.0
+# Supply Management System
 
 A Django-based inventory management system built with traditional Django architecture.
 
