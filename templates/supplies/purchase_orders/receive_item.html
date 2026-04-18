@@ -71,7 +71,7 @@
                         <div class="col-md-4">
                             <div class="metric-card border border-white border-opacity-10 bg-primary bg-opacity-10 p-3 h-100 text-center">
                                 <div class="text-secondary xsmall text-uppercase fw-700 mb-1">Expected Remainder</div>
-                                <div class="h4 mb-0 fw-800 text-primary">{{ item.remaining_quantity }} units</div>
+                                <div class="h4 mb-0 fw-800 text-primary">{{ item.quantity_pending }} units</div>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -103,7 +103,7 @@
                                 {% if form.quantity_received.errors %}
                                     <div class="text-danger xsmall mt-1">{{ form.quantity_received.errors }}</div>
                                 {% endif %}
-                                <div class="text-secondary xsmall mt-2">Maximum allowed: {{ item.remaining_quantity }} units</div>
+                                <div class="text-secondary xsmall mt-2">Maximum allowed: {{ item.quantity_pending }} units</div>
                             </div>
                         </div>
                         
@@ -172,8 +172,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const quantityInput = document.getElementById('{{ form.quantity_received.id_for_label }}');
     const newStockPreview = document.getElementById('new-stock-preview');
     const receivingAmount = document.getElementById('receiving-amount');
-    const currentStock = {{ item.supply.current_stock }};
-    const maxQuantity = {{ item.remaining_quantity }};
+    const currentStock = Number("{{ item.supply.current_stock|default:0 }}");
+    const maxQuantity = Number("{{ item.quantity_pending|default:0 }}");
     
     function updateStockPreview() {
         const receiving = parseInt(quantityInput.value) || 0;
